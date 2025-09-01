@@ -1,0 +1,28 @@
+{
+    "welcome": "Willkommen",
+    "search": "Suchen...",
+    "logout": "Abmelden",
+    "profile": "Mein Profil",
+    "name": "{{name}}",
+    "dashboard": {
+      "Profile": "Profil",
+      "HolidayCalender": "Feiertagskalender",
+      "DallyWorkUpdate": "Tägliche Arbeitsaktualisierung",
+      "LeaveApply": "Urlaub beantragen",
+      "AttendanceStatus": "Anwesenheitsstatus",
+      "statistics": "Statistiken",
+      "View": "Ansehen",
+      "timePeriods": {
+        "today": "Heute",
+        "week": "Woche",
+        "month": "Monat",
+        "year": "Jahr"
+      },
+      "workTime": "Arbeitszeit",
+      "clockIn": "Einchecken",
+      "remaining": "Verbleibend",
+      "overtime": "Überstunden",
+      "break": "Pause",
+      "viewAttendance": "Anwesenheit anzeigen"
+    }
+  }

@@ -1,0 +1,29 @@
+{
+  "welcome": "Welcome",
+  "search": "Search...",
+  "logout": "Logout",
+  "profile": "My Profile",
+  "name": "{{name}}",
+  "dashboard": {
+    "Profile": "Profile",
+    "HolidayCalender":"Holiday Calender",
+    "DallyWorkUpdate": "Dally Work Update",
+    "LeaveApply": "Leave Apply",
+    "AttendanceStatus": "Attendance Status",
+    "statistics": "Statistics",
+    "View":"View",
+    "timePeriods": {
+      "today": "Today",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "workTime": "Work Time",
+    "clockIn": "Clock-In",
+    "remaining": "Remaining",
+    "overtime": "Overtime",
+    "break": "Break",
+    "viewAttendance": "View Attendance"
+    
+  }
+}

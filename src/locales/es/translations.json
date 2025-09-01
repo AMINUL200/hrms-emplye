@@ -1,0 +1,28 @@
+{
+    "welcome": "Bienvenido",
+    "search": "Buscar...",
+    "logout": "Cerrar sesión",
+    "profile": "Mi Perfil",
+    "name": "{{name}}",
+    "dashboard": {
+      "Profile": "Perfil",
+      "HolidayCalender": "Calendario de días festivos",
+      "DallyWorkUpdate": "Actualización diaria de trabajo",
+      "LeaveApply": "Solicitar permiso",
+      "AttendanceStatus": "Estado de asistencia",
+      "statistics": "Estadísticas",
+      "View": "Ver",
+      "timePeriods": {
+        "today": "Hoy",
+        "week": "Semana",
+        "month": "Mes",
+        "year": "Año"
+      },
+      "workTime": "Tiempo de trabajo",
+      "clockIn": "Fichar",
+      "remaining": "Restante",
+      "overtime": "Horas extras",
+      "break": "Pausa",
+      "viewAttendance": "Ver asistencia"
+    }
+  }

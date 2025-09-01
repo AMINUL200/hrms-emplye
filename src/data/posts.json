@@ -1,0 +1,257 @@
+[
+  {
+    "id": 1,
+    "user": {
+      "name": "John Doe",
+      "avatar": "https://randomuser.me/api/portraits/men/1.jpg"
+    },
+    "content": "Just enjoyed a beautiful hike in the mountains today! The views were absolutely breathtaking. 🏔️ #nature #adventure",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2025-07-27T17:30:00Z",
+    "likes": 24,
+    "comments": 5,
+    "isLiked": false,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Jane Smith",
+        "text": "Looks amazing! Which trail did you take?",
+        "avatar": "https://randomuser.me/api/portraits/women/1.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mike Johnson",
+        "text": "I was there last weekend! The sunset is incredible from that viewpoint.",
+        "avatar": "https://randomuser.me/api/portraits/men/2.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mike Johnson",
+        "text": "I was there last weekend! The sunset is incredible from that viewpoint.",
+        "avatar": "https://randomuser.me/api/portraits/men/2.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mike Johnson",
+        "text": "I was there last weekend! The sunset is incredible from that viewpoint.",
+        "avatar": "https://randomuser.me/api/portraits/men/2.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mike Johnson",
+        "text": "I was there last weekend! The sunset is incredible from that viewpoint.",
+        "avatar": "https://randomuser.me/api/portraits/men/2.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mike Johnson",
+        "text": "I was there last weekend! The sunset is incredible from that viewpoint.",
+        "avatar": "https://randomuser.me/api/portraits/men/2.jpg"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "user": {
+      "name": "Sarah Williams",
+      "avatar": "https://randomuser.me/api/portraits/women/2.jpg"
+    },
+    "content": "Just finished reading \"The Midnight Library\" by Matt Haig. Highly recommend it to anyone looking for a thought-provoking read! What are you all reading these days?",
+    "timestamp": "2023-06-15T17:00:00Z",
+    "likes": 42,
+    "comments": 8,
+    "isLiked": true,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Robert Brown",
+        "text": "Loved that book! The concept was so unique.",
+        "avatar": "https://randomuser.me/api/portraits/men/3.jpg"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "user": {
+      "name": "Michael Chen",
+      "avatar": "https://randomuser.me/api/portraits/men/4.jpg"
+    },
+    "content": "Just launched my new website! Check it out and let me know what you think. #webdev #portfolio",
+    "image": "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-14T09:20:00Z",
+    "likes": 56,
+    "comments": 12,
+    "isLiked": false,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Lisa Wong",
+        "text": "The design looks super clean! Great job!",
+        "avatar": "https://randomuser.me/api/portraits/women/3.jpg"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "user": {
+      "name": "Emma Johnson",
+      "avatar": "https://randomuser.me/api/portraits/women/4.jpg"
+    },
+    "content": "Beautiful day for a picnic in the park! 🧺☀️ #weekendvibes",
+    "image": "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-13T11:45:00Z",
+    "likes": 89,
+    "comments": 15,
+    "isLiked": true,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "David Miller",
+        "text": "Looks like perfect weather! Which park is this?",
+        "avatar": "https://randomuser.me/api/portraits/men/5.jpg"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "user": {
+      "name": "Alex Turner",
+      "avatar": "https://randomuser.me/api/portraits/men/6.jpg"
+    },
+    "content": "Just completed my first marathon! 🏃‍♂️💨 Never thought I could do it but here we are! #fitnessgoals",
+    "image": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-12T07:15:00Z",
+    "likes": 132,
+    "comments": 28,
+    "isLiked": false,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Sophia Lee",
+        "text": "Congratulations! That's an amazing achievement!",
+        "avatar": "https://randomuser.me/api/portraits/women/5.jpg"
+      },
+      {
+        "id": 2,
+        "user": "James Wilson",
+        "text": "What was your training routine like?",
+        "avatar": "https://randomuser.me/api/portraits/men/7.jpg"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "user": {
+      "name": "Olivia Martinez",
+      "avatar": "https://randomuser.me/api/portraits/women/6.jpg"
+    },
+    "content": "My new puppy finally arrived today! Meet Bailey! 🐶❤️ #dogsofinstagram",
+    "image": "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-11T10:00:00Z",
+    "likes": 215,
+    "comments": 42,
+    "isLiked": true,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Daniel Kim",
+        "text": "So adorable! What breed is Bailey?",
+        "avatar": "https://randomuser.me/api/portraits/men/8.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Emily Davis",
+        "text": "Those eyes! 😍",
+        "avatar": "https://randomuser.me/api/portraits/women/7.jpg"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "user": {
+      "name": "Ryan Park",
+      "avatar": "https://randomuser.me/api/portraits/men/9.jpg"
+    },
+    "content": "Just got promoted to Senior Developer today! 🎉 All those late nights finally paid off. #careergoals",
+    "timestamp": "2023-06-10T16:40:00Z",
+    "likes": 178,
+    "comments": 35,
+    "isLiked": false,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Jessica Brown",
+        "text": "Congratulations Ryan! Well deserved!",
+        "avatar": "https://randomuser.me/api/portraits/women/8.jpg"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "user": {
+      "name": "Sophie Wilson",
+      "avatar": "https://randomuser.me/api/portraits/women/9.jpg"
+    },
+    "content": "Homemade pasta from scratch tonight! Never knew it could be this satisfying to make. #foodie #homecooking",
+    "image": "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-09T18:20:00Z",
+    "likes": 97,
+    "comments": 18,
+    "isLiked": true,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Thomas Lee",
+        "text": "Recipe please! That looks delicious!",
+        "avatar": "https://randomuser.me/api/portraits/men/10.jpg"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "user": {
+      "name": "Daniel Kim",
+      "avatar": "https://randomuser.me/api/portraits/men/11.jpg"
+    },
+    "content": "Sunset views from my new apartment! Can't get enough of this. #newhome #sunsetlover",
+    "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "timestamp": "2023-06-08T20:10:00Z",
+    "likes": 143,
+    "comments": 22,
+    "isLiked": false,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Ava Martinez",
+        "text": "That view is incredible! Which neighborhood is this?",
+        "avatar": "https://randomuser.me/api/portraits/women/10.jpg"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "user": {
+      "name": "Priya Patel",
+      "avatar": "https://randomuser.me/api/portraits/women/11.jpg"
+    },
+    "content": "Started learning React this week and already built my first small app! The learning curve is steep but rewarding. #coding #webdevelopment",
+    "timestamp": "2023-06-07T12:00:00Z",
+    "likes": 87,
+    "comments": 14,
+    "isLiked": true,
+    "commentsList": [
+      {
+        "id": 1,
+        "user": "Ethan Moore",
+        "text": "Keep it up! React gets easier with practice.",
+        "avatar": "https://randomuser.me/api/portraits/men/12.jpg"
+      },
+      {
+        "id": 2,
+        "user": "Mia Taylor",
+        "text": "What resources are you using to learn?",
+        "avatar": "https://randomuser.me/api/portraits/women/12.jpg"
+      }
+    ]
+  }
+]

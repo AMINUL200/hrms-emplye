@@ -1,0 +1,255 @@
+/* Base Styles */
+.attendance-container {
+    min-height: 83vh;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+    padding: 1rem;
+}
+
+.attendance-wrapper {
+    max-width: 56rem;
+    margin: 0 auto;
+}
+
+/* Card Styles */
+.attendance-card,
+.history-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+/* Header Styles */
+.attendance-header,
+.history-header {
+    background:  #FF902F;
+    padding: 1.5rem;
+    color: white;
+}
+
+.attendance-header h2,
+.history-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.attendance-header p {
+    opacity: 0.9;
+    margin: 0.5rem 0 0;
+}
+
+/* Form Styles */
+.attendance-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.error-message {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    padding: 1rem;
+}
+
+.error-message p {
+    color: #b91c1c;
+    margin: 0;
+}
+
+.form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Button Styles */
+.attendance-type-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .attendance-type-buttons {
+        flex-direction: row;
+    }
+}
+
+.attendance-type-btn {
+    flex: 1 1 0%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s;
+    background-color: white;
+    cursor: pointer;
+}
+
+.attendance-type-btn:hover {
+    background-color: #f9fafb;
+}
+
+.active-attendance-btn {
+    background-color: #e0e7ff;
+    border-color: #6366f1;
+    color: #4338ca;
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Input Styles */
+.location-fields,
+.time-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .location-fields,
+    .time-fields {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.location-field,
+.time-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.location-field label,
+.time-field label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.location-input,
+.time-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    color: #374151;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    color: white;
+    background-color: #FF902F;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #ec7a16;
+}
+
+.disabled-btn {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.disabled-btn:hover {
+    background-color: #9ca3af;
+}
+.danger-btn {
+    background-color: #dc2626; /* Red-600 */
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.danger-btn:hover {
+    background-color: #b91c1c; /* Red-700 */
+    opacity: 1;
+}
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* History Table Styles */
+.history-content {
+    padding: 1.5rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.history-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.history-table th {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: #f9fafb;
+}
+
+.history-table td {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.history-table tr:not(:last-child) td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    display: inline-flex;
+}
+
+.check-in-badge {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.check-out-badge {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.break-badge {
+    background-color: #fef9c3;
+    color: #854d0e;
+}

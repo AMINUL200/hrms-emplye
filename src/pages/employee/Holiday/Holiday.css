@@ -1,0 +1,385 @@
+/* Holiday Calendar */
+.holiday-calendar {
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.month-year-container {
+    position: relative;
+    height: 40px;
+    overflow: hidden;
+}
+
+.month-year {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    transition: transform 0.3s ease;
+}
+
+.navigation {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.nav-button {
+    padding: 8px 16px;
+    border: none;
+    background: #f0f2f5;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #2c3e50;
+    transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+    background: #e0e3e7;
+    transform: translateY(-1px);
+}
+
+.today-button {
+    background: #00536f;
+    color: white;
+}
+
+.today-button:hover {
+    background: #00415a;
+}
+
+.legend {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.today-legend {
+    background: #FF902F;
+}
+
+.off-day-legend {
+    background: #a0d1ff;
+}
+
+.national-legend {
+    background: #ff6b6b;
+}
+
+.personal-legend {
+    background: #8ce99a;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-table th {
+    border: 1px solid #e0e3e7;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #fff;
+    background: #00536f;
+    font-weight: 500;
+}
+
+.calendar-day {
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #e0e3e7;
+    height: 80px;
+    vertical-align: top;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: #f8f9fa;
+    transform: scale(1.02);
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.empty {
+    background: #fafafa;
+    border: none;
+}
+
+.day-number {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.holiday-label {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+}
+
+.holiday-label.personal {
+    background: rgba(140, 233, 154, 0.2);
+}
+
+/* Day type styles */
+.calendar-day.today {
+    background: #FF902F;
+    color: white;
+}
+
+.calendar-day.today .day-number {
+    font-weight: bold;
+}
+
+.calendar-day.off-day {
+    background: #f0f8ff;
+    color: #4a90e2;
+}
+
+.calendar-day.national-holiday {
+    background: #fff0f0;
+    color: #ff6b6b;
+}
+
+.calendar-day.national-holiday .holiday-label {
+    color: #ff6b6b;
+    font-weight: 500;
+}
+
+.calendar-day.personal-holiday {
+    background: #f0fff4;
+    color: #38a169;
+}
+
+/* Animations */
+.month-year-container.slide-up .month-year {
+    animation: slideUp 0.3s ease-in-out;
+}
+
+.month-year-container.slide-down .month-year {
+    animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.calendar-grid.slide-left {
+    animation: slideLeft 0.3s ease-in-out;
+}
+
+.calendar-grid.slide-right {
+    animation: slideRight 0.3s ease-in-out;
+}
+
+@keyframes slideLeft {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .calendar-day {
+        height: 60px;
+        padding: 4px;
+    }
+    
+    .holiday-label {
+        font-size: 0.6rem;
+    }
+    
+    .month-year {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .navigation {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .calendar-day {
+        height: 50px;
+    }
+    
+    .day-number {
+        font-size: 0.9rem;
+    }
+    
+    .holiday-label {
+        display: none;
+    }
+}
+
+/* Holiday Popup Styles */
+.holiday-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.holiday-popup {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.holiday-popup h3 {
+    margin-top: 0;
+    color: #00536f;
+}
+
+.popup-type {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.popup-type.national {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.popup-type.personal {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+/* Update holiday-label in calendar */
+.holiday-label {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 0px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+    max-width: 100%;
+    width: 90%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.holiday-label.personal {
+    background: rgba(140, 233, 154, 0.2);
+}
+
+.calendar-day {
+    cursor: default; /* Default cursor for normal days */
+}
+
+.calendar-day.off-day,
+.calendar-day.national-holiday,
+.calendar-day.personal-holiday {
+    cursor: pointer; /* Pointer cursor for clickable days */
+}
+
+.national-holiday{
+    padding: 8px 0;
+}
+
