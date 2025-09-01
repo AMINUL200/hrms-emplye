@@ -1,4 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
 [[redirects]]
-  from = "/hrms-v2/*"
-  to = "/hrms-v2/index.html"
+  from = "/*"
+  to = "/index.html"
   status = 200
