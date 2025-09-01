@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/hrms-v2/*"
+  to = "/hrms-v2/index.html"
+  status = 200
