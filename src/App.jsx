@@ -31,7 +31,7 @@ const App = () => {
   return (
     <>
       <ToastContainer />
-      <Router basename="/hrms-v2">
+      <Router >
         <Routes>
           {/* Root redirect */}
           <Route path="/" element={<Navigate to={isAuthenticated ? "/organization/employerdashboard" : "/login"} replace />} />
