@@ -125,7 +125,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </li>
 
             {/* Apps Section */}
-            <li className={`has-dropdown ${location.pathname.startsWith('/apps') ? 'active-parent' : ''}`}>
+            {/* <li className={`has-dropdown ${location.pathname.startsWith('/apps') ? 'active-parent' : ''}`}>
               <a className='side-title' onClick={() => toggleSubMenu('apps')}>
                 <span> Apps</span>
                 <span className={`menu-arrow ${openMenu.apps ? 'rotate' : 'un-rotate'}`}>
@@ -216,7 +216,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   </NavLink>
                 </li>
               </ul>
-            </li>
+            </li> */}
 
 
           </ul>
