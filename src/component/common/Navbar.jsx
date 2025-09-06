@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next';
 
 
 const Navbar = ({ toggleSidebar, isOpen }) => {
-    const { logoutUser } = useContext(AuthContext);
+    const { logoutUser, data } = useContext(AuthContext);
+    const storage_url = import.meta.env.VITE_STORAGE_URL;
     const navigate = useNavigate();
 
     const { t, i18n } = useTranslation();
@@ -17,6 +18,22 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     const changeLanguage = (lang) => {
         i18n.changeLanguage(lang);
     };
+
+    // Helper function to format employee name
+    const getFullName = () => {
+        if (!data) return 'Loading...';
+        const { emp_fname, emp_mname, emp_lname } = data;
+        return [emp_fname, emp_mname, emp_lname].filter(Boolean).join(' ');
+    };
+
+    // Helper function to get profile image
+    const getProfileImage = () => {
+        if (data?.emp_image) {
+            return `${storage_url}/${data.emp_image}`;
+        }
+        return 'https://i.pravatar.cc/40';
+    };
+
 
 
 
@@ -31,7 +48,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 </div>
 
                 {/* Toggle Button */}
-                <div className={`toggle_btn ${!isOpen ? 'sidebar-open' : 'sidebar-closed'}`} onClick={toggleSidebar}>
+                {/* <div className={`toggle_btn ${!isOpen ? 'sidebar-open' : 'sidebar-closed'}`} onClick={toggleSidebar}> */}
+                <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar}>
                     <span className="bar-icon">
                         <span></span>
                         <span></span>
@@ -102,12 +120,13 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                         >
                             {/* Profile Image */}
                             <div className="user-img-wrapper me-2">
-                                <img src="https://i.pravatar.cc/40" alt="User" className="user-img" />
+                                {/* <img src="https://i.pravatar.cc/40" alt="User" className="user-img" /> */}
+                               <img src={getProfileImage()} alt="User Image" className="user-img" />
                             </div>
 
                             {/* User Name */}
                             <div className="user-name">
-                                <span>{t("name", { name: "John Doe" })}</span>
+                                <span>{getFullName()}</span>
 
                             </div>
 
@@ -119,8 +138,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
 
                         {/* Dropdown Menu */}
                         <div className="dropdown-menu dropdown-menu-right">
-                            <a className="dropdown-item" onClick={() => navigate('/profile')}>{t("profile")}</a>
-                            <a className="dropdown-item" onClick={logoutUser}>{t("logout")}</a>
+                            <a className="dropdown-item" onClick={() => navigate('/profile')}>Profile</a>
+                            <a className="dropdown-item" onClick={logoutUser}>Logout</a>
                         </div>
                     </div>
                 </div>

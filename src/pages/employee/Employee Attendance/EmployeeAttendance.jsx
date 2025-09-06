@@ -5,6 +5,7 @@ import { EmployeeContext } from '../../../context/EmployeeContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import PageLoader from '../../../component/loader/PageLoader';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const EmployeeAttendance = () => {
     const { token, data } = useContext(AuthContext);
@@ -20,6 +21,22 @@ const EmployeeAttendance = () => {
     const [showCheckOut, setShowCheckOut] = useState(false);
     const [showStartBreak, setShowStartBreak] = useState(false);
     const [showEndBreak, setShowEndBreak] = useState(false);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // New state for timer
+    const [workTime, setWorkTime] = useState('00:00:00');
+    const [isWorking, setIsWorking] = useState(false);
+    const [timerInterval, setTimerInterval] = useState(null);
+    const [todayWorkTime, setTodayWorkTime] = useState('00:00:00');
+
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        return () => clearInterval(timer); // cleanup
+    }, []);
 
     const findGeolocation = () => {
         if (navigator.geolocation) {
@@ -48,13 +65,22 @@ const EmployeeAttendance = () => {
 
             if (res.data.status === 200 && res.data.flag === 1) {
                 const status = res.data.data[0]?.punch_status || '';
-                setAttendanceStatus(status);
+                console.log("status: ", status);
+                const dutyHours = res.data.data[0]?.duty_hours || '00:00:00';
 
+                setAttendanceStatus(status);
 
                 if (status === 'IN') {
                     await getBreakStatus();
+                    // Start the timer if user is checked in but not on break
+                    if (breakStatus !== 'Break Start') {
+                        startTimer();
+                    }
                 } else if (status === 'OUT') {
-                    // toast.info('You have already checked out for today');
+                    stopTimer();
+                    // Get today's total work time
+                    // await getTodayWorkTime();
+                    setTodayWorkTime(dutyHours)
                 }
             }
         } catch (error) {
@@ -74,6 +100,13 @@ const EmployeeAttendance = () => {
             if (res.data.status === 200 && res.data.flag === 1) {
                 const status = res.data.data[0]?.punch_status || '';
                 setBreakStatus(status);
+
+                // Control timer based on break status
+                if (status === 'Break Start') {
+                    stopTimer();
+                } else if (status === 'Break End' || status === '') {
+                    startTimer();
+                }
             }
         } catch (error) {
             console.log(error.message);
@@ -81,10 +114,62 @@ const EmployeeAttendance = () => {
         }
     }
 
+  
+
+    // Timer functions
+    const startTimer = () => {
+        setIsWorking(true);
+        // In a real app, you would fetch the start time from your API
+        // For demo, we'll start from 00:00:00
+        let seconds = 0;
+        const interval = setInterval(() => {
+            seconds++;
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            setWorkTime(
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+            );
+        }, 1000);
+
+        setTimerInterval(interval);
+    };
+
+    const stopTimer = () => {
+        setIsWorking(false);
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            setTimerInterval(null);
+        }
+    };
+
+    const resetTimer = () => {
+        stopTimer();
+        setWorkTime('00:00:00');
+    };
 
     useEffect(() => {
         findGeolocation();
         getCurrentAttendanceStatus();
+
+        // Check if it's a new day and reset timer
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+
+        const midnightTimeout = setTimeout(() => {
+            resetTimer();
+            setTodayWorkTime('00:00:00');
+        }, timeUntilMidnight);
+
+        return () => {
+            if (timerInterval) clearInterval(timerInterval);
+            clearTimeout(midnightTimeout);
+        };
     }, []);
 
     useEffect(() => {
@@ -131,8 +216,6 @@ const EmployeeAttendance = () => {
                 punch_type: data?.punch_type,
             };
 
-            console.log("login logout data ::", attendanceData);
-
             try {
                 const res = await axios.post(`${api_url}/creat-attendance`,
                     attendanceData,
@@ -143,6 +226,14 @@ const EmployeeAttendance = () => {
 
                 if (res.status === 200 && res.data.flag === 1) {
                     toast.success(res.data.message);
+
+                    if (attendanceType === 'check-in') {
+                        startTimer();
+                    } else if (attendanceType === 'check-out') {
+                        stopTimer();
+                        await getTodayWorkTime();
+                    }
+
                     getCurrentAttendanceStatus();
                 } else {
                     toast.error(res.data.message)
@@ -176,6 +267,13 @@ const EmployeeAttendance = () => {
 
                 if (res.data.status === 200 && res.data.flag === 1) {
                     toast.success(res.data.message);
+
+                    if (attendanceType === 'break-start') {
+                        stopTimer();
+                    } else if (attendanceType === 'break-end') {
+                        startTimer();
+                    }
+
                     getCurrentAttendanceStatus();
                 } else {
                     toast.error(res.data.message)
@@ -191,11 +289,11 @@ const EmployeeAttendance = () => {
     };
 
     const getButtonClass = (type) => {
-        let buttonClass = "attendance-type-btn";
-        if (type === 'check-in' && showCheckIn && attendanceType === 'check-in') buttonClass += " active-attendance-btn";
-        if (type === 'check-out' && showCheckOut && attendanceType === 'check-out') buttonClass += " active-attendance-btn";
-        if (type === 'break-start' && showStartBreak && attendanceType === 'break-start') buttonClass += " active-attendance-btn";
-        if (type === 'break-end' && showEndBreak && attendanceType === 'break-end') buttonClass += " active-attendance-btn";
+        let buttonClass = "btn attendance-type-btn m-1";
+        if (type === 'check-in' && showCheckIn && attendanceType === 'check-in') buttonClass += " btn-primary";
+        if (type === 'check-out' && showCheckOut && attendanceType === 'check-out') buttonClass += " btn-danger";
+        if (type === 'break-start' && showStartBreak && attendanceType === 'break-start') buttonClass += " btn-warning";
+        if (type === 'break-end' && showEndBreak && attendanceType === 'break-end') buttonClass += " btn-info";
         return buttonClass;
     };
 
@@ -204,137 +302,125 @@ const EmployeeAttendance = () => {
     }
 
     return (
-        <div className="attendance-container">
-            <div className="attendance-wrapper">
-                <div className="attendance-card">
-                    <div className="attendance-header">
-                        <h2>Employee Attendance System</h2>
-                        <p>Record your work status with location tracking</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="attendance-form">
-                        {error && (
-                            <div className="error-message">
-                                <p>{error}</p>
-                            </div>
-                        )}
-
-                        <div className="form-content">
-                            <div className="attendance-type-buttons">
-                                {showCheckIn && (
-                                    <button
-                                        type="button"
-                                        className={getButtonClass('check-in')}
-                                        onClick={() => setAttendanceType('check-in')}
-                                    >
-                                        Check In
-                                    </button>
-                                )}
-                                {showStartBreak && (
-                                    <button
-                                        type="button"
-                                        className={getButtonClass('break-start')}
-                                        onClick={() => setAttendanceType('break-start')}
-                                    >
-                                        Start Break
-                                    </button>
-                                )}
-                                {showEndBreak && (
-                                    <button
-                                        type="button"
-                                        className={getButtonClass('break-end')}
-                                        onClick={() => setAttendanceType('break-end')}
-                                    >
-                                        End Break
-                                    </button>
-                                )}
-                                {showCheckOut && (
-                                    <button
-                                        type="button"
-                                        className={getButtonClass('check-out')}
-                                        onClick={() => setAttendanceType('check-out')}
-                                    >
-                                        Check Out
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="location-fields">
-                                <div className="location-field">
-                                    <label>Latitude</label>
-                                    <input
-                                        type="text"
-                                        value={location.latitude || 'Fetching...'}
-                                        disabled
-                                        className="location-input"
-                                    />
-                                </div>
-                                <div className="location-field">
-                                    <label>Longitude</label>
-                                    <input
-                                        type="text"
-                                        value={location.longitude || 'Fetching...'}
-                                        disabled
-                                        className="location-input"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="time-fields">
-                                <div className="time-field">
-                                    <label>Current Date</label>
-                                    <input
-                                        type="text"
-                                        value={new Date().toLocaleDateString()}
-                                        disabled
-                                        className="time-input"
-                                    />
-                                </div>
-                                <div className="time-field">
-                                    <label>Current Time</label>
-                                    <input
-                                        type="text"
-                                        value={new Date().toLocaleTimeString()}
-                                        disabled
-                                        className="time-input"
-                                    />
-                                </div>
-                                <div className="time-field">
-                                    <label>Punch Type:</label>
-                                    <input
-                                        type="text"
-                                        value={data?.punch_type}
-                                        disabled
-                                        className="time-input"
-                                    />
-                                </div>
-                            </div>
+        <div className="container-fluid py-4 attendance-container">
+            <div className="row justify-content-center">
+                <div className="col-12 col-md-8 col-lg-6">
+                    <div className="card shadow-lg border-0">
+                        <div className="card-header text-white text-center py-3">
+                            <h2 className="mb-0">Employee Attendance System</h2>
+                            <p className="mb-0">Record your work status with location tracking</p>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={!location.latitude || isSubmitting || attendanceStatus === 'OUT'}
-                            className={`submit-btn 
-                                ${!location.latitude || isSubmitting ? 'disabled-btn' :
-                                    attendanceStatus === 'OUT' ? 'danger-btn' : ''
-                                }`}
-                        >
-                            {isSubmitting ? (
-                                <span className="spinner-container">
-                                    <svg className="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Processing...
-                                </span>
-                            ) : attendanceStatus === 'OUT' ? (
-                                <span>Today Already have Check Out</span>
-                            ) :
-                                (
-                                    `Record ${attendanceType.replace('-', ' ')}`
+                        <div className="card-body p-4">
+                            {/* Timer Display */}
+                            <div className="row mb-4">
+                                <div className="col-12">
+                                    <div className={`card timer-card ${isWorking ? 'bg-success text-white' : 'bg-light'}`}>
+                                        <div className="card-body text-center py-3">
+                                            <h5 className="card-title">Today's Work Time</h5>
+                                            <div className="display-4 fw-bold">{todayWorkTime}</div>
+                                            <p className="mb-0">Total time worked today</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {attendanceStatus === 'IN' && (
+                                <div className="row mb-4">
+                                    <div className="col-12">
+                                        <div className={`card timer-card ${isWorking ? 'bg-info text-white' : 'bg-warning'}`}>
+                                            <div className="card-body text-center py-3">
+                                                <h5 className="card-title">Current Session</h5>
+                                                <div className="display-4 fw-bold">{workTime}</div>
+                                                <p className="mb-0">{isWorking ? 'Working...' : 'On Break'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit}>
+                                {error && (
+                                    <div className="alert alert-danger">
+                                        <p className="mb-0">{error}</p>
+                                    </div>
                                 )}
-                        </button>
-                    </form>
+
+                                <div className="d-flex flex-wrap justify-content-center mb-4">
+                                    {showCheckIn && (
+                                        <button
+                                            type="button"
+                                            className={getButtonClass('check-in')}
+                                            onClick={() => setAttendanceType('check-in')}
+                                        >
+                                            Check In
+                                        </button>
+                                    )}
+                                    {showStartBreak && (
+                                        <button
+                                            type="button"
+                                            className={getButtonClass('break-start')}
+                                            onClick={() => setAttendanceType('break-start')}
+                                        >
+                                            Start Break
+                                        </button>
+                                    )}
+                                    {showEndBreak && (
+                                        <button
+                                            type="button"
+                                            className={getButtonClass('break-end')}
+                                            onClick={() => setAttendanceType('break-end')}
+                                        >
+                                            End Break
+                                        </button>
+                                    )}
+                                    {showCheckOut && (
+                                        <button
+                                            type="button"
+                                            className={getButtonClass('check-out')}
+                                            onClick={() => setAttendanceType('check-out')}
+                                        >
+                                            Check Out
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="text-center mb-4">
+                                    <div className="row">
+                                        <div className="col-12 col-md-6 mb-2">
+                                            <strong>Date:</strong> {new Date().toLocaleDateString('en-GB')}
+                                        </div>
+                                        <div className="col-12 col-md-6 mb-2">
+                                            <strong>Time:</strong> {currentTime.toLocaleTimeString()}
+                                        </div>
+                                        {/* <div className="col-12 col-md-4 mb-2">
+                                            <strong>Punch Type:</strong> {data?.punch_type}
+                                        </div> */}
+                                    </div>
+                                </div>
+
+                                <div className="text-center">
+                                    <button
+                                        type="submit"
+                                        disabled={!location.latitude || isSubmitting || attendanceStatus === 'OUT'}
+                                        className={`btn btn-lg ${attendanceStatus === 'OUT' ? 'btn-secondary' : 'btn-primary'} px-5`}
+                                        style={{ minWidth: '200px' }}
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Processing...
+                                            </>
+                                        ) : attendanceStatus === 'OUT' ? (
+                                            <span>Already Checked Out</span>
+                                        ) : (
+                                            `Record ${attendanceType.replace('-', ' ')}`
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

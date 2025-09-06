@@ -20,6 +20,8 @@ const Dashboard = () => {
   const { token } = useContext(AuthContext);
   const { postsData, getPostData } = useContext(EmployeeContext);
 
+  
+
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const dashboardCards = [
@@ -238,14 +240,14 @@ const Dashboard = () => {
               {/* Holiday */}
               <div className="card info-card flex-fill" >
                 <div className="card-body">
-                  <h4>{t('dashboard.upcomingHolidays')}</h4>
+                  <h4>Upcoming Holidays</h4>
                   <div className="holiday-details">
                     <div className="holiday-calendar">
                       <div className="holiday-calendar-icon">
                         <FontAwesomeIcon icon={faCalendarDays} size="lg" color="#fff" />
 
                       </div>
-                      <div className="holiday-calendar-content">
+                      <div className="holiday-calendar-content" style={{textAlign:'center'}}>
                         <h6>Ramzan</h6>
                         <p>Mon 20 May 2024</p>
                       </div>

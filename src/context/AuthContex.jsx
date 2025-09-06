@@ -35,8 +35,8 @@ const AuthContextProvider = (props) => {
     const loginUser = async (email, password) => {
         if (!validateForm(email, password)) return;
 
-        
-        
+
+
 
         setIsLoading(true);
         try {
@@ -102,6 +102,13 @@ const AuthContextProvider = (props) => {
         } catch (error) {
             console.error("Logout error:", error);
             toast.error("Failed to logout");
+        } finally {
+            // Clear local state and storage on successful logout
+            setData(null);
+            setToken("");
+            localStorage.removeItem("token");
+            localStorage.removeItem("userData");
+            toast.info("Logged out successfully");
         }
     };
 

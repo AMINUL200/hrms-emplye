@@ -132,6 +132,7 @@ const Post = ({ posts }) => {
                             <img
                                 src={post?.employee_image}
                                 alt={post?.employee_name}
+                                loading='lazy'
                                 className="rounded-circle post-avatar "
                             />
                             <div className="ms-3">

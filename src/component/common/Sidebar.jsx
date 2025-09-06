@@ -88,7 +88,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                       `sidebar-link ${isActive ? 'active' : ''}`
                     }
                   >
-                    Daily Work Update
+                     Work Update
                   </NavLink>
                 </li>
                 <li>

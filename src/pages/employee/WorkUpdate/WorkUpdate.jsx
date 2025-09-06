@@ -18,6 +18,8 @@ const WorkUpdate = () => {
     const { token } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [rawWorkUpdateData, setRawWorkUpdateData] = useState([]);
+    const [showRemarksModal, setShowRemarksModal] = useState(false);
+    const [currentRemarks, setCurrentRemarks] = useState('');
 
     const fetchWorkUpdatesData = async () => {
         try {
@@ -74,6 +76,12 @@ const WorkUpdate = () => {
     const startIndex = (currentPage - 1) * workUpdatePerPage;
     const endIndex = startIndex + workUpdatePerPage;
     const currentWorkUpdate = filteredWorkUpdate.slice(startIndex, endIndex);
+
+    // Handle showing remarks in modal
+    const handleShowRemarks = (remarks) => {
+        setCurrentRemarks(remarks);
+        setShowRemarksModal(true);
+    };
 
     // Export to Excel function
     const exportToExcel = () => {
@@ -153,6 +161,36 @@ const WorkUpdate = () => {
 
     return (
         <div className='work-update'>
+            {/* Remarks Modal */}
+            {showRemarksModal && (
+                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Remarks</h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close" 
+                                    onClick={() => setShowRemarksModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="remarks-text">{currentRemarks}</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary" 
+                                    onClick={() => setShowRemarksModal(false)}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <div className="row justify-content-between align-items-center mb-3">
                 <Breadcrumb pageTitle="Work Update" />
                 <div style={{ width: 'fit-content' }}>
@@ -171,7 +209,7 @@ const WorkUpdate = () => {
                         <div className="card-header d-flex justify-content-between ">
                             <h4 className="card-title m-0">
                                 <FontAwesomeIcon icon={faFile} className="me-2" />
-                                Daily Work Update
+                                 Work Update
                             </h4>
                             <div className="card-export">
                                 <button className='btn btn-success me-2' onClick={exportToExcel}>
@@ -244,7 +282,7 @@ const WorkUpdate = () => {
                                                         <th>From Time</th>
                                                         <th>To Time</th>
                                                         <th>Time</th>
-                                                        <th className="text-center">Remarks</th>
+                                                        <th className="text-center">Work Report</th>
                                                         <th>Comment</th>
                                                         <th>Actions</th>
                                                     </tr>
@@ -258,7 +296,20 @@ const WorkUpdate = () => {
                                                                 <td>{item.from}</td>
                                                                 <td>{item.to}</td>
                                                                 <td>{item.time}</td>
-                                                                <td className="text-center">{item.remarks}</td>
+                                                                <td className="text-center">
+                                                                    {item.remarks && item.remarks.length > 30 ? (
+                                                                        <span 
+                                                                            className="remarks-truncate"
+                                                                            style={{cursor: 'pointer'}}
+                                                                            onClick={() => handleShowRemarks(item.remarks)}
+                                                                            title="Click to view full remarks"
+                                                                        >
+                                                                            {item.remarks.substring(0, 30)}...
+                                                                        </span>
+                                                                    ) : (
+                                                                        item.remarks || 'No remarks'
+                                                                    )}
+                                                                </td>
                                                                 <td>{item.comment}</td>
                                                                 <td className="text-end">
                                                                     <div className="dropdown dropdown-action dropstart">
@@ -268,7 +319,6 @@ const WorkUpdate = () => {
                                                                         <div className="dropdown-menu dropdown-menu-left">
                                                                             <Link className="dropdown-item"
                                                                                 to={`/organization/add-work-update?update=${item.id}`}
-                                                                               
                                                                             >
                                                                                 <FontAwesomeIcon icon={faPencil} /> Edit
                                                                             </Link>
@@ -310,6 +360,39 @@ const WorkUpdate = () => {
                     </div>
                 </div>
             </div>
+            
+            {/* Custom CSS */}
+            <style>
+                {`
+                    .remarks-truncate {
+                        color: #0d6efd;
+                        text-decoration: underline dotted;
+                    }
+                    
+                    .remarks-truncate:hover {
+                        color: #0a58ca;
+                    }
+                    
+                    .modal-body .remarks-text {
+                        word-wrap: break-word;
+                        white-space: pre-wrap;
+                    }
+                    
+                    .table-responsive-ee {
+                        overflow-x: auto;
+                    }
+                    
+                    .work-update-table th,
+                    .work-update-table td {
+                        vertical-align: middle;
+                    }
+                    
+                    .work-update-table th:nth-child(6),
+                    .work-update-table td:nth-child(6) {
+                        max-width: 200px;
+                    }
+                `}
+            </style>
         </div>
     );
 };

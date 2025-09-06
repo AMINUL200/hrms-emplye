@@ -15,7 +15,14 @@ const AttendanceStatus = () => {
     const api_url = import.meta.env.VITE_API_URL;
     const [loading, setLoading] = useState(true)
     const [rawAttendanceStatusData, setRawAttendanceStatusData] = useState([])
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [currentLocation, setCurrentLocation] = useState({ text: '', type: '' });
 
+
+    // Function to format time values - show "Absent" for "00:00:00"
+    const formatTimeValue = (timeValue) => {
+        return timeValue === '00:00:00' || !timeValue ? 'Absent' : timeValue;
+    };
 
     const getCurrentData = async (fromDate = null, toDate = null) => {
         try {
@@ -37,9 +44,8 @@ const AttendanceStatus = () => {
                     }
                 }
             );
-            
+
             if (res.data.flag === 1) {
-                console.log(res.data.data);
                 setRawAttendanceStatusData(res.data.data);
             } else {
                 toast.error(res.data.message)
@@ -76,7 +82,7 @@ const AttendanceStatus = () => {
                 entry.time_in_location.toLowerCase().includes(term) ||
                 entry.time_out_location.toLowerCase().includes(term)
             )
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        // .sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [searchTerm, rawAttendanceStatusData]);
 
     const totalPages = Math.ceil(filteredData.length / attendancesStatusPage);
@@ -120,27 +126,31 @@ const AttendanceStatus = () => {
             [id]: value
         }));
     };
-     // Reset function
+    // Reset function
     const handleReset = () => {
         // Clear date filters
         setDateFilter({
             from_date: '',
             to_date: ''
         });
-        
+
         // Clear search term
         setSearchTerm('');
-        
+
         // Reset to first page
         setCurrentPage(1);
-        
+
         // // Fetch original data
         // setLoading(true);
         getCurrentData()
-            // .finally(() => setLoading(false));
+        // .finally(() => setLoading(false));
     };
 
-
+    // Handle showing location in modal
+    const handleShowLocation = (location, type) => {
+        setCurrentLocation({ text: location, type });
+        setShowLocationModal(true);
+    };
 
     // Export to Excel function
     const exportToExcel = () => {
@@ -148,11 +158,11 @@ const AttendanceStatus = () => {
         const exportData = filteredData.map(item => ({
             'SI No.': item.id || 'N/A',
             'Date': item.date || 'N/A',
-            'Clock In': item.time_in || 'N/A',
-            'Clock In Location': item.time_in_location || 'N/A',
-            'Clock Out': item.time_out || 'N/A',
-            'Clock Out Location': item.time_out_location || 'N/A',
-            'Duty Hours': item.duty_hours || 'N/A'
+            'Clock In': formatTimeValue(item.time_in),
+            'Clock In Location': item.time_in_location || 'Absent',
+            'Clock Out': formatTimeValue(item.time_out),
+            'Clock Out Location': item.time_out_location || 'Absent',
+            'Duty Hours': item.duty_hours || 'Absent'
         }));
 
         // Create worksheet
@@ -178,11 +188,11 @@ const AttendanceStatus = () => {
         const tableData = filteredData.map(item => [
             item.id || 'N/A',
             item.date || 'N/A',
-            item.time_in || 'N/A',
-            item.time_in_location || 'N/A',
-            item.time_out || 'N/A',
-            item.time_out_location || 'N/A',
-            item.duty_hours || 'N/A'
+            formatTimeValue(item.time_in),
+            item.time_in_location || 'Absent',
+            formatTimeValue(item.time_out),
+            item.time_out_location || 'Absent',
+            item.duty_hours || 'Absent'
         ]);
 
         // Add table to PDF
@@ -214,6 +224,38 @@ const AttendanceStatus = () => {
 
     return (
         <div className='attendance-status'>
+            {/* Location Modal */}
+            {showLocationModal && (
+                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {currentLocation.type === 'in' ? 'Clock In' : 'Clock Out'} Location
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setShowLocationModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="location-text">{currentLocation.text}</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowLocationModal(false)}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="row">
                 <Breadcrumb pageTitle={"Attendance Status"} />
 
@@ -332,17 +374,42 @@ const AttendanceStatus = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {/* {console.log(currentData)
-                                                    } */}
                                                     {currentData.length > 0 ? (
                                                         currentData.map((entry, index) => (
                                                             <tr key={index}>
-                                                                <td>{entry?.id || 'N/A'}</td>
+                                                                <td>{startIndex + index + 1 || 'N/A'}</td>
                                                                 <td>{entry?.date || 'N/A'}</td>
-                                                                <td>{entry?.time_in || 'N/A'}</td>
-                                                                <td className="text-center">{entry?.time_in_location || 'N/A'}</td>
-                                                                <td>{entry?.time_out || 'N/A'}</td>
-                                                                <td className="text-center">{entry?.time_out_location || 'N/A'}</td>
+                                                                {/* <td>{entry?.time_in || 'Absent'}</td> */}
+                                                                <td>{formatTimeValue(entry?.time_in)}</td>
+                                                                <td className="text-center">
+                                                                    {entry?.time_in_location && entry.time_in_location.length > 30 ? (
+                                                                        <span
+                                                                            className="location-truncate"
+                                                                            style={{ cursor: 'pointer' }}
+                                                                            onClick={() => handleShowLocation(entry.time_in_location, 'in')}
+                                                                            title="Click to view full location"
+                                                                        >
+                                                                            {entry.time_in_location.substring(0, 30)}...
+                                                                        </span>
+                                                                    ) : (
+                                                                        entry?.time_in_location || 'Absent'
+                                                                    )}
+                                                                </td>
+                                                                <td>{formatTimeValue(entry?.time_out)}</td>
+                                                                <td className="text-center">
+                                                                    {entry?.time_out_location && entry.time_out_location.length > 30 ? (
+                                                                        <span
+                                                                            className="location-truncate"
+                                                                            style={{ cursor: 'pointer' }}
+                                                                            onClick={() => handleShowLocation(entry.time_out_location, 'out')}
+                                                                            title="Click to view full location"
+                                                                        >
+                                                                            {entry.time_out_location.substring(0, 30)}...
+                                                                        </span>
+                                                                    ) : (
+                                                                        entry?.time_out_location || 'Absent'
+                                                                    )}
+                                                                </td>
                                                                 <td>{entry?.duty_hours || 'N/A'}</td>
                                                             </tr>
                                                         ))
@@ -373,14 +440,45 @@ const AttendanceStatus = () => {
                                     </div>
                                 </div>
                             </div>
-
-
-
-
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Custom CSS */}
+            <style>
+                {`
+                    .location-truncate {
+                        color: #0d6efd;
+                        text-decoration: underline dotted;
+                    }
+                    
+                    .location-truncate:hover {
+                        color: #0a58ca;
+                    }
+                    
+                    .modal-body .location-text {
+                        word-wrap: break-word;
+                        white-space: pre-wrap;
+                    }
+                    
+                    .table-responsive-ee {
+                        overflow-x: auto;
+                    }
+                    
+                    .attendance-status-table th,
+                    .attendance-status-table td {
+                        vertical-align: middle;
+                    }
+                    
+                    .attendance-status-table th:nth-child(4),
+                    .attendance-status-table td:nth-child(4),
+                    .attendance-status-table th:nth-child(6),
+                    .attendance-status-table td:nth-child(6) {
+                        max-width: 200px;
+                    }
+                `}
+            </style>
         </div>
     );
 };
