@@ -7,6 +7,7 @@ import axios from 'axios';
 import PageLoader from '../../../component/loader/PageLoader';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { calcDuration, parseAPITime } from '../../../utils/calcDuration';
+import { getLocationName } from '../../../utils/getLocationName';
 
 const EmployeeAttendance = () => {
     const { token, data } = useContext(AuthContext);
@@ -299,13 +300,18 @@ const EmployeeAttendance = () => {
         const now = new Date();
 
         if (attendanceType === 'check-in' || attendanceType === 'check-out') {
-            const attendanceData = {
+            // Add location name only when needed
+            const locationName = await getLocationName(location.latitude, location.longitude);
+            let attendanceData = {
                 latitude: location.latitude,
                 longitude: location.longitude,
                 time: now.toLocaleTimeString('en-GB', { hour12: false }),
                 date: now.toISOString().split('T')[0],
                 punch_type: data?.punch_type,
+                location : locationName,
             };
+           
+            console.log(attendanceData);
 
             try {
                 const res = await axios.post(`${api_url}/creat-attendance`,
@@ -340,6 +346,8 @@ const EmployeeAttendance = () => {
             }
 
         } else if (attendanceType === 'break-start' || attendanceType === 'break-end') {
+            // Add location name only when needed
+            const locationName = await getLocationName(location.latitude, location.longitude);
 
             const attendanceData = {
                 break_date: now.toISOString().split('T')[0],
@@ -347,7 +355,10 @@ const EmployeeAttendance = () => {
                 break_latitude: location.latitude,
                 break_longitude: location.longitude,
                 punch_type: data?.punch_type,
+                break_location: locationName,
             };
+
+            console.log(attendanceData);
 
             try {
                 const res = await axios.post(`${api_url}/creat-break`,

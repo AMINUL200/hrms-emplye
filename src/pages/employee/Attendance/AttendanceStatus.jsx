@@ -159,9 +159,9 @@ const AttendanceStatus = () => {
             'SI No.': item.id || 'N/A',
             'Date': item.date || 'N/A',
             'Clock In': formatTimeValue(item.time_in),
-            'Clock In Location': item.time_in_location || 'Absent',
+            // 'Clock In Location': item.time_in_location || 'Absent',
             'Clock Out': formatTimeValue(item.time_out),
-            'Clock Out Location': item.time_out_location || 'Absent',
+            // 'Clock Out Location': item.time_out_location || 'Absent',
             'Duty Hours': item.duty_hours || 'Absent'
         }));
 
@@ -189,15 +189,15 @@ const AttendanceStatus = () => {
             item.id || 'N/A',
             item.date || 'N/A',
             formatTimeValue(item.time_in),
-            item.time_in_location || 'Absent',
+            // item.time_in_location || 'Absent',
             formatTimeValue(item.time_out),
-            item.time_out_location || 'Absent',
+            // item.time_out_location || 'Absent',
             item.duty_hours || 'Absent'
         ]);
 
         // Add table to PDF
         autoTable(doc, {
-            head: [['SI No.', 'Date', 'Clock In', 'Clock In Location', 'Clock Out', 'Clock Out Location', 'Duty Hours']],
+            head: [['SI No.', 'Date', 'Clock In',  'Clock Out',  'Duty Hours']],
             body: tableData,
             startY: 20,
             styles: {
@@ -367,9 +367,9 @@ const AttendanceStatus = () => {
                                                         <th>SI No.</th>
                                                         <th>Date</th>
                                                         <th>Clock In</th>
-                                                        <th className="text-center">Clock In Location</th>
+                                                        {/* <th className="text-center">Clock In Location</th> */}
                                                         <th>Clock Out</th>
-                                                        <th className="text-center">Clock Out Location</th>
+                                                        {/* <th className="text-center">Clock Out Location</th> */}
                                                         <th>Duty Hours</th>
                                                     </tr>
                                                 </thead>
@@ -381,7 +381,7 @@ const AttendanceStatus = () => {
                                                                 <td>{entry?.date || 'N/A'}</td>
                                                                 {/* <td>{entry?.time_in || 'Absent'}</td> */}
                                                                 <td>{formatTimeValue(entry?.time_in)}</td>
-                                                                <td className="text-center">
+                                                                {/* <td className="text-center">
                                                                     {entry?.time_in_location && entry.time_in_location.length > 30 ? (
                                                                         <span
                                                                             className="location-truncate"
@@ -394,9 +394,9 @@ const AttendanceStatus = () => {
                                                                     ) : (
                                                                         entry?.time_in_location || 'Absent'
                                                                     )}
-                                                                </td>
+                                                                </td> */}
                                                                 <td>{formatTimeValue(entry?.time_out)}</td>
-                                                                <td className="text-center">
+                                                                {/* <td className="text-center">
                                                                     {entry?.time_out_location && entry.time_out_location.length > 30 ? (
                                                                         <span
                                                                             className="location-truncate"
@@ -409,7 +409,7 @@ const AttendanceStatus = () => {
                                                                     ) : (
                                                                         entry?.time_out_location || 'Absent'
                                                                     )}
-                                                                </td>
+                                                                </td> */}
                                                                 <td>{entry?.duty_hours || 'N/A'}</td>
                                                             </tr>
                                                         ))
