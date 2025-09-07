@@ -32,7 +32,7 @@ const EmployeeAttendance = () => {
     // Use refs for intervals to access latest values in cleanup
     const workTimerIntervalRef = useRef(null);
     const breakTimerIntervalRef = useRef(null);
-    
+
     // Work Timer state
     const [workTime, setWorkTime] = useState('00:00:00');
     const [isWorking, setIsWorking] = useState(false);
@@ -132,14 +132,14 @@ const EmployeeAttendance = () => {
 
                 const apiBreakStart = parseAPITime(record.break_time_start);
                 const apiBreakEnd = record.break_time_end ? parseAPITime(record.break_time_end) : null;
-                
+
                 setBreakStartTime(apiBreakStart);
                 setBreakEndTime(apiBreakEnd);
 
                 if (record.punch_status === "Break Start" && !apiBreakEnd) {
                     // Currently on break
                     setIsOnBreak(true);
-                    
+
                     // Calculate and freeze work time from check-in to break start
                     const workSecondsBeforeBreak = calcDuration(checkInTime, apiBreakStart);
                     setTotalWorkedSeconds(workSecondsBeforeBreak);
@@ -149,22 +149,22 @@ const EmployeeAttendance = () => {
                     // Start live break timer
                     const breakElapsed = calcDuration(apiBreakStart, new Date());
                     startBreakTimer(breakElapsed);
-                    
+
                 } else if (record.punch_status === "Break End" && apiBreakEnd) {
                     // Break has ended
                     setIsOnBreak(false);
-                    
+
                     // Calculate total break time and freeze it
                     const totalBreakTime = calcDuration(apiBreakStart, apiBreakEnd);
                     setBreakTime(secondsToTime(totalBreakTime));
                     setTotalBreakSeconds(totalBreakTime);
                     stopBreakTimer();
-                    
+
                     // Calculate work time: (check-in to break-start) + (break-end to now)
                     const workBeforeBreak = calcDuration(checkInTime, apiBreakStart);
                     const workAfterBreak = calcDuration(apiBreakEnd, new Date());
                     const totalWorkSeconds = workBeforeBreak + workAfterBreak;
-                    
+
                     startWorkTimer(totalWorkSeconds);
                 }
             } else {
@@ -172,7 +172,7 @@ const EmployeeAttendance = () => {
                 setBreakStatus('');
                 setIsOnBreak(false);
                 stopBreakTimer();
-                
+
                 if (checkInTime && attendanceStatus === 'IN') {
                     // Calculate work time from check-in to now
                     const workedSeconds = calcDuration(checkInTime, new Date());
@@ -495,7 +495,7 @@ const EmployeeAttendance = () => {
                                             End Break
                                         </button>
                                     )}
-                                    {showCheckOut && (
+                                    {showCheckOut && !showEndBreak && (
                                         <button
                                             type="button"
                                             className={getButtonClass('check-out')}
@@ -504,6 +504,7 @@ const EmployeeAttendance = () => {
                                             Check Out
                                         </button>
                                     )}
+
                                 </div>
 
                                 <div className="text-center mb-4">

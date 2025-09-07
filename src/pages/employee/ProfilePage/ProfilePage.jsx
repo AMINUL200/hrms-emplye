@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ProfileImg } from '../../../assets';
-import { faEllipsisV, faPencil, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV, faPencil, faTrashCan, faCamera, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Breadcrumb from '../../../component/common/Breadcrumb';
 import './ProfilePage.css';
 import { AuthContext } from '../../../context/AuthContex';
@@ -19,6 +19,7 @@ const ProfilePage = () => {
 	const [isEdit, setIsEdit] = useState(false);
 	const [profileData, setProfileData] = useState(null);
 	const [imageUploading, setImageUploading] = useState(false);
+	const fileInputRef = useRef(null);
 
 	const fetchProfileData = async () => {
 		try {
@@ -43,6 +44,93 @@ const ProfilePage = () => {
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const handleImageSelect = (event) => {
+		const file = event.target.files[0];
+		if (file) {
+			// Validate file type
+			const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+			if (!allowedTypes.includes(file.type)) {
+				toast.error('Please select a valid image file (JPEG, PNG, GIF)');
+				return;
+			}
+
+			// Validate file size (max 5MB)
+			const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+			if (file.size > maxSize) {
+				toast.error('Please select an image smaller than 5MB');
+				return;
+			}
+
+			updateProfileImage(file);
+		}
+	};
+
+	const updateProfileImage = async (imageFile) => {
+		setImageUploading(true);
+		console.log(imageFile);
+		
+		try {
+			const formData = new FormData();
+			formData.append('emp_image', imageFile);
+
+			const response = await axios.post(`${api_url}/employee`, formData, {
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'multipart/form-data'
+				}
+			});
+
+			if (response.data.flag === 1) {
+				toast.success(response.data.message || "Profile image updated successfully");
+				// Refresh profile data to get the new image
+				await fetchProfileData();
+			} else {
+				toast.error(response.data.message || "Failed to update profile image");
+			}
+		} catch (error) {
+			console.error("Error updating profile image:", error);
+			toast.error(error?.response?.data?.message || "Failed to update profile image");
+		} finally {
+			setImageUploading(false);
+			// Reset file input
+			if (fileInputRef.current) {
+				fileInputRef.current.value = '';
+			}
+		}
+	};
+
+	const removeProfileImage = async () => {
+		if (!window.confirm('Are you sure you want to remove your profile image?')) {
+			return;
+		}
+
+		setImageUploading(true);
+		try {
+			const response = await axios.post(`${api_url}/employee/remove-image`, {}, {
+				headers: {
+					'Authorization': `Bearer ${token}`
+				}
+			});
+
+			if (response.data.flag === 1) {
+				toast.success(response.data.message || "Profile image removed successfully");
+				// Refresh profile data
+				await fetchProfileData();
+			} else {
+				toast.error(response.data.message || "Failed to remove profile image");
+			}
+		} catch (error) {
+			console.error("Error removing profile image:", error);
+			toast.error(error?.response?.data?.message || "Failed to remove profile image");
+		} finally {
+			setImageUploading(false);
+		}
+	};
+
+	const triggerImageUpload = () => {
+		fileInputRef.current?.click();
 	};
 
 	useEffect(() => {
@@ -76,7 +164,7 @@ const ProfilePage = () => {
 	};
 
 	if (loading) {
-		return <PageLoader/>
+		return <PageLoader />
 	}
 
 	if (!profileData) {
@@ -105,9 +193,57 @@ const ProfilePage = () => {
 							<div className="profile-view">
 								<div className="profile-img-wrap">
 									<div className="profile-img">
-										<a href="#"><img src={getProfileImage()} alt="User Image" /></a>
+										<img src={getProfileImage()} alt="User Image" />
+
+										{/* Image Upload Controls */}
+										<div className="profile-img-overlay text-center">
+											<div className="profile-img-actions">
+												<button
+													className="btn btn-sm btn-primary me-2"
+													onClick={triggerImageUpload}
+													disabled={imageUploading}
+													title="Change Profile Image"
+												>
+													{imageUploading ? (
+														<FontAwesomeIcon icon={faSpinner} spin />
+													) : (
+														<FontAwesomeIcon icon={faCamera} />
+													)}
+												</button>
+
+												{/* {profileData?.emp_image && (
+													<button
+														className="btn btn-sm btn-danger"
+														onClick={removeProfileImage}
+														disabled={imageUploading}
+														title="Remove Profile Image"
+													>
+														<FontAwesomeIcon icon={faTrashCan} />
+													</button>
+												)} */}
+											</div>
+										</div>
+
+										{/* Hidden file input */}
+										<input
+											type="file"
+											ref={fileInputRef}
+											onChange={handleImageSelect}
+											accept="image/jpeg,image/jpg,image/png,image/gif"
+											style={{ display: 'none' }}
+										/>
 									</div>
+
+									{imageUploading && (
+										<div className="image-upload-status">
+											<small className="text-muted">
+												<FontAwesomeIcon icon={faSpinner} spin className="me-1" />
+												Updating image...
+											</small>
+										</div>
+									)}
 								</div>
+
 								<div className="profile-basic">
 									<div className="row">
 										<div className="col-md-5">
@@ -163,11 +299,6 @@ const ProfilePage = () => {
 												<li>
 													<div className="title">Reports to:</div>
 													<div className="text">
-														<div className="avatar-box">
-															<div className="avatar avatar-xs">
-																<img src="assets/img/profiles/avatar-16.jpg" alt="User Image" />
-															</div>
-														</div>
 														<a href="profile.html">
 															{profileData.emp_reporting_auth || 'Not assigned'}
 														</a>
@@ -341,7 +472,7 @@ const ProfilePage = () => {
 							</div>
 						</div>
 					</div>
-					
+
 					{/* Document Information */}
 					<div className="row">
 						<div className="col-md-6 d-flex">
