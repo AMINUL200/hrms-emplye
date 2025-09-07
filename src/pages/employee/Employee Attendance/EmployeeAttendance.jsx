@@ -441,7 +441,8 @@ const EmployeeAttendance = () => {
                             </div>
 
                             {/* Break Timer Display - Show when on break or break has ended */}
-                            {isOnBreak  && (
+                            {/* {(isOnBreak || (breakStatus === 'Break End' && breakTime !== '00:00:00')) && ( */}
+                            {isOnBreak && (
                                 <div className="row mb-4">
                                     <div className="col-12">
                                         <div className={`card timer-card ${isOnBreak ? 'bg-danger text-white' : 'bg-info text-white'}`}>
