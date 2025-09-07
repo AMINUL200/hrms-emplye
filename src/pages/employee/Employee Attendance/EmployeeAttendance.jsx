@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import './EmployeeAttendance.css'
 import { AuthContext } from '../../../context/AuthContex';
 import { EmployeeContext } from '../../../context/EmployeeContext';
@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import PageLoader from '../../../component/loader/PageLoader';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { calcDuration, parseAPITime } from '../../../utils/calcDuration';
 
 const EmployeeAttendance = () => {
     const { token, data } = useContext(AuthContext);
@@ -23,19 +24,32 @@ const EmployeeAttendance = () => {
     const [showEndBreak, setShowEndBreak] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    // New state for timer
+    // Store API times for calculations
+    const [timeIn, setTimeIn] = useState(null);
+    const [breakStartTime, setBreakStartTime] = useState(null);
+    const [breakEndTime, setBreakEndTime] = useState(null);
+
+    // Use refs for intervals to access latest values in cleanup
+    const workTimerIntervalRef = useRef(null);
+    const breakTimerIntervalRef = useRef(null);
+    
+    // Work Timer state
     const [workTime, setWorkTime] = useState('00:00:00');
     const [isWorking, setIsWorking] = useState(false);
-    const [timerInterval, setTimerInterval] = useState(null);
     const [todayWorkTime, setTodayWorkTime] = useState('00:00:00');
+    const [totalWorkedSeconds, setTotalWorkedSeconds] = useState(0);
 
+    // Break Timer state
+    const [breakTime, setBreakTime] = useState('00:00:00');
+    const [isOnBreak, setIsOnBreak] = useState(false);
+    const [totalBreakSeconds, setTotalBreakSeconds] = useState(0);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
-        return () => clearInterval(timer); // cleanup
+        return () => clearInterval(timer);
     }, []);
 
     const findGeolocation = () => {
@@ -57,31 +71,46 @@ const EmployeeAttendance = () => {
         }
     }
 
+    // Convert seconds to time string (always returns "HH:MM:SS" format)
+    const secondsToTime = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const getCurrentAttendanceStatus = async () => {
         try {
             const res = await axios.get(`${api_url}/attendance-status`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (res.data.status === 200 && res.data.flag === 1) {
-                const status = res.data.data[0]?.punch_status || '';
-                console.log("status: ", status);
-                const dutyHours = res.data.data[0]?.duty_hours || '00:00:00';
+            if (res.data.status === 200 && res.data.flag === 1 && res.data.data.length > 0) {
+                const record = res.data.data[0];
+                setAttendanceStatus(record.punch_status);
 
-                setAttendanceStatus(status);
+                const apiTimeIn = parseAPITime(record.time_in);
+                const apiTimeOut = record.time_out ? parseAPITime(record.time_out) : null;
+                setTimeIn(apiTimeIn);
 
-                if (status === 'IN') {
-                    await getBreakStatus();
-                    // Start the timer if user is checked in but not on break
-                    if (breakStatus !== 'Break Start') {
-                        startTimer();
-                    }
-                } else if (status === 'OUT') {
-                    stopTimer();
-                    // Get today's total work time
-                    // await getTodayWorkTime();
-                    setTodayWorkTime(dutyHours)
+                if (record.punch_status === "IN") {
+                    // User is checked in - get break status first, then calculate work time
+                    await getBreakStatus(apiTimeIn);
+                } else if (record.punch_status === "OUT") {
+                    // User has checked out - freeze work timer at total worked time
+                    const workedSeconds = calcDuration(apiTimeIn, apiTimeOut);
+                    setTotalWorkedSeconds(workedSeconds);
+                    setWorkTime(secondsToTime(workedSeconds));
+                    setTodayWorkTime(secondsToTime(workedSeconds));
+                    stopWorkTimer();
+                    stopBreakTimer();
+                } else {
+                    // Not checked in yet
+                    resetWorkTimer();
                 }
+            } else {
+                // No attendance record found
+                resetWorkTimer();
             }
         } catch (error) {
             console.log(error.message);
@@ -91,21 +120,63 @@ const EmployeeAttendance = () => {
         }
     }
 
-    const getBreakStatus = async () => {
+    const getBreakStatus = async (checkInTime = timeIn) => {
         try {
             const res = await axios.get(`${api_url}/break-status`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (res.data.status === 200 && res.data.flag === 1) {
-                const status = res.data.data[0]?.punch_status || '';
-                setBreakStatus(status);
+            if (res.data.status === 200 && res.data.flag === 1 && res.data.data.length > 0) {
+                const record = res.data.data[0];
+                setBreakStatus(record.punch_status);
 
-                // Control timer based on break status
-                if (status === 'Break Start') {
-                    stopTimer();
-                } else if (status === 'Break End' || status === '') {
-                    startTimer();
+                const apiBreakStart = parseAPITime(record.break_time_start);
+                const apiBreakEnd = record.break_time_end ? parseAPITime(record.break_time_end) : null;
+                
+                setBreakStartTime(apiBreakStart);
+                setBreakEndTime(apiBreakEnd);
+
+                if (record.punch_status === "Break Start" && !apiBreakEnd) {
+                    // Currently on break
+                    setIsOnBreak(true);
+                    
+                    // Calculate and freeze work time from check-in to break start
+                    const workSecondsBeforeBreak = calcDuration(checkInTime, apiBreakStart);
+                    setTotalWorkedSeconds(workSecondsBeforeBreak);
+                    setWorkTime(secondsToTime(workSecondsBeforeBreak));
+                    stopWorkTimer();
+
+                    // Start live break timer
+                    const breakElapsed = calcDuration(apiBreakStart, new Date());
+                    startBreakTimer(breakElapsed);
+                    
+                } else if (record.punch_status === "Break End" && apiBreakEnd) {
+                    // Break has ended
+                    setIsOnBreak(false);
+                    
+                    // Calculate total break time and freeze it
+                    const totalBreakTime = calcDuration(apiBreakStart, apiBreakEnd);
+                    setBreakTime(secondsToTime(totalBreakTime));
+                    setTotalBreakSeconds(totalBreakTime);
+                    stopBreakTimer();
+                    
+                    // Calculate work time: (check-in to break-start) + (break-end to now)
+                    const workBeforeBreak = calcDuration(checkInTime, apiBreakStart);
+                    const workAfterBreak = calcDuration(apiBreakEnd, new Date());
+                    const totalWorkSeconds = workBeforeBreak + workAfterBreak;
+                    
+                    startWorkTimer(totalWorkSeconds);
+                }
+            } else {
+                // No break record found - normal work time calculation
+                setBreakStatus('');
+                setIsOnBreak(false);
+                stopBreakTimer();
+                
+                if (checkInTime && attendanceStatus === 'IN') {
+                    // Calculate work time from check-in to now
+                    const workedSeconds = calcDuration(checkInTime, new Date());
+                    startWorkTimer(workedSeconds);
                 }
             }
         } catch (error) {
@@ -114,66 +185,85 @@ const EmployeeAttendance = () => {
         }
     }
 
-  
+    // Work Timer functions
+    const startWorkTimer = (initialSeconds = 0) => {
+        // Stop any existing work timer first
+        if (workTimerIntervalRef.current) {
+            clearInterval(workTimerIntervalRef.current);
+        }
 
-    // Timer functions
-    const startTimer = () => {
         setIsWorking(true);
-        // In a real app, you would fetch the start time from your API
-        // For demo, we'll start from 00:00:00
-        let seconds = 0;
-        const interval = setInterval(() => {
-            seconds++;
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
+        setTotalWorkedSeconds(initialSeconds);
+        setWorkTime(secondsToTime(initialSeconds));
 
-            setWorkTime(
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-            );
+        const interval = setInterval(() => {
+            setTotalWorkedSeconds(prev => {
+                const newSeconds = prev + 1;
+                setWorkTime(secondsToTime(newSeconds));
+                return newSeconds;
+            });
         }, 1000);
 
-        setTimerInterval(interval);
+        workTimerIntervalRef.current = interval;
     };
 
-    const stopTimer = () => {
+    const stopWorkTimer = () => {
         setIsWorking(false);
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            setTimerInterval(null);
+        if (workTimerIntervalRef.current) {
+            clearInterval(workTimerIntervalRef.current);
+            workTimerIntervalRef.current = null;
         }
     };
 
-    const resetTimer = () => {
-        stopTimer();
+    const resetWorkTimer = () => {
+        stopWorkTimer();
         setWorkTime('00:00:00');
+        setTotalWorkedSeconds(0);
+    };
+
+    // Break Timer functions
+    const startBreakTimer = (initialSeconds = 0) => {
+        // Stop any existing break timer first
+        if (breakTimerIntervalRef.current) {
+            clearInterval(breakTimerIntervalRef.current);
+        }
+
+        setIsOnBreak(true);
+        setTotalBreakSeconds(initialSeconds);
+        setBreakTime(secondsToTime(initialSeconds));
+
+        const interval = setInterval(() => {
+            setTotalBreakSeconds(prev => {
+                const newSeconds = prev + 1;
+                setBreakTime(secondsToTime(newSeconds));
+                return newSeconds;
+            });
+        }, 1000);
+
+        breakTimerIntervalRef.current = interval;
+    };
+
+    const stopBreakTimer = () => {
+        setIsOnBreak(false);
+        if (breakTimerIntervalRef.current) {
+            clearInterval(breakTimerIntervalRef.current);
+            breakTimerIntervalRef.current = null;
+        }
     };
 
     useEffect(() => {
         findGeolocation();
         getCurrentAttendanceStatus();
 
-        // Check if it's a new day and reset timer
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-
-        const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-
-        const midnightTimeout = setTimeout(() => {
-            resetTimer();
-            setTodayWorkTime('00:00:00');
-        }, timeUntilMidnight);
-
+        // Cleanup on unmount
         return () => {
-            if (timerInterval) clearInterval(timerInterval);
-            clearTimeout(midnightTimeout);
+            if (workTimerIntervalRef.current) clearInterval(workTimerIntervalRef.current);
+            if (breakTimerIntervalRef.current) clearInterval(breakTimerIntervalRef.current);
         };
     }, []);
 
+    // Update UI based on attendance and break status
     useEffect(() => {
-        // Determine which buttons to show based on status
         if (attendanceStatus === '') {
             setShowCheckIn(true);
             setAttendanceType('check-in');
@@ -183,14 +273,15 @@ const EmployeeAttendance = () => {
         } else if (attendanceStatus === 'IN') {
             setShowCheckIn(false);
             setShowCheckOut(true);
-            setAttendanceType('check-out');
 
             if (breakStatus === 'Break Start') {
                 setShowStartBreak(false);
                 setShowEndBreak(true);
-            } else if (breakStatus === 'Break End' || breakStatus === '') {
+                setAttendanceType('break-end');
+            } else {
                 setShowStartBreak(true);
                 setShowEndBreak(false);
+                setAttendanceType('break-start');
             }
         } else if (attendanceStatus === 'OUT') {
             setShowCheckIn(false);
@@ -207,7 +298,7 @@ const EmployeeAttendance = () => {
 
         const now = new Date();
 
-        if ((showCheckIn && attendanceType === 'check-in') || (showCheckOut && attendanceType === 'check-out')) {
+        if (attendanceType === 'check-in' || attendanceType === 'check-out') {
             const attendanceData = {
                 latitude: location.latitude,
                 longitude: location.longitude,
@@ -222,19 +313,21 @@ const EmployeeAttendance = () => {
                     {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                console.log(res.data);
 
                 if (res.status === 200 && res.data.flag === 1) {
                     toast.success(res.data.message);
 
                     if (attendanceType === 'check-in') {
-                        startTimer();
+                        // Start work timer from 0 for new check-in
+                        startWorkTimer(0);
                     } else if (attendanceType === 'check-out') {
-                        stopTimer();
-                        await getTodayWorkTime();
+                        // Stop both timers
+                        stopWorkTimer();
+                        stopBreakTimer();
                     }
 
-                    getCurrentAttendanceStatus();
+                    // Refresh attendance status
+                    await getCurrentAttendanceStatus();
                 } else {
                     toast.error(res.data.message)
                 }
@@ -246,8 +339,7 @@ const EmployeeAttendance = () => {
                 setIsSubmitting(false);
             }
 
-
-        } else if ((showStartBreak && attendanceType === 'break-start') || (showEndBreak && attendanceType === 'break-end')) {
+        } else if (attendanceType === 'break-start' || attendanceType === 'break-end') {
 
             const attendanceData = {
                 break_date: now.toISOString().split('T')[0],
@@ -256,7 +348,6 @@ const EmployeeAttendance = () => {
                 break_longitude: location.longitude,
                 punch_type: data?.punch_type,
             };
-            console.log("break api call :: ", attendanceData);
 
             try {
                 const res = await axios.post(`${api_url}/creat-break`,
@@ -269,12 +360,17 @@ const EmployeeAttendance = () => {
                     toast.success(res.data.message);
 
                     if (attendanceType === 'break-start') {
-                        stopTimer();
+                        // Freeze work timer at current time and start break timer
+                        stopWorkTimer();
+                        startBreakTimer(0);
                     } else if (attendanceType === 'break-end') {
-                        startTimer();
+                        // Stop break timer and resume work timer
+                        stopBreakTimer();
+                        // Work timer will be recalculated when getBreakStatus is called
                     }
 
-                    getCurrentAttendanceStatus();
+                    // Refresh status to get updated break information
+                    await getBreakStatus();
                 } else {
                     toast.error(res.data.message)
                 }
@@ -315,24 +411,48 @@ const EmployeeAttendance = () => {
                             {/* Timer Display */}
                             <div className="row mb-4">
                                 <div className="col-12">
-                                    <div className={`card timer-card ${isWorking ? 'bg-success text-white' : 'bg-light'}`}>
+                                    <div className={`card timer-card ${attendanceStatus === 'OUT'
+                                        ? 'bg-secondary text-white'
+                                        : isWorking
+                                            ? 'bg-success text-white'
+                                            : isOnBreak
+                                                ? 'bg-warning'
+                                                : 'bg-warning'
+                                        }`}>
                                         <div className="card-body text-center py-3">
-                                            <h5 className="card-title">Today's Work Time</h5>
-                                            <div className="display-4 fw-bold">{todayWorkTime}</div>
-                                            <p className="mb-0">Total time worked today</p>
+                                            <h5 className="card-title">Work Time</h5>
+
+                                            <div className="display-4 fw-bold">
+                                                {attendanceStatus === 'OUT'
+                                                    ? todayWorkTime
+                                                    : workTime}
+                                            </div>
+
+                                            <p className="mb-0">
+                                                {attendanceStatus === 'OUT'
+                                                    ? "Day Complete - Total Time"
+                                                    : attendanceStatus === 'IN'
+                                                        ? (isOnBreak ? "Work Timer Paused" : "Working...")
+                                                        : "Ready to Start"}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {attendanceStatus === 'IN' && (
+                            {/* Break Timer Display - Show when on break or break has ended */}
+                            {isOnBreak  && (
                                 <div className="row mb-4">
                                     <div className="col-12">
-                                        <div className={`card timer-card ${isWorking ? 'bg-info text-white' : 'bg-warning'}`}>
+                                        <div className={`card timer-card ${isOnBreak ? 'bg-danger text-white' : 'bg-info text-white'}`}>
                                             <div className="card-body text-center py-3">
-                                                <h5 className="card-title">Current Session</h5>
-                                                <div className="display-4 fw-bold">{workTime}</div>
-                                                <p className="mb-0">{isWorking ? 'Working...' : 'On Break'}</p>
+                                                <h5 className="card-title">Break Time</h5>
+                                                <div className="display-4 fw-bold">
+                                                    {breakTime}
+                                                </div>
+                                                <p className="mb-0">
+                                                    {isOnBreak ? "Currently on Break" : "Break Completed"}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -393,9 +513,6 @@ const EmployeeAttendance = () => {
                                         <div className="col-12 col-md-6 mb-2">
                                             <strong>Time:</strong> {currentTime.toLocaleTimeString()}
                                         </div>
-                                        {/* <div className="col-12 col-md-4 mb-2">
-                                            <strong>Punch Type:</strong> {data?.punch_type}
-                                        </div> */}
                                     </div>
                                 </div>
 
@@ -412,7 +529,7 @@ const EmployeeAttendance = () => {
                                                 Processing...
                                             </>
                                         ) : attendanceStatus === 'OUT' ? (
-                                            <span>Already Checked Out</span>
+                                            <span>Day Complete</span>
                                         ) : (
                                             `Record ${attendanceType.replace('-', ' ')}`
                                         )}
