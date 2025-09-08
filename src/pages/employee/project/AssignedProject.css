@@ -1,45 +1,394 @@
-.assigned-card {
-  border-radius: 12px;
+/* AssignedProject.css */
+.assigned-projects-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.extra-count {
+.projects-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
+  margin-bottom: 2rem;
 }
 
-.cursor-pointer {
+.projects-header h2 {
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.projects-summary {
+  display: flex;
+  gap: 1rem;
+}
+
+.total-projects, .completed-projects {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.total-projects {
+  background-color: #ebf8ff;
+  color: #3182ce;
+}
+
+.completed-projects {
+  background-color: #f0fff4;
+  color: #38a169;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  overflow: hidden;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.team-avatars {
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.status-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.open {
+  background-color: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.closed {
+  background-color: #e9d8fd;
+  color: #44337a;
+}
+
+.status-badge.in-progress {
+  background-color: #bee3f8;
+  color: #1a365d;
+}
+
+.card-menu-btn {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.card-menu-btn:hover {
+  background-color: #f7fafc;
+  color: #4a5568;
+}
+
+.card-content {
+  padding: 1rem 1.5rem;
+  flex-grow: 1;
+}
+
+.project-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+}
+
+.project-code {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0 0 1rem 0;
+}
+
+.project-description {
+  color: #718096;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a5568;
 }
 
-.team-avatars .avatar {
-  margin-left: -10px; /* ~30% overlap for 32px avatar */
-  border: 2px solid #fff; /* White border like in your screenshot */
+.stat-item.urgent {
+  color: #e53e3e;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
+.stat-item svg {
+  width: 14px;
+  height: 14px;
 }
 
-.extra-count {
+.progress-container {
+  margin-bottom: 1.5rem;
+}
+
+.progress-labels {
   display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.low {
+  background-color: #f56565;
+}
+
+.progress-fill.medium {
+  background-color: #ecc94b;
+}
+
+.progress-fill.high {
+  background-color: #48bb78;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #fafafa;
+}
+
+.role-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.role-info svg {
+  width: 14px;
+  height: 14px;
+}
+
+.view-project {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4299e1;
+  font-weight: 600;
+}
+
+.view-project svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s;
+}
+
+.project-card:hover .view-project svg {
+  transform: translateX(3px);
+}
+
+/* Skeleton loading */
+.project-card-skeleton {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  height: 340px;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.skeleton-badge {
+  width: 60px;
+  height: 24px;
+  border-radius: 20px;
+  background-color: #edf2f7;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 70%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-code {
+  height: 16px;
+  width: 40%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-description {
+  height: 14px;
+  width: 100%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-description:nth-child(5) {
+  width: 80%;
+}
+
+.skeleton-stats {
+  height: 16px;
+  width: 60%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin: 1.5rem 0 1rem;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-progress {
+  height: 8px;
+  width: 100%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+.skeleton-footer {
+  height: 20px;
+  width: 50%;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Error and empty states */
+.error-state, .empty-state {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
+
+.error-icon, .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-state h3, .empty-state h3 {
+  color: #2d3748;
+  margin: 0 0 0.5rem 0;
+}
+
+.error-state p, .empty-state p {
+  color: #718096;
+  margin: 0 0 1.5rem 0;
+}
+
+.retry-button {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #3182ce;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assigned-projects-container {
+    padding: 1rem;
+  }
+  
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

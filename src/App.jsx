@@ -45,12 +45,12 @@ const App = () => {
           <Route path="/organization" element={<MainLayout />}>
             <Route path="employerdashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="employee-attendance" element={<ProtectedRoute><EmployeeAttendance /></ProtectedRoute>} />
+            <Route path="attendance-status" element={<ProtectedRoute><AttendanceStatus /></ProtectedRoute>} />
             <Route path="employerprofile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
             <Route path="holiday" element={<ProtectedRoute><Holiday /></ProtectedRoute>} />
             <Route path="work-update" element={<ProtectedRoute><WorkUpdate /></ProtectedRoute>} />
             <Route path="add-work-update" element={<ProtectedRoute><AddWorkUpdate /></ProtectedRoute>} />
-            <Route path="attendance-status" element={<ProtectedRoute><AttendanceStatus /></ProtectedRoute>} />
             <Route path="holiday-list" element={<ProtectedRoute><HolidayList /></ProtectedRoute>} />
             <Route path="holiday-apply" element={<ProtectedRoute><HolidayApply /></ProtectedRoute>} />
             <Route path="post" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />

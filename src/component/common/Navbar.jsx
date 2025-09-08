@@ -1,19 +1,80 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthContex';
 import { useNavigate } from 'react-router-dom';
 import { deFlag, esFlag, frFlag, logo2, usFlag } from '../../assets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisVertical, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { 
+    faEllipsisVertical, 
+    faSearch
+} from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
-
-
+import BirthdayDropdown from './BirthdayDropdown';
+import NotificationDropdown from './NotificationDropdown';
+// import NotificationDropdown from '../components/NotificationDropdown';
+// import BirthdayDropdown from '../components/BirthdayDropdown';
 
 const Navbar = ({ toggleSidebar, isOpen }) => {
     const { logoutUser, data } = useContext(AuthContext);
     const storage_url = import.meta.env.VITE_STORAGE_URL;
     const navigate = useNavigate();
-
     const { t, i18n } = useTranslation();
+
+    // Sample notifications data - replace with your API data
+    const [notifications] = useState([
+        {
+            id: 1,
+            title: "New Project Assignment",
+            message: "You have been assigned to Project Alpha",
+            time: "2 hours ago",
+            isRead: false
+        },
+        {
+            id: 2,
+            title: "Meeting Reminder",
+            message: "Team standup meeting in 30 minutes",
+            time: "30 minutes ago",
+            isRead: false
+        },
+        {
+            id: 3,
+            title: "Task Completed",
+            message: "Your task has been marked as completed",
+            time: "1 day ago",
+            isRead: true
+        }
+    ]);
+
+    // Sample birthday data - replace with your API data
+    const [birthdays] = useState([
+        {
+            id: 1,
+            name: "John Smith",
+            image: "https://i.pravatar.cc/60?img=1",
+            birthdate: "Dec 15",
+            department: "Engineering"
+        },
+        {
+            id: 2,
+            name: "Sarah Johnson",
+            image: "https://i.pravatar.cc/60?img=2",
+            birthdate: "Dec 15",
+            department: "Marketing"
+        },
+        {
+            id: 3,
+            name: "Mike Davis",
+            image: "https://i.pravatar.cc/60?img=3",
+            birthdate: "Dec 16",
+            department: "HR"
+        },
+        {
+            id: 4,
+            name: "Emma Wilson",
+            image: "https://i.pravatar.cc/60?img=4",
+            birthdate: "Dec 16",
+            department: "Finance"
+        }
+    ]);
 
     const changeLanguage = (lang) => {
         i18n.changeLanguage(lang);
@@ -34,8 +95,20 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
         return 'https://i.pravatar.cc/40';
     };
 
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.notification-dropdown')) {
+                // This will be handled within the NotificationDropdown component
+            }
+            if (!event.target.closest('.birthday-dropdown')) {
+                // This will be handled within the BirthdayDropdown component
+            }
+        };
 
-
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
     return (
         <div className='header'>
@@ -48,7 +121,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 </div>
 
                 {/* Toggle Button */}
-                {/* <div className={`toggle_btn ${!isOpen ? 'sidebar-open' : 'sidebar-closed'}`} onClick={toggleSidebar}> */}
                 <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar}>
                     <span className="bar-icon">
                         <span></span>
@@ -58,28 +130,21 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 </div>
             </div>
 
-
-            {/* Page Title */}
-
-
             {/* Right Side Menu */}
             <div className="hed-right">
                 <div className='search-info'>
-                    <div className="search" >
+                    <div className="search">
                         <input
                             type="text"
                             placeholder={t("search")}
                         />
-                        <button
-                            type="submit"
-                        >
+                        <button type="submit">
                             <FontAwesomeIcon icon={faSearch} />
                         </button>
                     </div>
 
-
                     <div className="dropdown lang-dropdown">
-                        <a className="dropdown-toggle" data-bs-toggle="dropdown" >
+                        <a className="dropdown-toggle" data-bs-toggle="dropdown">
                             <img
                                 src={i18n.language === 'en' ? usFlag : i18n.language === 'fr' ? frFlag : i18n.language === 'es' ? esFlag : deFlag}
                                 width={20} alt=""
@@ -107,8 +172,13 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                         </div>
                     </div>
 
-
+                    {/* Use Notification Component */}
+                    <NotificationDropdown notifications={notifications} />
+                    
+                    {/* Use Birthday Component */}
+                    <BirthdayDropdown birthdays={birthdays} />
                 </div>
+
                 <div className='header-profile'>
                     <div className="dropdown mobile-user-menu">
                         {/* Entire profile trigger area */}
@@ -120,14 +190,12 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                         >
                             {/* Profile Image */}
                             <div className="user-img-wrapper me-2">
-                                {/* <img src="https://i.pravatar.cc/40" alt="User" className="user-img" /> */}
-                               <img src={getProfileImage()} alt="User Image" className="user-img" />
+                                <img src={getProfileImage()} alt="User Image" className="user-img" />
                             </div>
 
                             {/* User Name */}
                             <div className="user-name">
                                 <span>{getFullName()}</span>
-
                             </div>
 
                             {/* Icon */}
@@ -143,7 +211,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

@@ -409,13 +409,12 @@ const EmployeeAttendance = () => {
     }
 
     return (
-        <div className="container-fluid py-4 attendance-container">
+        <div className="attendance-container">
             <div className="row justify-content-center">
-                <div className="col-12 col-md-8 col-lg-6">
+                <div className="col-12 ">
                     <div className="card shadow-lg border-0">
                         <div className="card-header text-white text-center py-3">
-                            <h2 className="mb-0">Employee Attendance System</h2>
-                            <p className="mb-0">Record your work status with location tracking</p>
+                            <h2 className="mb-0 mx-auto">Employee Attendance System</h2>
                         </div>
 
                         <div className="card-body p-4">

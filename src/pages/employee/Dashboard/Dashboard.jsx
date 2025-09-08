@@ -13,6 +13,7 @@ import { AuthContext } from '../../../context/AuthContex';
 import { toast } from 'react-toastify';
 import PageLoader from '../../../component/loader/PageLoader';
 import { EmployeeContext } from '../../../context/EmployeeContext';
+import EmployeeAttendance from '../Employee Attendance/EmployeeAttendance';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -233,7 +234,7 @@ const Dashboard = () => {
 
 
 
-      <div className="row section-padding ">
+      <div className="row section-padding gap-0 ">
         <div className="col-xxl-6 col-lg-12 col-md-12">
           <div className="row">
             <div className="col-lg-12 col-md-12">
@@ -261,7 +262,8 @@ const Dashboard = () => {
             </div>
             <div className="col-lg-12 col-md-12   " >
               <div className='pb-4 bg-grays'>
-                <NotificationCard />
+                {/* <NotificationCard /> */}
+                <EmployeeAttendance/>
 
               </div>
             </div>
@@ -270,7 +272,7 @@ const Dashboard = () => {
         </div>
         {/* posts */}
         <div className="col-xxl-6 col-lg-12 col-md-12 pb-4  bg-grays"
-          style={{ paddingLeft: '0', paddingRight: '0' }}
+          style={{ paddingLeft: '0', paddingRight: '0', margin:'0, 70px, 0' }}
         >
           <div className="d-flex justify-content-between align-items-center post-h mb-2">
             <h3 className="m-0">Latest Posts</h3>

@@ -1,4 +1,5 @@
 import logo2 from './img/logo2.png'
+import logo from './img/logo.png'
 import img from './img/img02.jpg'
 import car1 from './img/caro1.png'
 import car2 from './img/caro2.png'
@@ -22,6 +23,7 @@ import avatar9 from './img/profiles/avatar-09.jpg'
 
 export {
     logo2,
+    logo,
     img,
     car1,
     car2,
