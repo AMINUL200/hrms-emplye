@@ -325,10 +325,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
           <hr className="sidebar-divider" />
 
           {/* Footer logo and version info */}
-          <div className="sidebar-footer-bottom">
+          <div className="sidebar-footer-bottom"
+          style={{background:'white', margin:'0 10px', borderRadius:'20px'}}
+          >
             <div className="footer-logo">
               <img src={logo} width="50" height="50" alt="Logo" />
-              <span>Develop By</span>
+              <span style={{color:'black'}}>Develop By</span>
               <img src={logo2} width="50" height="50" alt="Logo" />
             </div>
             <div className="footer-version">&copy; 2025 SponicHR. All rights reserved.</div>

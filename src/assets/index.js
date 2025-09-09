@@ -20,6 +20,8 @@ import deFlag from './img/flags/de.png'
 
 import avatar9 from './img/profiles/avatar-09.jpg'
 
+import swc_global from './img/swc_global.png'
+
 
 export {
     logo2,
@@ -39,6 +41,6 @@ export {
     esFlag,
     deFlag,
     avatar9,
-    // Add more images as needed
- 
+    swc_global
+
 }

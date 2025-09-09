@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthContex';
 import { useNavigate } from 'react-router-dom';
-import { deFlag, esFlag, frFlag, logo2, usFlag } from '../../assets';
+import { deFlag, esFlag, frFlag, logo2, swc_global, usFlag } from '../../assets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faEllipsisVertical, 
@@ -116,7 +116,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 {/* Logo */}
                 <div className="header-log">
                     <a href="#" className="logo2">
-                        <img src={logo2} width="100" height="90" alt="Logo" />
+                        <img src={swc_global} width="100" height="80" alt="Logo" />
                     </a>
                 </div>
 

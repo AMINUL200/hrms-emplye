@@ -28,8 +28,10 @@ const AssignedProject = () => {
       const res = await axios.get(`${api_url}/project-list`, {
         headers: { Authorization: `Bearer ${token}` } 
       });
+      console.log(res.data);
       
       if (res.data.status === 1) {
+
         setProjects(res.data.data);
       } else {
         setError(res.data.message || 'Failed to fetch projects');
