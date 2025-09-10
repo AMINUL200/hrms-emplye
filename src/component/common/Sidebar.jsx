@@ -97,13 +97,13 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       submenu: [
         {
           title: 'Leave Apply',
-          path: '/organization/leaves',
+          path: '/organization/apply-leaves',
           icon: faClipboardList,
           type: 'single'
         },
         {
           title: 'Leave List',
-          path: '/organization/leave-list',
+          path: '/organization/leaves-list',
           icon: faListAlt,
           type: 'single'
         }

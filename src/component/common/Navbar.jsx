@@ -109,6 +109,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
+    console.log(data);
+    
 
     return (
         <div className='header'>
@@ -116,7 +118,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 {/* Logo */}
                 <div className="header-log">
                     <a href="#" className="logo2">
-                        <img src={swc_global} width="100" height="80" alt="Logo" />
+                        <img src={`${storage_url}/${data?.org_logo}`} width="100" height="80" alt="Logo" />
                     </a>
                 </div>
 

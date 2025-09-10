@@ -24,8 +24,11 @@ import AssignedProject from './pages/employee/project/AssignedProject';
 import ViewProject from './pages/employee/view project/ViewProject';
 
 import './App.css'
+import LeaveApplication from './pages/employee/Leaves/LeaveApplication';
+import LeaveList from './pages/employee/Leaves/LeaveList';
 
 const App = () => {
+
   const { isAuthenticated } = useContext(AuthContext);
 
   return (
@@ -44,10 +47,16 @@ const App = () => {
           {/* Protected organization routes */}
           <Route path="/organization" element={<MainLayout />}>
             <Route path="employerdashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="employerprofile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
             <Route path="employee-attendance" element={<ProtectedRoute><EmployeeAttendance /></ProtectedRoute>} />
             <Route path="attendance-status" element={<ProtectedRoute><AttendanceStatus /></ProtectedRoute>} />
-            <Route path="employerprofile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            
             <Route path="leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
+            <Route path="apply-leaves" element={<ProtectedRoute><LeaveApplication /></ProtectedRoute>} />
+            <Route path="leaves-list" element={<ProtectedRoute><LeaveList /></ProtectedRoute>} />
+
+
             <Route path="holiday" element={<ProtectedRoute><Holiday /></ProtectedRoute>} />
             <Route path="work-update" element={<ProtectedRoute><WorkUpdate /></ProtectedRoute>} />
             <Route path="add-work-update" element={<ProtectedRoute><AddWorkUpdate /></ProtectedRoute>} />

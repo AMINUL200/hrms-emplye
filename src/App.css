@@ -1962,7 +1962,7 @@ textarea {
     border: none !important;
     display: inline-flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
 }
 
 .btn-apply {

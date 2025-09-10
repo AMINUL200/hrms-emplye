@@ -560,7 +560,7 @@ const ViewProject = () => {
                 <div className="message-footer">
                   <div className="message-time" aria-hidden="true">
                     {msg.time}
-                    {msg.updatedAt !== msg.createdAt && " (edited)"}
+                    {/* {msg.updatedAt !== msg.createdAt && " (edited)"} */}
                   </div>
                   <div className="message-actions">
                     <button
