@@ -13,14 +13,17 @@ import {
   faPaperPlane,
   faDownload,
   faSmile,
-  faMicrophone
+  faMicrophone,
+  faEdit,
+  faTrash,
+  faCheck,
+  faBan
 } from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import ProjectDetails from "../../../component/task/ProjectDetails";
-// import ProjectDetails from "./ProjectDetails"; // Import the new component
 
 const ViewProject = () => {
   const { id } = useParams();
@@ -28,7 +31,9 @@ const ViewProject = () => {
   const api_url = import.meta.env.VITE_API_URL;
   const stor_url = import.meta.env.VITE_STORAGE_URL;
   const [loading, setLoading] = useState(true);
-  const currentUser = data?.employee_id; // Use the logged-in user's employee code
+  const [sending, setSending] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const currentUser = data?.employee_id;
   const chatBoxRef = useRef(null);
   const fileInputRef = useRef(null);
   const [newMessage, setNewMessage] = useState("");
@@ -37,6 +42,7 @@ const ViewProject = () => {
   const [showFileTypes, setShowFileTypes] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
   const resizeObserverRef = useRef(null);
 
   // State for project data from API
@@ -85,7 +91,6 @@ const ViewProject = () => {
     return posts.map(post => {
       const message = {
         id: post.id,
-        // parentId: post.parent_id,
         sender: post.user_name,
         senderCode: post.employee_code,
         text: post.title,
@@ -93,7 +98,9 @@ const ViewProject = () => {
           hour: "2-digit",
           minute: "2-digit"
         }),
-        file: post.file
+        file: post.file,
+        createdAt: post.created_at,
+        updatedAt: post.updated_at
       };
 
       // If this is a reply, add replyTo information
@@ -120,7 +127,6 @@ const ViewProject = () => {
         });
         setIsAtBottom(true);
       } catch (error) {
-        // Fallback for browsers that don't support scroll options
         chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
       }
     }
@@ -167,14 +173,14 @@ const ViewProject = () => {
       const newAttachments = files.map(file => ({
         file,
         name: file.name,
-        type: file.type.split('/')[0], // 'image', 'application', etc.
+        type: file.type.split('/')[0],
         size: file.size,
         preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
       }));
       setAttachments([...attachments, ...newAttachments]);
       setShowFileTypes(false);
     }
-    e.target.value = null; // Reset file input
+    e.target.value = null;
   };
 
   // Remove attachment
@@ -198,8 +204,9 @@ const ViewProject = () => {
   // Handle reply to a message
   const handleReply = (message) => {
     setReplyingTo(message);
+    setEditingMessage(null);
     setShowEmojiPicker(false);
-    // Scroll to the message being replied to
+    
     const messageElement = document.getElementById(`message-${message.id}`);
     if (messageElement) {
       messageElement.classList.add('highlight-message');
@@ -215,9 +222,92 @@ const ViewProject = () => {
     setReplyingTo(null);
   };
 
+  // Handle edit message
+  const handleEdit = (message) => {
+    setEditingMessage(message);
+    setNewMessage(message.text);
+    setReplyingTo(null);
+    
+    // Focus on the input field
+    setTimeout(() => {
+      const input = document.querySelector('.chat-input input');
+      if (input) input.focus();
+    }, 100);
+  };
+
+  // Cancel edit
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setNewMessage("");
+  };
+
+  // Save edited message
+  const saveEdit = async () => {
+    if (!newMessage.trim() && !editingMessage.file) {
+      toast.error("Message cannot be empty");
+      return;
+    }
+    
+    setEditing(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('title', newMessage);
+      formData.append('_method', 'PUT');
+
+      const response = await axios.post(`${api_url}/project-posts/${editingMessage.id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      if (response.data.success ) {
+        // Refresh project data to get the updated post
+        getProjectData();
+        setEditingMessage(null);
+        setNewMessage("");
+        toast.success("Message updated successfully");
+      } else {
+        toast.error("Failed to update message");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error updating message");
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  // Delete message
+  const deleteMessage = async (messageId) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`${api_url}/project-posts/${messageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success ) {
+        // Refresh project data to reflect the deletion
+        getProjectData();
+        toast.success("Message deleted successfully");
+      } else {
+        toast.error("Failed to delete message");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error deleting message");
+    }
+  };
+
   // Handle sending message with attachments and replies
   const handleSendMessage = useCallback(async () => {
     if (newMessage.trim() || attachments.length > 0) {
+      setSending(true);
+      
       try {
         const formData = new FormData();
         formData.append('title', newMessage);
@@ -225,8 +315,6 @@ const ViewProject = () => {
 
         if (replyingTo) {
           formData.append('parent_id', replyingTo.id);
-          // console.log('parentId: ', replyingTo.id);
-          
         }
 
         // Add attachments if any
@@ -241,11 +329,9 @@ const ViewProject = () => {
           }
         });
 
-        console.log(response.data);
         if (response.data.status === 200) {
           // Refresh project data to get the new post
           getProjectData();
-          
 
           // Clear attachments and message
           attachments.forEach(att => {
@@ -261,6 +347,8 @@ const ViewProject = () => {
       } catch (error) {
         console.error(error);
         toast.error("Error sending message");
+      } finally {
+        setSending(false);
       }
     }
   }, [newMessage, attachments, replyingTo, id, token, api_url]);
@@ -270,10 +358,14 @@ const ViewProject = () => {
     (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        handleSendMessage();
+        if (editingMessage) {
+          saveEdit();
+        } else {
+          handleSendMessage();
+        }
       }
     },
-    [handleSendMessage]
+    [handleSendMessage, editingMessage, saveEdit]
   );
 
   // Clean up object URLs when component unmounts
@@ -284,6 +376,34 @@ const ViewProject = () => {
       });
     };
   }, [attachments]);
+
+  // SVG Loader Component
+  const Loader = ({ size = 20, color = "#ffffff" }) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 38 38"
+      xmlns="http://www.w3.org/2000/svg"
+      stroke={color}
+      className="message-loader"
+    >
+      <g fill="none" fillRule="evenodd">
+        <g transform="translate(1 1)" strokeWidth="2">
+          <circle strokeOpacity=".5" cx="18" cy="18" r="18" />
+          <path d="M36 18c0-9.94-8.06-18-18-18">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 18 18"
+              to="360 18 18"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </path>
+        </g>
+      </g>
+    </svg>
+  );
 
   if (loading) {
     return <div className="loading">Loading project data...</div>;
@@ -322,6 +442,18 @@ const ViewProject = () => {
           </div>
         )}
 
+        {/* Edit indicator */}
+        {editingMessage && (
+          <div className="edit-indicator">
+            <div className="edit-info">
+              <span>Editing message</span>
+            </div>
+            <button className="cancel-edit" onClick={cancelEdit}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+        )}
+
         <div
           className="chat-box custom-scroll"
           ref={chatBoxRef}
@@ -350,11 +482,9 @@ const ViewProject = () => {
                   </div>
                 )}
 
-
                 {msg.file && (
                   <div className="message-attachments">
                     <div className="attachment">
-                      {/* Check if file is an image */}
                       {msg.file.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
                         <div className="image-preview">
                           <img
@@ -425,21 +555,40 @@ const ViewProject = () => {
                     </div>
                   </div>
                 )}
+                
                 {msg.text && <div className="message-text">{msg.text}</div>}
                 <div className="message-footer">
                   <div className="message-time" aria-hidden="true">
                     {msg.time}
+                    {msg.updatedAt !== msg.createdAt && " (edited)"}
                   </div>
-                  <button
-                    className="reply-button"
-                    onClick={() => {
-                      handleReply(msg);
-                      console.log("Reply button clicked!", msg);
-                    }}
-                    aria-label={`Reply to ${msg.sender}`}
-                  >
-                    <FontAwesomeIcon icon={faReply} />
-                  </button>
+                  <div className="message-actions">
+                    <button
+                      className="reply-button"
+                      onClick={() => handleReply(msg)}
+                      aria-label={`Reply to ${msg.sender}`}
+                    >
+                      <FontAwesomeIcon icon={faReply} />
+                    </button>
+                    {msg.senderCode === currentUser && (
+                      <>
+                        <button
+                          className="edit-button"
+                          onClick={() => handleEdit(msg)}
+                          aria-label="Edit message"
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                        <button
+                          className="delete-button"
+                          onClick={() => deleteMessage(msg.id)}
+                          aria-label="Delete message"
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -534,18 +683,46 @@ const ViewProject = () => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={replyingTo ? `Replying to ${replyingTo.sender}...` : "Write your message here..."}
-                aria-label="Type your message"
+                placeholder={
+                  replyingTo 
+                    ? `Replying to ${replyingTo.sender}...` 
+                    : editingMessage 
+                    ? "Edit your message..." 
+                    : "Write your message here..."
+                }
+                aria-label={editingMessage ? "Edit your message" : "Type your message"}
+                disabled={sending || editing}
               />
             </div>
-            <button
-              className="send-button"
-              onClick={handleSendMessage}
-              aria-label="Send message"
-              disabled={!newMessage.trim() && attachments.length === 0}
-            >
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </button>
+            {editingMessage ? (
+              <div className="edit-actions">
+                <button
+                  className="save-edit"
+                  onClick={saveEdit}
+                  aria-label="Save changes"
+                  disabled={(!newMessage.trim() && attachments.length === 0) || editing}
+                >
+                  {editing ? <Loader size={16} color="#ffffff" /> : <FontAwesomeIcon icon={faCheck} />}
+                </button>
+                <button
+                  className="cancel-edit-btn"
+                  onClick={cancelEdit}
+                  aria-label="Cancel edit"
+                  disabled={editing}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+            ) : (
+              <button
+                className="send-button"
+                onClick={handleSendMessage}
+                aria-label="Send message"
+                disabled={(!newMessage.trim() && attachments.length === 0) || sending}
+              >
+                {sending ? <Loader size={16} color="#ffffff" /> : <FontAwesomeIcon icon={faPaperPlane} />}
+              </button>
+            )}
           </div>
         </div>
       </div>
