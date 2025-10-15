@@ -26,6 +26,7 @@ import ViewProject from './pages/employee/view project/ViewProject';
 import './App.css'
 import LeaveApplication from './pages/employee/Leaves/LeaveApplication';
 import LeaveList from './pages/employee/Leaves/LeaveList';
+import ViewProjectPage from './pages/employee/view project/ViewProjectPage';
 
 const App = () => {
 
@@ -64,7 +65,7 @@ const App = () => {
             <Route path="holiday-apply" element={<ProtectedRoute><HolidayApply /></ProtectedRoute>} />
             <Route path="post" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
             <Route path="assigned-project" element={<ProtectedRoute><AssignedProject /></ProtectedRoute>} />
-            <Route path="assigned-project/:id" element={<ProtectedRoute><ViewProject /></ProtectedRoute>} />
+            <Route path="assigned-project/:id" element={<ProtectedRoute><ViewProjectPage /></ProtectedRoute>} />
           </Route>
 
           {/* Catch-all redirect */}
