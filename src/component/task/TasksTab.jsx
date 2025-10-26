@@ -29,48 +29,81 @@ const TasksComponent = ({
             onDrop={(e) => handleDrop(e, column)}
           >
             <div className={`column-header ${column.toLowerCase()}-header`}>
-              {formatColumnName(column)} ({tasks[column]?.length || 0})
-            </div>
-            {tasks[column]?.map((task) => (
-              <div
-                key={task.id}
-                className="task-item"
-                draggable
-                onDragStart={(e) => handleDragStart(e, task.id, column)}
-                onDragEnd={handleDragEnd}
-                onClick={() => handleTaskClick(task)}
-              >
-                <div className="task-header">
-                  <div className="task-title">{task.title}</div>
-                  <button
-                    className="task-menu-btn"
-                    onClick={(e) => handleTaskMenuClick(task, e)}
-                  >
-                    ⋮
-                  </button>
-                </div>
-                <div className="task-description">{task.description}</div>
-                <div className="task-meta">
-                  <span>Assigned to: {task.assignee}</span>
-                  {task.priority && (
-                    <span
-                      className={`task-priority priority-${task.priority}`}
-                    >
-                      {task.priority}
-                    </span>
-                  )}
-                </div>
-                <small style={{ color: "#6c757d" }}>
-                  Due: {task.dueDate}
-                </small>
-                {task.comments.length > 0 && (
-                  <div className="task-comments-count">
-                    💬 {task.comments.length} comment
-                    {task.comments.length > 1 ? "s" : ""}
-                  </div>
-                )}
+              <div className="column-title">
+                {formatColumnName(column)} 
+                <span className="task-count">({tasks[column]?.length || 0})</span>
               </div>
-            ))}
+              {dragOverColumn === column && (
+                <div className="drop-indicator">Drop here to move</div>
+              )}
+            </div>
+            
+            <div className="task-list">
+              {tasks[column]?.map((task) => (
+                <div
+                  key={task.id}
+                  className="task-item"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, task.id, column)}
+                  onDragEnd={handleDragEnd}
+                  onClick={() => handleTaskClick(task)}
+                >
+                  <div className="task-header">
+                    <div className="task-title">{task.title}</div>
+                    <button
+                      className="task-menu-btn"
+                      onClick={(e) => handleTaskMenuClick(task, e)}
+                      title="Task options"
+                    >
+                      ⋮
+                    </button>
+                  </div>
+                  
+                  {task.description && (
+                    <div className="task-description">{task.description}</div>
+                  )}
+                  
+                  <div className="task-meta">
+                    <div className="assignee-info">
+                      <span className="assignee-label">Assigned to:</span>
+                      <span className="assignee-name">{task.assignee}</span>
+                    </div>
+                    {task.priority && (
+                      <span
+                        className={`task-priority priority-${task.priority}`}
+                      >
+                        {task.priority}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="task-footer">
+                    {task.dueDate && (
+                      <small className="due-date">
+                        📅 {task.dueDate}
+                      </small>
+                    )}
+                    {task.comments.length > 0 && (
+                      <div className="task-comments-count">
+                        💬 {task.comments.length}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="task-drag-handle" title="Drag to move">
+                    ⋯⋯
+                  </div>
+                </div>
+              ))}
+              
+              {tasks[column]?.length === 0 && (
+                <div className="empty-column">
+                  <div className="empty-icon">📋</div>
+                  <p>No tasks in {formatColumnName(column).toLowerCase()}</p>
+                  <small>Drag tasks here or create new ones</small>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>

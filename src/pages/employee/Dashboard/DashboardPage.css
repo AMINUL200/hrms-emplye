@@ -1,0 +1,48 @@
+/* Dashboard Container */
+.dashboard-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Dashboard Card Styling */
+.dashboard-card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  color: #495057;
+  transition: box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tall card for Post section */
+.dashboard-card-tall {
+  min-height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .dashboard-card {
+    min-height: 100px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-page-container {
+    padding: 1rem !important;
+  }
+  
+  .dashboard-card {
+    min-height: 80px;
+    padding: 1rem;
+  }
+}

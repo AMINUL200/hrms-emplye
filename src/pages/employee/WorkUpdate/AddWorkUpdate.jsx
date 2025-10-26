@@ -6,6 +6,7 @@ import { AuthContext } from '../../../context/AuthContex'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import CustomTextEditor from '../../../component/common/CustomTextEditor'
 
 const AddWorkUpdate = () => {
     const api_url = import.meta.env.VITE_API_URL;
@@ -310,14 +311,20 @@ const AddWorkUpdate = () => {
                                             <div className="col-md-12">
                                                 <div className="form-group">
                                                     <label htmlFor="remarks">Work Update</label>
-                                                    <textarea 
+                                                    {/* <textarea 
                                                         className="form-control" 
                                                         id="remarks" 
                                                         rows='4'
                                                         value={formData.remarks}
                                                         onChange={handleInputChange}
                                                         required
-                                                    ></textarea>
+                                                    ></textarea> */}
+                                                    <CustomTextEditor
+                                                        value={formData.remarks}
+                                                        onChange={newContent => setFormData(prev => ({ ...prev, remarks: newContent }))}
+                                                        height={200}
+                                                        placeholder="Enter work update details here..."
+                                                    />
                                                 </div>
                                             </div>
                                         </div>

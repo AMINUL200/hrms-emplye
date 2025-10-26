@@ -8,8 +8,6 @@ import PageLoader from "../../../component/loader/PageLoader";
 import axios from "axios";
 import OverviewComponent from "../../../component/task/OverviewTab";
 import TasksComponent from "../../../component/task/TasksTab";
-// import OverviewComponent from "./OverviewComponent";
-// import TasksComponent from "./TasksComponent";
 
 const ViewProjectPage = () => {
   const { id } = useParams();
@@ -17,7 +15,11 @@ const ViewProjectPage = () => {
   const api_url = import.meta.env.VITE_API_URL;
   const stor_url = import.meta.env.VITE_STORAGE_URL;
   const [loading, setLoading] = useState(true);
-  const [handleSendMessageLoading, setHandleSendMessageLoading] = useState(false);
+  const [handleSendMessageLoading, setHandleSendMessageLoading] =
+    useState(false);
+
+  const [handleAddTaskCommentLoading, setHandleAddTaskCommentLoading] =
+    useState(false);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTask, setSelectedTask] = useState(null);
@@ -87,15 +89,15 @@ const ViewProjectPage = () => {
       if (response.data.success) {
         const tasksData = response.data.data;
         console.log(tasksData);
-        
+
         // Extract column names dynamically
         const columns = Object.keys(tasksData);
         setTaskColumns(columns);
-        
+
         // Transform API data to match component structure
         const transformedTasks = {};
-        columns.forEach(column => {
-          transformedTasks[column] = tasksData[column].map(task => ({
+        columns.forEach((column) => {
+          transformedTasks[column] = tasksData[column].map((task) => ({
             ...task,
             priority: task.priority || "medium", // Add default priority if not present
             assignee: task.assignee || "Unassigned",
@@ -107,12 +109,12 @@ const ViewProjectPage = () => {
                 user: task.assignee || "System",
                 timestamp: task.createdDate,
                 description: "Task created",
-              }
+              },
             ],
             comments: task.comments || [],
           }));
         });
-        
+
         setTasks(transformedTasks);
       }
     } catch (error) {
@@ -181,11 +183,11 @@ const ViewProjectPage = () => {
   const formatColumnName = (columnName) => {
     // Convert camelCase or snake_case to Title Case
     return columnName
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/_/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ")
       .trim();
   };
 
@@ -286,9 +288,12 @@ const ViewProjectPage = () => {
       return;
 
     try {
-      const response = await axios.delete(`${api_url}/project-posts/${messageId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.delete(
+        `${api_url}/project-posts/${messageId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.status === 200) {
         await getProjectData();
@@ -352,7 +357,59 @@ const ViewProjectPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Update task status and position on drag and drop
+
+  const updateTaskStatus = async (taskId, newStatus) => {
+    try {
+      const response = await axios.post(
+        `${api_url}/task-status-change/${taskId}`,
+        {
+          status: newStatus,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Task status updated successfully");
+        return true;
+      } else {
+        toast.error("Failed to update task status");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+      return false;
+    }
+  };
+
+  const updateTaskPosition = async (taskId, positionData) => {
+    try {
+      const response = await axios.put(
+        `${api_url}/project-task-position-update/${taskId}`,
+        positionData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.success) {
+        return true;
+      } else {
+        toast.error("Failed to update task position");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+      return false;
+    }
+  };
+
   // Drag and drop handlers
+
   const handleDragStart = (e, taskId, sourceColumn) => {
     e.dataTransfer.setData("taskId", taskId.toString());
     e.dataTransfer.setData("sourceColumn", sourceColumn);
@@ -381,7 +438,7 @@ const ViewProjectPage = () => {
     }
   };
 
-  const handleDrop = (e, targetColumn) => {
+  const handleDrop = async (e, targetColumn) => {
     e.preventDefault();
     const taskId = parseInt(e.dataTransfer.getData("taskId"));
     const sourceColumn = e.dataTransfer.getData("sourceColumn");
@@ -391,31 +448,36 @@ const ViewProjectPage = () => {
     const taskToMove = tasks[sourceColumn].find((task) => task.id === taskId);
 
     if (taskToMove) {
-      const updatedTask = {
-        ...taskToMove,
-        status: targetColumn,
-      };
+      // Update status via API
+      const success = await updateTaskStatus(taskId, targetColumn);
 
-      const moveActivity = {
-        id: Date.now(),
-        type: "moved",
-        user: currentUser,
-        timestamp: new Date().toLocaleString(),
-        description: `Moved to ${formatColumnName(targetColumn)}`,
-      };
+      if (success) {
+        const updatedTask = {
+          ...taskToMove,
+          status: targetColumn,
+        };
 
-      updatedTask.activities = [...updatedTask.activities, moveActivity];
+        const moveActivity = {
+          id: Date.now(),
+          type: "moved",
+          user: currentUser,
+          timestamp: new Date().toLocaleString(),
+          description: `Moved to ${formatColumnName(targetColumn)}`,
+        };
 
-      const updatedSourceTasks = tasks[sourceColumn].filter(
-        (task) => task.id !== taskId
-      );
-      const updatedTargetTasks = [...tasks[targetColumn], updatedTask];
+        updatedTask.activities = [...updatedTask.activities, moveActivity];
 
-      setTasks({
-        ...tasks,
-        [sourceColumn]: updatedSourceTasks,
-        [targetColumn]: updatedTargetTasks,
-      });
+        const updatedSourceTasks = tasks[sourceColumn].filter(
+          (task) => task.id !== taskId
+        );
+        const updatedTargetTasks = [...tasks[targetColumn], updatedTask];
+
+        setTasks({
+          ...tasks,
+          [sourceColumn]: updatedSourceTasks,
+          [targetColumn]: updatedTargetTasks,
+        });
+      }
     }
 
     setDraggedTask(null);
@@ -435,46 +497,66 @@ const ViewProjectPage = () => {
     setAttachedFiles([]);
   };
 
-  const handleAddTaskComment = () => {
+  const handleAddTaskComment = async () => {
     if (taskComment.trim() === "") return;
+    setHandleAddTaskCommentLoading(true);
 
-    const newComment = {
-      id: Date.now(),
-      user: currentUser,
-      message: taskComment,
-      timestamp: new Date().toLocaleString(),
-      attachments: attachedFiles,
-    };
+    try {
+      const response = await axios.post(
+        `${api_url}/project-task-comment-add`,
+        {
+          task_id: selectedTask.id,
+          comment_details: taskComment.trim(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    const updatedTasks = { ...tasks };
-    const taskColumn = selectedTask.status;
-    const taskInColumn = updatedTasks[taskColumn].findIndex(
-      (task) => task.id === selectedTask.id
-    );
-    
-    if (taskInColumn !== -1) {
-      updatedTasks[taskColumn][taskInColumn].comments.push(newComment);
-      setTasks(updatedTasks);
-      setSelectedTask({
-        ...selectedTask,
-        comments: [...selectedTask.comments, newComment],
-      });
+      if (response.data.success) {
+        getTaskData();
+        getProjectData();
+        // Create the new comment object for immediate UI update
+        const newComment = {
+          id: Date.now(), // Temporary ID
+          user: currentUser,
+          message: taskComment.trim(),
+          timestamp: new Date().toLocaleString(),
+        };
+
+        // Update the selectedTask with the new comment
+        setSelectedTask((prevTask) => ({
+          ...prevTask,
+          comments: [...prevTask.comments, newComment],
+        }));
+
+        // Update the tasks state to reflect the new comment
+        const updatedTasks = { ...tasks };
+        const taskColumn = selectedTask.status;
+        const taskInColumn = updatedTasks[taskColumn].findIndex(
+          (task) => task.id === selectedTask.id
+        );
+
+        if (taskInColumn !== -1) {
+          updatedTasks[taskColumn][taskInColumn].comments = [
+            ...updatedTasks[taskColumn][taskInColumn].comments,
+            newComment,
+          ];
+          setTasks(updatedTasks);
+        }
+
+        setTaskComment("");
+        setAttachedFiles([]);
+        toast.success("Comment added successfully");
+      } else {
+        toast.error("Failed to add comment");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    } finally {
+      setHandleAddTaskCommentLoading(false);
     }
-
-    setTaskComment("");
-    setAttachedFiles([]);
-  };
-
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const newFiles = files.map((file) => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      type: file.type.split("/")[1] || "file",
-      size: (file.size / 1024 / 1024).toFixed(1) + " MB",
-      file: file,
-    }));
-    setAttachedFiles([...attachedFiles, ...newFiles]);
   };
 
   const handleRemoveAttachment = (attachmentId) => {
@@ -510,27 +592,46 @@ const ViewProjectPage = () => {
     setShowTaskMenu(false);
   };
 
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = async (newStatus) => {
     if (!selectedTaskForMenu) return;
 
-    const updatedTasks = { ...tasks };
-    const currentColumn = selectedTaskForMenu.status;
+    // Update status via API
+    const success = await updateTaskStatus(selectedTaskForMenu.id, newStatus);
 
-    const taskIndex = updatedTasks[currentColumn].findIndex(
-      (task) => task.id === selectedTaskForMenu.id
-    );
-    if (taskIndex !== -1) {
-      const taskToMove = updatedTasks[currentColumn][taskIndex];
-      updatedTasks[currentColumn].splice(taskIndex, 1);
+    if (success) {
+      const updatedTasks = { ...tasks };
+      const currentColumn = selectedTaskForMenu.status;
 
-      const updatedTask = { ...taskToMove, status: newStatus };
-      updatedTasks[newStatus].push(updatedTask);
+      const taskIndex = updatedTasks[currentColumn].findIndex(
+        (task) => task.id === selectedTaskForMenu.id
+      );
+      if (taskIndex !== -1) {
+        const taskToMove = updatedTasks[currentColumn][taskIndex];
+        updatedTasks[currentColumn].splice(taskIndex, 1);
 
-      setTasks(updatedTasks);
+        const updatedTask = {
+          ...taskToMove,
+          status: newStatus,
+          activities: [
+            ...taskToMove.activities,
+            {
+              id: Date.now(),
+              type: "moved",
+              user: currentUser,
+              timestamp: new Date().toLocaleString(),
+              description: `Status changed to ${formatColumnName(newStatus)}`,
+            },
+          ],
+        };
+        updatedTasks[newStatus].push(updatedTask);
+
+        setTasks(updatedTasks);
+      }
+
+      setShowStatusChangePopup(false);
+      setSelectedTaskForMenu(null);
+      toast.success(`Task moved to ${formatColumnName(newStatus)}`);
     }
-
-    setShowStatusChangePopup(false);
-    setSelectedTaskForMenu(null);
   };
 
   const handleMoveTask = (position) => {
@@ -796,7 +897,7 @@ const ViewProjectPage = () => {
             >
               <Paperclip className="w-5 h-5" />
             </button>
-            <button 
+            <button
               disabled={handleSendMessageLoading}
               onClick={handleSendMessage}
             >
@@ -878,9 +979,7 @@ const ViewProjectPage = () => {
             >
               <span className="nav-icon">{getNavIcon("tasks")}</span>
               Tasks
-              <span className="nav-badge">
-                {getTotalTaskCount()}
-              </span>
+              <span className="nav-badge">{getTotalTaskCount()}</span>
             </button>
           </li>
           <li className="nav-item">
@@ -989,41 +1088,14 @@ const ViewProjectPage = () => {
                   {selectedTask.comments.map((comment) => (
                     <div key={comment.id} className="comment-item">
                       <div className="comment-header">
-                        <span className="comment-user">{comment.user}</span>
+                        <span className="comment-user">
+                          {comment.user !== "" ? comment.user : "You"}
+                        </span>
                         <span className="comment-time">
                           {comment.timestamp}
                         </span>
                       </div>
                       <div className="comment-content">{comment.comment}</div>
-                      {comment.attachments &&
-                        comment.attachments.length > 0 && (
-                          <div className="comment-attachments">
-                            {comment.attachments.map((attachment) => (
-                              <div
-                                key={attachment.id}
-                                className="attachment-item"
-                              >
-                                <span className="attachment-icon">
-                                  {attachment.type === "pdf"
-                                    ? "📄"
-                                    : attachment.type === "image"
-                                    ? "🖼️"
-                                    : attachment.type === "word"
-                                    ? "📝"
-                                    : attachment.type === "excel"
-                                    ? "📊"
-                                    : "📎"}
-                                </span>
-                                <span className="attachment-name">
-                                  {attachment.name}
-                                </span>
-                                <span className="attachment-size">
-                                  {attachment.size}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
                     </div>
                   ))}
                 </div>
@@ -1037,41 +1109,22 @@ const ViewProjectPage = () => {
                       rows="3"
                     />
                     <div className="comment-actions">
-                      <label className="file-upload-btn">
-                        📎 Attach Files
-                        <input
-                          type="file"
-                          multiple
-                          onChange={handleFileUpload}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-                      {attachedFiles.length > 0 && (
-                        <div className="attached-files">
-                          {attachedFiles.map((file) => (
-                            <div key={file.id} className="attached-file">
-                              <span>{file.name}</span>
-                              <button
-                                onClick={() =>
-                                  setAttachedFiles(
-                                    attachedFiles.filter(
-                                      (f) => f.id !== file.id
-                                    )
-                                  )
-                                }
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                       <button
                         className="add-comment-btn"
                         onClick={handleAddTaskComment}
-                        disabled={taskComment.trim() === ""}
+                        disabled={
+                          taskComment.trim() === "" ||
+                          handleAddTaskCommentLoading
+                        }
                       >
-                        Add Comment
+                        {handleAddTaskCommentLoading ? (
+                          <>
+                            <div className="loading-spinner"></div>
+                            Adding...
+                          </>
+                        ) : (
+                          "Add Comment"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1162,8 +1215,8 @@ const ViewProjectPage = () => {
             </div>
             <div className="status-options">
               {taskColumns
-                .filter(column => column !== selectedTaskForMenu.status)
-                .map(column => (
+                .filter((column) => column !== selectedTaskForMenu.status)
+                .map((column) => (
                   <button
                     key={column}
                     className="status-option"

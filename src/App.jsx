@@ -27,6 +27,7 @@ import './App.css'
 import LeaveApplication from './pages/employee/Leaves/LeaveApplication';
 import LeaveList from './pages/employee/Leaves/LeaveList';
 import ViewProjectPage from './pages/employee/view project/ViewProjectPage';
+import DashboardPage from './pages/employee/Dashboard/DashboardPage';
 
 const App = () => {
 
@@ -48,6 +49,7 @@ const App = () => {
           {/* Protected organization routes */}
           <Route path="/organization" element={<MainLayout />}>
             <Route path="employerdashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            {/* <Route path="employerdashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} /> */}
             <Route path="employerprofile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
             <Route path="employee-attendance" element={<ProtectedRoute><EmployeeAttendance /></ProtectedRoute>} />
