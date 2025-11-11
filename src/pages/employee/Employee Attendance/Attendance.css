@@ -1,0 +1,84 @@
+/* Base Styles */
+.attendance-component {
+    min-height: 100%;
+    height: 100%;
+    background: transparent; 
+}
+
+.attendance-component .card-header {
+    background-color: #FF902F;
+}
+
+.attendance-component .row {
+    height: 100%;
+}
+
+/* Card Styles */
+.attendance-component .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.attendance-component .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.compact-card .card-body {
+    padding: 1rem !important;
+}
+
+/* Timer Card */
+.timer-card {
+    transition: all 0.3s ease;
+}
+
+/* Button Styles */
+.attendance-type-btn {
+    min-width: 120px;
+    transition: all 0.2s;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    color: white;
+    background-color: #FF902F;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #ec7a16;
+}
+
+.disabled-btn {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.disabled-btn:hover {
+    background-color: #9ca3af;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .attendance-component .display-4 {
+        font-size: 2rem;
+    }
+    
+    .attendance-component .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .compact-card .card-body {
+        padding: 0.75rem !important;
+    }
+}

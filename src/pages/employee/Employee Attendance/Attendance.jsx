@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
-import './EmployeeAttendance.css'
+import './Attendance.css';
 import { AuthContext } from '../../../context/AuthContex';
-import { EmployeeContext } from '../../../context/EmployeeContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import PageLoader from '../../../component/loader/PageLoader';
@@ -9,7 +8,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { calcDuration, parseAPITime } from '../../../utils/calcDuration';
 import { getLocationName } from '../../../utils/getLocationName';
 
-const EmployeeAttendance = () => {
+const Attendance = ({ 
+  showHeader = true, 
+  compact = false,
+  onStatusChange,
+  customClassName = '' 
+}) => {
     const { token, data } = useContext(AuthContext);
     const api_url = import.meta.env.VITE_API_URL;
     const [location, setLocation] = useState({ latitude: '', longitude: '' });
@@ -95,10 +99,8 @@ const EmployeeAttendance = () => {
                 setTimeIn(apiTimeIn);
 
                 if (record.punch_status === "IN") {
-                    // User is checked in - get break status first, then calculate work time
                     await getBreakStatus(apiTimeIn);
                 } else if (record.punch_status === "OUT") {
-                    // User has checked out - freeze work timer at total worked time
                     const workedSeconds = calcDuration(apiTimeIn, apiTimeOut);
                     setTotalWorkedSeconds(workedSeconds);
                     setWorkTime(secondsToTime(workedSeconds));
@@ -106,11 +108,9 @@ const EmployeeAttendance = () => {
                     stopWorkTimer();
                     stopBreakTimer();
                 } else {
-                    // Not checked in yet
                     resetWorkTimer();
                 }
             } else {
-                // No attendance record found
                 resetWorkTimer();
             }
         } catch (error) {
@@ -138,44 +138,29 @@ const EmployeeAttendance = () => {
                 setBreakEndTime(apiBreakEnd);
 
                 if (record.punch_status === "Break Start" && !apiBreakEnd) {
-                    // Currently on break
                     setIsOnBreak(true);
-
-                    // Calculate and freeze work time from check-in to break start
                     const workSecondsBeforeBreak = calcDuration(checkInTime, apiBreakStart);
                     setTotalWorkedSeconds(workSecondsBeforeBreak);
                     setWorkTime(secondsToTime(workSecondsBeforeBreak));
                     stopWorkTimer();
-
-                    // Start live break timer
                     const breakElapsed = calcDuration(apiBreakStart, new Date());
                     startBreakTimer(breakElapsed);
-
                 } else if (record.punch_status === "Break End" && apiBreakEnd) {
-                    // Break has ended
                     setIsOnBreak(false);
-
-                    // Calculate total break time and freeze it
                     const totalBreakTime = calcDuration(apiBreakStart, apiBreakEnd);
                     setBreakTime(secondsToTime(totalBreakTime));
                     setTotalBreakSeconds(totalBreakTime);
                     stopBreakTimer();
-
-                    // Calculate work time: (check-in to break-start) + (break-end to now)
                     const workBeforeBreak = calcDuration(checkInTime, apiBreakStart);
                     const workAfterBreak = calcDuration(apiBreakEnd, new Date());
                     const totalWorkSeconds = workBeforeBreak + workAfterBreak;
-
                     startWorkTimer(totalWorkSeconds);
                 }
             } else {
-                // No break record found - normal work time calculation
                 setBreakStatus('');
                 setIsOnBreak(false);
                 stopBreakTimer();
-
                 if (checkInTime && attendanceStatus === 'IN') {
-                    // Calculate work time from check-in to now
                     const workedSeconds = calcDuration(checkInTime, new Date());
                     startWorkTimer(workedSeconds);
                 }
@@ -188,7 +173,6 @@ const EmployeeAttendance = () => {
 
     // Work Timer functions
     const startWorkTimer = (initialSeconds = 0) => {
-        // Stop any existing work timer first
         if (workTimerIntervalRef.current) {
             clearInterval(workTimerIntervalRef.current);
         }
@@ -224,7 +208,6 @@ const EmployeeAttendance = () => {
 
     // Break Timer functions
     const startBreakTimer = (initialSeconds = 0) => {
-        // Stop any existing break timer first
         if (breakTimerIntervalRef.current) {
             clearInterval(breakTimerIntervalRef.current);
         }
@@ -256,7 +239,6 @@ const EmployeeAttendance = () => {
         findGeolocation();
         getCurrentAttendanceStatus();
 
-        // Cleanup on unmount
         return () => {
             if (workTimerIntervalRef.current) clearInterval(workTimerIntervalRef.current);
             if (breakTimerIntervalRef.current) clearInterval(breakTimerIntervalRef.current);
@@ -291,7 +273,19 @@ const EmployeeAttendance = () => {
             setShowEndBreak(false);
             setAttendanceType('')
         }
-    }, [attendanceStatus, breakStatus]);
+
+        // Call callback if provided
+        if (onStatusChange) {
+            onStatusChange({
+                attendanceStatus,
+                breakStatus,
+                workTime,
+                breakTime,
+                isWorking,
+                isOnBreak
+            });
+        }
+    }, [attendanceStatus, breakStatus, workTime, breakTime, isWorking, isOnBreak]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -300,7 +294,6 @@ const EmployeeAttendance = () => {
         const now = new Date();
 
         if (attendanceType === 'check-in' || attendanceType === 'check-out') {
-            // Add location name only when needed
             const locationName = await getLocationName(location.latitude, location.longitude);
             let attendanceData = {
                 latitude: location.latitude,
@@ -308,10 +301,8 @@ const EmployeeAttendance = () => {
                 time: now.toLocaleTimeString('en-GB', { hour12: false }),
                 date: now.toISOString().split('T')[0],
                 punch_type: data?.punch_type,
-                location : locationName,
+                location: locationName,
             };
-           
-            console.log(attendanceData);
 
             try {
                 const res = await axios.post(`${api_url}/creat-attendance`,
@@ -324,15 +315,12 @@ const EmployeeAttendance = () => {
                     toast.success(res.data.message);
 
                     if (attendanceType === 'check-in') {
-                        // Start work timer from 0 for new check-in
                         startWorkTimer(0);
                     } else if (attendanceType === 'check-out') {
-                        // Stop both timers
                         stopWorkTimer();
                         stopBreakTimer();
                     }
 
-                    // Refresh attendance status
                     await getCurrentAttendanceStatus();
                 } else {
                     toast.error(res.data.message)
@@ -346,7 +334,6 @@ const EmployeeAttendance = () => {
             }
 
         } else if (attendanceType === 'break-start' || attendanceType === 'break-end') {
-            // Add location name only when needed
             const locationName = await getLocationName(location.latitude, location.longitude);
 
             const attendanceData = {
@@ -357,8 +344,6 @@ const EmployeeAttendance = () => {
                 punch_type: data?.punch_type,
                 break_location: locationName,
             };
-
-            console.log(attendanceData);
 
             try {
                 const res = await axios.post(`${api_url}/creat-break`,
@@ -371,16 +356,12 @@ const EmployeeAttendance = () => {
                     toast.success(res.data.message);
 
                     if (attendanceType === 'break-start') {
-                        // Freeze work timer at current time and start break timer
                         stopWorkTimer();
                         startBreakTimer(0);
                     } else if (attendanceType === 'break-end') {
-                        // Stop break timer and resume work timer
                         stopBreakTimer();
-                        // Work timer will be recalculated when getBreakStatus is called
                     }
 
-                    // Refresh status to get updated break information
                     await getBreakStatus();
                 } else {
                     toast.error(res.data.message)
@@ -409,17 +390,19 @@ const EmployeeAttendance = () => {
     }
 
     return (
-        <div className="attendance-container">
+        <div className={`attendance-component ${customClassName}`}>
             <div className="row justify-content-center">
-                <div className="col-12 p-0 ">
-                    <div className="card shadow-lg border-0">
-                        <div className="card-header text-white text-center py-3">
-                            <h2 className="mb-0 mx-auto"> Attendance </h2>
-                        </div>
-
-                        <div className="card-body p-4">
+                <div className="col-12">
+                    <div className={`card shadow-lg border-0 ${compact ? 'compact-card' : ''}`}>
+                        {showHeader && (
+                            <div className="card-header text-white text-center py-3">
+                                <h2 className="mb-0 mx-auto">Attendance</h2>
+                            </div>
+                        )}
+                        
+                        <div className={`card-body ${compact ? 'p-3' : 'p-4'}`}>
                             {/* Timer Display */}
-                            {/* <div className="row mb-4">
+                            <div className="row mb-4">
                                 <div className="col-12">
                                     <div className={`card timer-card ${attendanceStatus === 'OUT'
                                         ? 'bg-secondary text-white'
@@ -431,13 +414,11 @@ const EmployeeAttendance = () => {
                                         }`}>
                                         <div className="card-body text-center py-3">
                                             <h5 className="card-title">Work Time</h5>
-
-                                            <div className="display-4 fw-bold">
+                                            <div className={`fw-bold ${compact ? 'display-6' : 'display-4'}`}>
                                                 {attendanceStatus === 'OUT'
                                                     ? todayWorkTime
                                                     : workTime}
                                             </div>
-
                                             <p className="mb-0">
                                                 {attendanceStatus === 'OUT'
                                                     ? "Day Complete - Total Time"
@@ -448,17 +429,16 @@ const EmployeeAttendance = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </div> */}
+                            </div>
 
-                            {/* Break Timer Display - Show when on break or break has ended */}
-                            {/* {(isOnBreak || (breakStatus === 'Break End' && breakTime !== '00:00:00')) && ( */}
-                            {/* {isOnBreak && (
+                            {/* Break Timer Display */}
+                            {isOnBreak && (
                                 <div className="row mb-4">
                                     <div className="col-12">
                                         <div className={`card timer-card ${isOnBreak ? 'bg-danger text-white' : 'bg-info text-white'}`}>
                                             <div className="card-body text-center py-3">
                                                 <h5 className="card-title">Break Time</h5>
-                                                <div className="display-4 fw-bold">
+                                                <div className={`fw-bold ${compact ? 'display-6' : 'display-4'}`}>
                                                     {breakTime}
                                                 </div>
                                                 <p className="mb-0">
@@ -468,7 +448,7 @@ const EmployeeAttendance = () => {
                                         </div>
                                     </div>
                                 </div>
-                            )} */}
+                            )}
 
                             <form onSubmit={handleSubmit}>
                                 {error && (
@@ -514,26 +494,27 @@ const EmployeeAttendance = () => {
                                             Check Out
                                         </button>
                                     )}
-
                                 </div>
 
-                                <div className="text-center mb-4">
-                                    <div className="row">
-                                        <div className="col-12 col-md-6 mb-2">
-                                            <strong>Date:</strong> {new Date().toLocaleDateString('en-GB')}
-                                        </div>
-                                        <div className="col-12 col-md-6 mb-2">
-                                            <strong>Time:</strong> {currentTime.toLocaleTimeString()}
+                                {!compact && (
+                                    <div className="text-center mb-4">
+                                        <div className="row">
+                                            <div className="col-12 col-md-6 mb-2">
+                                                <strong>Date:</strong> {new Date().toLocaleDateString('en-GB')}
+                                            </div>
+                                            <div className="col-12 col-md-6 mb-2">
+                                                <strong>Time:</strong> {currentTime.toLocaleTimeString()}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="text-center">
                                     <button
                                         type="submit"
                                         disabled={!location.latitude || isSubmitting || attendanceStatus === 'OUT'}
-                                        className={`btn btn-lg ${attendanceStatus === 'OUT' ? 'btn-secondary' : 'btn-primary'} px-5`}
-                                        style={{ minWidth: '200px' }}
+                                        className={`btn ${compact ? 'btn-md' : 'btn-lg'} ${attendanceStatus === 'OUT' ? 'btn-secondary' : 'btn-primary'} px-5`}
+                                        style={{ minWidth: compact ? '150px' : '200px' }}
                                     >
                                         {isSubmitting ? (
                                             <>
@@ -556,4 +537,4 @@ const EmployeeAttendance = () => {
     );
 }
 
-export default EmployeeAttendance;
+export default Attendance;

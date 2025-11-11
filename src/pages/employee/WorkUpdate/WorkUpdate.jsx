@@ -204,7 +204,9 @@ const WorkUpdate = () => {
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                <p className="remarks-text">{currentRemarks}</p>
+                                <p className="remarks-text blog-rich-text" dangerouslySetInnerHTML={{__html:currentRemarks}}>
+                                    {/* {currentRemarks} */}
+                                    </p>
                             </div>
                             <div className="modal-footer">
                                 <button 
@@ -340,8 +342,9 @@ const WorkUpdate = () => {
                                                                 style={{cursor: 'pointer'}}
                                                                 onClick={() => handleShowRemarks(item.remarks)}
                                                                 title="Click to view full remarks"
+                                                                dangerouslySetInnerHTML={{__html:item.remarks.substring(0, 30)}}
                                                             >
-                                                                {item.remarks.substring(0, 30)}...
+                                                                {/* {item.remarks.substring(0, 30)}... */}
                                                             </span>
                                                         ) : (
                                                             <span className="text-gray">{item.remarks || 'No remarks'}</span>

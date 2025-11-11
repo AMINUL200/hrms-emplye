@@ -1,3 +1,110 @@
+/* Alert Card Styles */
+.alert-card {
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  border: 1px solid;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.alert-success {
+  background-color: #d1f2eb;
+  border-color: #27ae60;
+  color: #155724;
+}
+
+.alert-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.alert-message {
+  flex: 1;
+  font-weight: 500;
+  font-size: 1rem;
+  text-align: left;
+  margin: 0;
+}
+
+.alert-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #27ae60;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.alert-close-btn:hover {
+  background-color: rgba(39, 174, 96, 0.1);
+  color: #145a32;
+}
+
+/* Optional: Different alert types you might need later */
+.alert-info {
+  background-color: #d6eaf8;
+  border-color: #3498db;
+  color: #154360;
+}
+
+.alert-warning {
+  background-color: #fcf3cf;
+  border-color: #f39c12;
+  color: #7d6608;
+}
+
+.alert-danger {
+  background-color: #fadbd8;
+  border-color: #e74c3c;
+  color: #78281f;
+}
+
+/* Hover effect for alert */
+.alert-card:hover {
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments for alert */
+@media (max-width: 767.98px) {
+  .alert-card {
+    padding: 0.75rem 1rem;
+  }
+  
+  .alert-content {
+    gap: 0.75rem;
+  }
+  
+  .alert-icon {
+    font-size: 1.25rem;
+  }
+  
+  .alert-message {
+    font-size: 0.9rem;
+  }
+  
+  .alert-close-btn {
+    font-size: 1.25rem;
+    width: 25px;
+    height: 25px;
+  }
+}
+
+/* Rest of your existing CSS remains the same */
 /* Dashboard Container */
 .dashboard-page-container {
   max-width: 1400px;
@@ -7,21 +114,144 @@
 /* Dashboard Card Styling */
 .dashboard-card {
   background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
   border-radius: 8px;
-  padding: 1.5rem;
   text-align: center;
   min-height: 120px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
   font-weight: 500;
   color: #495057;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
 }
 
 .dashboard-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ... rest of your existing CSS ... */
+
+/* Small Card Specific Styles */
+.small-card {
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--card-color, #f8f9fa) 0%, #ffffff 100%);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1.5rem 1rem;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.small-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.small-card:active {
+  transform: translateY(-2px) scale(1.01);
+  transition: all 0.1s ease;
+}
+
+/* Card Icon */
+.card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.small-card:hover .card-icon {
+  transform: scale(1.2) rotate(5deg);
+}
+
+/* Card Title */
+.card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.small-card:hover .card-title {
+  color: #1a2530;
+  transform: translateY(-2px);
+}
+
+/* Hover Effect Layer */
+.card-hover-effect {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.4), 
+    transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.small-card:hover .card-hover-effect {
+  left: 100%;
+}
+
+/* Pulse Animation on Hover */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+  }
+}
+
+.small-card:hover {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Ripple Effect */
+.small-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.small-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.small-card:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Focus styles for accessibility */
+.small-card:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
 }
 
 /* Tall card for Post section */
@@ -34,6 +264,19 @@
   .dashboard-card {
     min-height: 100px;
   }
+  
+  .small-card {
+    min-height: 100px;
+    padding: 1rem 0.5rem;
+  }
+  
+  .card-icon {
+    font-size: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -44,5 +287,48 @@
   .dashboard-card {
     min-height: 80px;
     padding: 1rem;
+  }
+  
+  .small-card {
+    min-height: 80px;
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .card-icon {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .card-title {
+    font-size: 0.75rem;
+  }
+}
+
+/* Loading state for cards */
+.small-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.small-card.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }
