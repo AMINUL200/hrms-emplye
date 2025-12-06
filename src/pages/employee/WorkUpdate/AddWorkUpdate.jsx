@@ -35,7 +35,10 @@ const AddWorkUpdate = () => {
             const response = await axios.get(`${api_url}/work-edit/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                }
+                },
+                params: {
+          t: Date.now(), // prevent caching
+        },
             })
 
             if(response.data.flag === 1){

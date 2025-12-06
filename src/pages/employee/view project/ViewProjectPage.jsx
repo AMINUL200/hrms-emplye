@@ -62,6 +62,9 @@ const ViewProjectPage = () => {
     try {
       const response = await axios.get(`${api_url}/projects/members/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: {
+          t: Date.now(), // prevent caching
+        },
       });
 
       if (response.data.status === 200) {
@@ -84,6 +87,9 @@ const ViewProjectPage = () => {
     try {
       const response = await axios.get(`${api_url}/project-wise-task/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: {
+          t: Date.now(), // prevent caching
+        },
       });
 
       if (response.data.success) {

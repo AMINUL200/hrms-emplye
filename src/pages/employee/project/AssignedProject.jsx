@@ -26,7 +26,10 @@ const AssignedProject = () => {
     try {
       setLoading(true);
       const res = await axios.get(`${api_url}/project-list`, {
-        headers: { Authorization: `Bearer ${token}` } 
+        headers: { Authorization: `Bearer ${token}` } ,
+        params: {
+          t: Date.now(), // prevent caching
+        },
       });
       console.log(res.data);
       

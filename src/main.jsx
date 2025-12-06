@@ -13,9 +13,9 @@ import EmployeeContextProvider from './context/EmployeeContext.jsx';
 createRoot(document.getElementById('root')).render(
   <AuthContextProvider>
     <EmployeeContextProvider>
-      <StrictMode>
+      {/* <StrictMode> */}
         <App />
-      </StrictMode>,
+      {/* </StrictMode>, */}
     </EmployeeContextProvider>
 
   </AuthContextProvider>

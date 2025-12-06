@@ -30,7 +30,10 @@ const Holiday = () => {
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
-                        }
+                        },
+                        params: {
+          t: Date.now(), // prevent caching
+        },
                     });
                 console.log(response.data.data);
 

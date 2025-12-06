@@ -31,6 +31,9 @@ const EmCalender = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          params: {
+          t: Date.now(), // prevent caching
+        },
         });
         console.log("Holiday data:", response.data.data);
         setHolidayData(response.data.data);

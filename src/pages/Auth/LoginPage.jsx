@@ -10,8 +10,8 @@ import { AuthContext } from '../../context/AuthContex';
 
 const LoginPage = () => {
 	const { loginUser, isLoading } = useContext(AuthContext);
-	const [email, setEmail] = useState('shila@yopmail.com');
-	const [password, setPassword] = useState('1760');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 	const [toggle, setToggle] = useState(false);
 
 

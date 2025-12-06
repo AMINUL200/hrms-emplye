@@ -101,7 +101,7 @@ const AuthContextProvider = (props) => {
 
         } catch (error) {
             console.error("Logout error:", error);
-            toast.error("Failed to logout");
+            // toast.error("Failed to logout");
         } finally {
             // Clear local state and storage on successful logout
             setData(null);
