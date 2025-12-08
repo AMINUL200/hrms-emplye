@@ -217,13 +217,13 @@ const Post = ({ posts }) => {
                                         <Reactions
                                             onSelect={(reaction) => {
                                                 handleLike(post.id, reaction);
-                                                setActiveReactions(null); // Close after selection
+                                                setActiveReactions(null); 
                                             }}
                                             currentReaction={post.current_reaction}
                                             onClose={() => setActiveReactions(null)}
                                         />
                                     </div>
-                                )}
+                               )} 
                             </div>
                             <button
                                 onClick={() => toggleCommentSection(post.id)}

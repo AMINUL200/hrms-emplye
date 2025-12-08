@@ -25,6 +25,10 @@ const EmployeeAttendance = () => {
   const [showEndBreak, setShowEndBreak] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [punchInTime, setPunchInTime] = useState("--");
+  const [punchOutTime, setPunchOutTime] = useState("--");
+  const [breakDuration, setBreakDuration] = useState("--");
+
   // Store API times for calculations
   const [timeIn, setTimeIn] = useState(null);
   const [breakStartTime, setBreakStartTime] = useState(null);
@@ -63,7 +67,7 @@ const EmployeeAttendance = () => {
           });
         },
         (err) => {
-          setError(err.message);
+          // setError(err.message);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -104,6 +108,15 @@ const EmployeeAttendance = () => {
           ? parseAPITime(record.time_out)
           : null;
         setTimeIn(apiTimeIn);
+
+        if (record.time_in) {
+          setPunchInTime(record.time_in);
+        }
+        if (record.time_out) {
+          setPunchOutTime(record.time_out);
+        } else {
+          setPunchOutTime("--");
+        }
 
         if (record.punch_status === "IN") {
           // User is checked in - get break status first, then calculate work time
@@ -156,6 +169,13 @@ const EmployeeAttendance = () => {
 
         setBreakStartTime(apiBreakStart);
         setBreakEndTime(apiBreakEnd);
+
+        if (apiBreakStart && apiBreakEnd) {
+          const totalBreakSeconds = calcDuration(apiBreakStart, apiBreakEnd);
+          setBreakDuration(secondsToTime(totalBreakSeconds));
+        } else {
+          setBreakDuration("--");
+        }
 
         if (record.punch_status === "Break Start" && !apiBreakEnd) {
           // Currently on break
@@ -456,57 +476,35 @@ const EmployeeAttendance = () => {
             </div>
 
             <div className="card-body p-4">
-              {/* Timer Display */}
-              {/* <div className="row mb-4">
-                                <div className="col-12">
-                                    <div className={`card timer-card ${attendanceStatus === 'OUT'
-                                        ? 'bg-secondary text-white'
-                                        : isWorking
-                                            ? 'bg-success text-white'
-                                            : isOnBreak
-                                                ? 'bg-warning'
-                                                : 'bg-warning'
-                                        }`}>
-                                        <div className="card-body text-center py-3">
-                                            <h5 className="card-title">Work Time</h5>
+              {/* Displayed punch in , punch out and break time*/}
 
-                                            <div className="display-4 fw-bold">
-                                                {attendanceStatus === 'OUT'
-                                                    ? todayWorkTime
-                                                    : workTime}
-                                            </div>
+              {attendanceStatus === "IN" || attendanceStatus === "OUT" ? (
+                <div className="row text-center " >
+                  {/* Check In Card */}
+                  <div className="col-md-4 ">
+                    <div className=" shadow-lg p-3">
+                      <h6 className="mb-1">Check In</h6>
+                      <strong>{punchInTime}</strong>
+                    </div>
+                  </div>
 
-                                            <p className="mb-0">
-                                                {attendanceStatus === 'OUT'
-                                                    ? "Day Complete - Total Time"
-                                                    : attendanceStatus === 'IN'
-                                                        ? (isOnBreak ? "Work Timer Paused" : "Working...")
-                                                        : "Ready to Start"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
+                  {/* Check Out Card */}
+                  <div className="col-md-4 mb-3">
+                    <div className=" shadow-lg p-3">
+                      <h6 className="mb-1">Check Out</h6>
+                      <strong>{punchOutTime}</strong>
+                    </div>
+                  </div>
 
-              {/* Break Timer Display - Show when on break or break has ended */}
-              {/* {(isOnBreak || (breakStatus === 'Break End' && breakTime !== '00:00:00')) && ( */}
-              {/* {isOnBreak && (
-                                <div className="row mb-4">
-                                    <div className="col-12">
-                                        <div className={`card timer-card ${isOnBreak ? 'bg-danger text-white' : 'bg-info text-white'}`}>
-                                            <div className="card-body text-center py-3">
-                                                <h5 className="card-title">Break Time</h5>
-                                                <div className="display-4 fw-bold">
-                                                    {breakTime}
-                                                </div>
-                                                <p className="mb-0">
-                                                    {isOnBreak ? "Currently on Break" : "Break Completed"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )} */}
+                  {/* Break Time Card */}
+                  <div className="col-md-4 mb-3">
+                    <div className=" shadow-lg p-3">
+                      <h6 className="mb-1">Break Time</h6>
+                      <strong>{breakDuration}</strong>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               <form onSubmit={handleSubmit}>
                 {error && (

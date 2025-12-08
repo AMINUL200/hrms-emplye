@@ -238,7 +238,7 @@
 .reactions-popup-wrapper {
   position: absolute;
   bottom: 100%;
-  right: -27px;
+  right: 100px;
   /* left: 100px; */
   padding-bottom: 10px;
   /* Space between button and reactions */
@@ -248,14 +248,14 @@
   position: absolute;
   bottom: -182%;
   left: 50%;
-  transform: translateX(-50%);
+  /* transform: translateX(-50%); */
   display: flex;
   background: white;
   border-radius: 50px;
   padding: 5px 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 100;
-  animation: fadeInUp 0.2s ease-out;
+  /* animation: fadeInUp 0.2s ease-out; */
   margin-bottom: 10px;
 }
 

@@ -26,27 +26,27 @@ const DashboardPage = () => {
 
   // Card configuration with routes
   const smallCards = [
-    {
-      id: 1,
-      title: "Leaves",
-      route: "/organization/leaves",
-      icon: "📅",
-      color: "#e3f2fd",
-    },
-    {
-      id: 2,
-      title: "Holidays",
-      route: "/organization/holiday",
-      icon: "🎉",
-      color: "#f3e5f5",
-    },
-    {
-      id: 3,
-      title: "Work Update",
-      route: "/organization/work-update",
-      icon: "📊",
-      color: "#e8f5e8",
-    },
+    // {
+    //   id: 1,
+    //   title: "Leaves",
+    //   route: "/organization/leaves",
+    //   icon: "📅",
+    //   color: "#e3f2fd",
+    // },
+    // {
+    //   id: 2,
+    //   title: "Holidays",
+    //   route: "/organization/holiday",
+    //   icon: "🎉",
+    //   color: "#f3e5f5",
+    // },
+    // {
+    //   id: 3,
+    //   title: "Work Update",
+    //   route: "/organization/work-update",
+    //   icon: "📊",
+    //   color: "#e8f5e8",
+    // },
     {
       id: 4,
       title: "Profile",
