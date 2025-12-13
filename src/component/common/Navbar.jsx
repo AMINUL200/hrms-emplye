@@ -229,7 +229,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   }, []); // Run once
 
   // Listen for live notification
-  useNoticeListener(data.emid, data.employee_id, (newNotification) => {
+  useNoticeListener(data?.emid, data?.employee_id, (newNotification) => {
     // Add new notification at top
     setNotifications((prev) => [newNotification, ...prev]);
 

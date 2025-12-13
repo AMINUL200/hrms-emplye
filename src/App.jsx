@@ -29,6 +29,7 @@ import LeaveList from './pages/employee/Leaves/LeaveList';
 import ViewProjectPage from './pages/employee/view project/ViewProjectPage';
 import DashboardPage from './pages/employee/Dashboard/DashboardPage';
 import Notifications from './pages/Notifications';
+import AttendanceReport from './pages/employee/Attendance/AttendanceReport';
 
 const App = () => {
 
@@ -56,6 +57,7 @@ const App = () => {
 
             <Route path="employee-attendance" element={<ProtectedRoute><EmployeeAttendance /></ProtectedRoute>} />
             <Route path="attendance-status" element={<ProtectedRoute><AttendanceStatus /></ProtectedRoute>} />
+            <Route path="attendance-report" element={<ProtectedRoute><AttendanceReport /></ProtectedRoute>} />
             
             <Route path="leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
             <Route path="apply-leaves" element={<ProtectedRoute><LeaveApplication /></ProtectedRoute>} />

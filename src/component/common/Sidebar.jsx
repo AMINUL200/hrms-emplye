@@ -66,6 +66,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
           path: '/organization/attendance-status',
           icon: faClipboardList,
           type: 'single'
+        },
+        {
+          title: 'Attendance Report',
+          path: '/organization/attendance-report',
+          icon: faClipboardList,
+          type: 'single'
         }
       ]
     },
