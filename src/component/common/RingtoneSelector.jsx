@@ -61,7 +61,7 @@ const RingtoneSelector = () => {
       {/* Action Buttons */}
       <div className="ringtone-actions">
         <button className="preview-btn" onClick={previewSound}>
-          <FontAwesomeIcon icon={faPlay} /> Preview
+          <FontAwesomeIcon icon={faPlay} /> Play
         </button>
 
         <button className="save-btn" onClick={saveTone}>

@@ -1,43 +1,50 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Pusher from "pusher-js";
 
 export default function useNoticeListener(emid, employeeId, onMessage) {
+  const audioRef = useRef(null);
+
   useEffect(() => {
     if (!emid || !employeeId) return;
+
+    // Initialize reusable audio object
+    audioRef.current = new Audio();
+    audioRef.current.volume = 1;
+
+    const playSound = () => {
+      const ringtone =
+        localStorage.getItem("selectedRingtone") ||
+        "/public/sounds/Doraemon Notification Ringtone Download - MobCup.Com.Co.mp3";
+
+      audioRef.current.src = ringtone;
+      audioRef.current.currentTime = 0;
+
+      audioRef.current
+        .play()
+        .catch((err) => console.warn("Audio play blocked:", err));
+    };
 
     const pusher = new Pusher("b5df271c0c008d8a6b60", {
       cluster: "ap2",
       forceTLS: true,
     });
 
-    // load ringtone from localStorage
-    let ringtoneFile =
-      localStorage.getItem("selectedRingtone") ||
-      "/public/sounds/Doraemon Notification Ringtone Download - MobCup.Com.Co.mp3";
-
-    const playSound = () => {
-      const audio = new Audio(ringtoneFile);
-      audio.volume = 1;
-      audio.play();
-    };
-
-    // Channel for organization-wide notifications
+    // ORG channel
     const orgChannel = `notice-channel.${emid}.all`;
     const chOrg = pusher.subscribe(orgChannel);
 
     chOrg.bind("notice-live", (data) => {
       playSound();
-      console.log("ORG Notification:", data.notification);
-      onMessage && onMessage(data.notification);
+      onMessage?.(data.notification);
     });
 
-    // Channel for personal notifications
+    // EMP channel
     const empChannel = `notice-channel.${emid}.${employeeId}`;
     const chEmp = pusher.subscribe(empChannel);
 
     chEmp.bind("notice-live", (data) => {
-      console.log("EMP Notification:", data.notification);
-      onMessage && onMessage(data.notification);
+      playSound();
+      onMessage?.(data.notification);
     });
 
     return () => {
@@ -45,5 +52,5 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
       pusher.unsubscribe(empChannel);
       pusher.disconnect();
     };
-  }, [emid, employeeId]);
+  }, [emid, employeeId, onMessage]);
 }

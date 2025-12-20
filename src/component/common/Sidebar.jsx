@@ -23,7 +23,8 @@ import {
   faBell,
   faPlusCircle,
   faListAlt,
-  faProjectDiagram
+  faProjectDiagram,
+  faEnvelope
 
 } from '@fortawesome/free-solid-svg-icons';
 import { logo, logo2 } from '../../assets';
@@ -160,6 +161,13 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       title: 'Post',
       path: '/organization/post',
       icon: faNewspaper,
+      type: 'single'
+    },
+    {
+      key: 'message-center',
+      title: 'Message Center',
+      path: '/organization/message-center',
+      icon: faEnvelope,
       type: 'single'
     }
   ];

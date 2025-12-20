@@ -30,6 +30,7 @@ import ViewProjectPage from './pages/employee/view project/ViewProjectPage';
 import DashboardPage from './pages/employee/Dashboard/DashboardPage';
 import Notifications from './pages/Notifications';
 import AttendanceReport from './pages/employee/Attendance/AttendanceReport';
+import MessageCenter from './pages/employee/message_center/MessageCenter';
 
 const App = () => {
 
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="post" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
             <Route path="assigned-project" element={<ProtectedRoute><AssignedProject /></ProtectedRoute>} />
             <Route path="assigned-project/:id" element={<ProtectedRoute><ViewProjectPage /></ProtectedRoute>} />
+            <Route path="message-center" element={<ProtectedRoute><MessageCenter /></ProtectedRoute>} />
           </Route>
 
           {/* Catch-all redirect */}
