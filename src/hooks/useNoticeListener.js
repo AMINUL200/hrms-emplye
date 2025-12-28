@@ -24,8 +24,8 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
         .catch((err) => console.warn("Audio play blocked:", err));
     };
 
-    const pusher = new Pusher("b5df271c0c008d8a6b60", {
-      cluster: "ap2",
+    const pusher = new Pusher("e438242d1567e1f86539", {
+      cluster: "eu",
       forceTLS: true,
     });
 
