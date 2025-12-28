@@ -4,6 +4,9 @@ import Pusher from "pusher-js";
 export default function useNoticeListener(emid, employeeId, onMessage) {
   const audioRef = useRef(null);
 
+  const PUSHER_KEY = import.meta.env.VITE_PUSHER_KEY;
+const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_CLUSTER;
+
   useEffect(() => {
     if (!emid || !employeeId) return;
 
@@ -24,8 +27,8 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
         .catch((err) => console.warn("Audio play blocked:", err));
     };
 
-    const pusher = new Pusher("e438242d1567e1f86539", {
-      cluster: "eu",
+    const pusher = new Pusher(PUSHER_KEY, {
+      cluster: PUSHER_CLUSTER,
       forceTLS: true,
     });
 

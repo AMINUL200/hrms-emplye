@@ -4,8 +4,6 @@ import Pusher from "pusher-js";
 const PUSHER_KEY = import.meta.env.VITE_PUSHER_KEY;
 const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_CLUSTER;
 
-console.log("PUSHER_KEY:", PUSHER_KEY);
-console.log("PUSHER_CLUSTER:", PUSHER_CLUSTER);
 
 export default function useProjectChatPusher(emid, projectId, onMessage) {
   useEffect(() => {
