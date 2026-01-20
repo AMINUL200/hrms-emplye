@@ -499,7 +499,7 @@ const MessageCenter = () => {
         id: post?.id,
         message: post?.title || "", // Using title field from your data
         employee_code: post?.employee_code,
-        user_name: `User ${post?.employee_code}`, // Format name from employee code
+        user_name: `${post?.name}`, // Format name from employee code
         created_at: post?.created_at,
         file: post?.file,
         title: post?.title,
@@ -699,7 +699,7 @@ const MessageCenter = () => {
                       </div>
                       <div className="member-code">{member.emp_code}</div>
                     </div>
-                    <div className="member-role">{member.role}</div>
+                    <div className="member-role">{member.role} {member.user_type === 'guest' && '(Guest)'}</div>
                   </div>
                 ))}
               </div>

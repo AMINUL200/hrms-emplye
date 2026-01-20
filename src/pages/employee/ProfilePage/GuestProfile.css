@@ -1,0 +1,102 @@
+.guest-profile-container {
+  background: #f8f9fb;
+  min-height: 100vh;
+}
+
+/* Header */
+.profile-header-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+}
+
+.profile-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.org-logo img {
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid #eee;
+}
+
+.logo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 28px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-basic-info h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.profile-basic-info p {
+  margin: 4px 0;
+  color: #6c757d;
+}
+
+.badge {
+  background: #ffe3e3;
+  color: #d6336c;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* Cards */
+.profile-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  height: 100%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.profile-card h5 {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 8px;
+}
+
+.info-row span {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.info-row p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .profile-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+}

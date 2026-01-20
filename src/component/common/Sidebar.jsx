@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect, useContext } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleRight,
   faCube,
@@ -24,153 +24,158 @@ import {
   faPlusCircle,
   faListAlt,
   faProjectDiagram,
-  faEnvelope
-
-} from '@fortawesome/free-solid-svg-icons';
-import { logo, logo2 } from '../../assets';
+  faEnvelope,
+} from "@fortawesome/free-solid-svg-icons";
+import { logo, logo2 } from "../../assets";
+import { AuthContext } from "../../context/AuthContex";
 
 const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   const [openMenu, setOpenMenu] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
+  const { data } = useContext(AuthContext);
 
   // Enhanced menu configuration array supporting different types
   const menuItems = [
     {
-      key: 'dashboard',
-      title: 'Dashboard',
-      path: '/organization/employerdashboard',
+      key: "dashboard",
+      title: "Dashboard",
+      path: "/organization/employerdashboard",
       icon: faCube,
-      type: 'single'
+      type: "single",
     },
     {
-      key: 'profile',
-      title: 'View Profile',
-      path: '/organization/employerprofile',
+      key: "profile",
+      title: "View Profile",
+      path: "/organization/employerprofile",
       icon: faUser,
-      type: 'single'
+      type: "single",
     },
     {
-      key: 'attendance',
-      title: 'Attendance',
+      key: "attendance",
+      title: "Attendance",
       icon: faUsers,
-      type: 'dropdown',
+      type: "dropdown",
       submenu: [
         {
-          title: 'Add Attendance',
-          path: '/organization/employee-attendance',
+          title: "Add Attendance",
+          path: "/organization/employee-attendance",
           icon: faCalendarCheck,
-          type: 'single'
+          type: "single",
         },
         {
-          title: 'Attendance Status',
-          path: '/organization/attendance-status',
+          title: "Attendance Status",
+          path: "/organization/attendance-status",
           icon: faClipboardList,
-          type: 'single'
+          type: "single",
         },
         {
-          title: 'Attendance Report',
-          path: '/organization/attendance-report',
+          title: "Attendance Report",
+          path: "/organization/attendance-report",
           icon: faClipboardList,
-          type: 'single'
-        }
-      ]
+          type: "single",
+        },
+      ],
     },
     {
-      key: 'work-management',
-      title: 'Work Management',
+      key: "work-management",
+      title: "Work Management",
       icon: faTasks,
-      type: 'dropdown',
+      type: "dropdown",
       submenu: [
         {
-          title: 'Work Update List',
-          path: '/organization/work-update',
+          title: "Work Update List",
+          path: "/organization/work-update",
           icon: faClipboardList,
-          type: 'single'
+          type: "single",
         },
         {
-          title: 'Add Work Report',
-          path: '/organization/add-work-update',
+          title: "Add Work Report",
+          path: "/organization/add-work-update",
           icon: faPlusCircle,
-          type: 'single'
+          type: "single",
         },
-      ]
+      ],
     },
     {
-      key: 'leave-management',
-      title: 'Leave Management',
+      key: "leave-management",
+      title: "Leave Management",
       icon: faBriefcase,
-      type: 'dropdown',
+      type: "dropdown",
       submenu: [
         {
-          title: 'Leave Apply',
-          path: '/organization/apply-leaves',
+          title: "Leave Apply",
+          path: "/organization/apply-leaves",
           icon: faClipboardList,
-          type: 'single'
+          type: "single",
         },
         {
-          title: 'Leave List',
-          path: '/organization/leaves-list',
+          title: "Leave List",
+          path: "/organization/leaves-list",
           icon: faListAlt,
-          type: 'single'
-        }
-      ]
+          type: "single",
+        },
+      ],
     },
     {
-      key: 'assign-project',
-      title: 'Assign Project',
-      path: '/organization/assigned-project',
+      key: "assign-project",
+      title: "Assign Project",
+      path: "/organization/assigned-project",
       icon: faProjectDiagram,
-      type: 'single'
+      type: "single",
     },
     {
-      key: 'calendar-holidays',
-      title: 'Calendar & Holidays',
+      key: "calendar-holidays",
+      title: "Calendar & Holidays",
       icon: faCalendarAlt,
-      type: 'multilevel',
+      type: "multilevel",
       submenu: [
         {
-          title: 'Holiday Calendar',
-          path: '/organization/holiday',
+          title: "Holiday Calendar",
+          path: "/organization/holiday",
           icon: faCalendarAlt,
-          type: 'single'
+          type: "single",
         },
         {
-          title: 'Holiday Management',
+          title: "Holiday Management",
           icon: faUmbrellaBeach,
-          type: 'dropdown',
+          type: "dropdown",
           submenu: [
             {
-              title: 'Holiday List',
-              path: '/organization/holiday-list',
+              title: "Holiday List",
+              path: "/organization/holiday-list",
               icon: faUmbrellaBeach,
-              type: 'single'
+              type: "single",
             },
             {
-              title: 'Holiday Apply',
-              path: '/organization/holiday-apply',
+              title: "Holiday Apply",
+              path: "/organization/holiday-apply",
               icon: faChartBar,
-              type: 'single'
-            }
-          ]
-        }
-      ]
+              type: "single",
+            },
+          ],
+        },
+      ],
     },
     {
-      key: 'post',
-      title: 'Post',
-      path: '/organization/post',
+      key: "post",
+      title: "Post",
+      path: "/organization/post",
       icon: faNewspaper,
-      type: 'single'
+      type: "single",
     },
     {
-      key: 'message-center',
-      title: 'Message Center',
-      path: '/organization/message-center',
+      key: "message-center",
+      title: "Message Center",
+      path: "/organization/message-center",
       icon: faEnvelope,
-      type: 'single'
-    }
+      type: "single",
+    },
   ];
+  const isGuest = data?.user_type === "guest";
+
+  const GUEST_ALLOWED_MENUS = ["message-center", "profile"];
+
   // Handle menu item clicks on small screens - close sidebar after selection
   const handleMenuItemClick = () => {
     if (isSmallScreen) {
@@ -194,7 +199,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   // Check if any submenu item is active (for parent highlighting)
   const hasActiveSubmenu = (submenu) => {
     if (!submenu) return false;
-    return submenu.some(item => {
+    return submenu.some((item) => {
       if (item.path && isMenuItemActive(item.path)) return true;
       if (item.submenu) return hasActiveSubmenu(item.submenu);
       return false;
@@ -206,16 +211,17 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
     return submenu.map((item, index) => {
       const itemKey = `${item.title}-${level}-${index}`;
 
-      if (item.type === 'single') {
+      if (item.type === "single") {
         // Single link item
         return (
-          <li key={itemKey}
-          // style={{ paddingLeft: `${level * 15}px` }}
+          <li
+            key={itemKey}
+            // style={{ paddingLeft: `${level * 15}px` }}
           >
             <NavLink
               to={item.path}
               className={({ isActive }) =>
-                `sidebar-link ${isActive ? 'active' : ''}`
+                `sidebar-link ${isActive ? "active" : ""}`
               }
               onClick={handleMenuItemClick}
             >
@@ -224,28 +230,32 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
             </NavLink>
           </li>
         );
-      } else if (item.type === 'dropdown' || item.type === 'multilevel') {
+      } else if (item.type === "dropdown" || item.type === "multilevel") {
         // Nested dropdown item
         return (
           <li
             key={itemKey}
-            className={`has-dropdown nested-dropdown ${hasActiveSubmenu(item.submenu) ? 'active-parent' : ''}`}
-          // style={{ paddingLeft: `${(level - 1) * 15}px` }}
+            className={`has-dropdown nested-dropdown ${hasActiveSubmenu(item.submenu) ? "active-parent" : ""}`}
+            // style={{ paddingLeft: `${(level - 1) * 15}px` }}
           >
             <a
-              className='side-title nested-title'
+              className="side-title nested-title"
               onClick={() => toggleSubMenu(itemKey)}
-            // style={{ paddingLeft: `${level * 15}px` }}
+              // style={{ paddingLeft: `${level * 15}px` }}
             >
               <span className="menu-icon">
                 <FontAwesomeIcon icon={item.icon} />
               </span>
               <span className="menu-text">{item.title}</span>
-              <span className={`menu-arrow ${openMenu[itemKey] ? 'rotate' : 'un-rotate'}`}>
+              <span
+                className={`menu-arrow ${openMenu[itemKey] ? "rotate" : "un-rotate"}`}
+              >
                 <FontAwesomeIcon icon={faAngleRight} />
               </span>
             </a>
-            <ul className={`submenu nested-submenu ${openMenu[itemKey] ? 'submenu-open' : ""}`}>
+            <ul
+              className={`submenu nested-submenu ${openMenu[itemKey] ? "submenu-open" : ""}`}
+            >
               {item.submenu && renderSubmenu(item.submenu, level + 1)}
             </ul>
           </li>
@@ -259,10 +269,10 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   return (
     <div
       className={`sidebar 
-        ${isOpen ? 'visible' : 'not-visible'} 
-        ${isMediumScreen ? 'medium-screen' : ''}
-        ${isSmallScreen ? 'small-screen' : ''}
-        ${isHovered ? 'hovered' : ''}
+        ${isOpen ? "visible" : "not-visible"} 
+        ${isMediumScreen ? "medium-screen" : ""}
+        ${isSmallScreen ? "small-screen" : ""}
+        ${isHovered ? "hovered" : ""}
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -284,15 +294,20 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
             </li>
 
             {/* Render menu items from configuration array */}
-            {menuItems.map((menuItem) => {
-              if (menuItem.type === 'single') {
+            {(isGuest
+              ? menuItems.filter((item) =>
+                  GUEST_ALLOWED_MENUS.includes(item.key),
+                )
+              : menuItems
+            ).map((menuItem) => {
+              if (menuItem.type === "single") {
                 // Direct single link
                 return (
                   <li key={menuItem.key} className="menu-item">
                     <NavLink
                       to={menuItem.path}
                       className={({ isActive }) =>
-                        `side-title ${isActive ? 'active' : ''}`
+                        `side-title ${isActive ? "active" : ""}`
                       }
                       onClick={handleMenuItemClick}
                     >
@@ -303,26 +318,38 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
                     </NavLink>
                   </li>
                 );
-              } else if (menuItem.type === 'dropdown' || menuItem.type === 'multilevel') {
+              } else if (
+                menuItem.type === "dropdown" ||
+                menuItem.type === "multilevel"
+              ) {
                 // Dropdown menu item
                 return (
                   <li
                     key={menuItem.key}
-                    className={`has-dropdown ${(menuItem.path && isMenuItemActive(menuItem.path)) || hasActiveSubmenu(menuItem.submenu)
-                      ? 'active-parent'
-                      : ''
-                      }`}
+                    className={`has-dropdown ${
+                      (menuItem.path && isMenuItemActive(menuItem.path)) ||
+                      hasActiveSubmenu(menuItem.submenu)
+                        ? "active-parent"
+                        : ""
+                    }`}
                   >
-                    <a className='side-title' onClick={() => toggleSubMenu(menuItem.key)}>
+                    <a
+                      className="side-title"
+                      onClick={() => toggleSubMenu(menuItem.key)}
+                    >
                       <span className="menu-icon">
                         <FontAwesomeIcon icon={menuItem.icon} />
                       </span>
                       <span className="menu-text">{menuItem.title}</span>
-                      <span className={`menu-arrow ${openMenu[menuItem.key] ? 'rotate' : 'un-rotate'}`}>
+                      <span
+                        className={`menu-arrow ${openMenu[menuItem.key] ? "rotate" : "un-rotate"}`}
+                      >
                         <FontAwesomeIcon icon={faAngleRight} />
                       </span>
                     </a>
-                    <ul className={`submenu ${openMenu[menuItem.key] ? 'submenu-open' : ""}`}>
+                    <ul
+                      className={`submenu ${openMenu[menuItem.key] ? "submenu-open" : ""}`}
+                    >
                       {menuItem.submenu && renderSubmenu(menuItem.submenu)}
                     </ul>
                   </li>
@@ -339,15 +366,22 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
           <hr className="sidebar-divider" />
 
           {/* Footer logo and version info */}
-          <div className="sidebar-footer-bottom"
-          style={{background:'white', margin:'0 10px', borderRadius:'20px'}}
+          <div
+            className="sidebar-footer-bottom"
+            style={{
+              background: "white",
+              margin: "0 10px",
+              borderRadius: "20px",
+            }}
           >
             <div className="footer-logo">
               <img src={logo} width="50" height="50" alt="Logo" />
-              <span style={{color:'black'}}>Develop By</span>
+              <span style={{ color: "black" }}>Develop By</span>
               <img src={logo2} width="50" height="50" alt="Logo" />
             </div>
-            <div className="footer-version">&copy; 2025 SponicHR. All rights reserved.</div>
+            <div className="footer-version">
+              &copy; 2025 SponicHR. All rights reserved.
+            </div>
           </div>
         </div>
       </div>

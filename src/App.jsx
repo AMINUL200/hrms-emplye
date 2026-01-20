@@ -31,6 +31,8 @@ import DashboardPage from './pages/employee/Dashboard/DashboardPage';
 import Notifications from './pages/Notifications';
 import AttendanceReport from './pages/employee/Attendance/AttendanceReport';
 import MessageCenter from './pages/employee/message_center/MessageCenter';
+import GuestLoginPage from './pages/Auth/GuestLoginPage';
+import ProfileRouter from './pages/employee/ProfilePage/ProfileRouter';
 
 const App = () => {
 
@@ -47,6 +49,7 @@ const App = () => {
           {/* Auth routes */}
           <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/organization/employerdashboard" replace />} />
           <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/organization/employerdashboard" replace />} />
+          <Route path="/guest-login" element={!isAuthenticated ? <GuestLoginPage /> : <Navigate to="/organization/employerdashboard" replace />} />
           <Route path="/subadmin" element={!isAuthenticated ? <SubadminLogin /> : <Navigate to="/organization/employerdashboard" replace />} />
 
           {/* Protected organization routes */}
@@ -54,7 +57,7 @@ const App = () => {
             {/* <Route path="employerdashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} /> */}
             <Route path="employerdashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="notification" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-            <Route path="employerprofile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="employerprofile" element={<ProtectedRoute><ProfileRouter /></ProtectedRoute>} />
 
             <Route path="employee-attendance" element={<ProtectedRoute><EmployeeAttendance /></ProtectedRoute>} />
             <Route path="attendance-status" element={<ProtectedRoute><AttendanceStatus /></ProtectedRoute>} />

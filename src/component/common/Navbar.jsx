@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContex";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   deFlag,
   esFlag,
@@ -36,8 +36,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
 
- console.log( localStorage.getItem("selectedRingtone"));
- 
+  console.log(localStorage.getItem("selectedRingtone"));
 
   // Support form state
   const [supportForm, setSupportForm] = useState({
@@ -85,7 +84,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       ];
       if (!allowedTypes.includes(file.type)) {
         toast.error(
-          "Invalid file type. Allowed: JPG, PNG, PDF, DOC, DOCX, TXT"
+          "Invalid file type. Allowed: JPG, PNG, PDF, DOC, DOCX, TXT",
         );
         e.target.value = "";
         return;
@@ -239,7 +238,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
 
   const updateStatus = (id) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, status: 1 } : n))
+      prev.map((n) => (n.id === id ? { ...n, status: 1 } : n)),
     );
   };
 
@@ -280,9 +279,18 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   };
 
   // Helper function to format employee name
+  // Helper function to format user name
   const getFullName = () => {
     if (!data) return "Loading...";
+
+    // ✅ Guest user (has single name field)
+    if (data.name) {
+      return data.name;
+    }
+
+    // ✅ Employee user (has separate fields)
     const { emp_fname, emp_mname, emp_lname } = data;
+
     return [emp_fname, emp_mname, emp_lname].filter(Boolean).join(" ");
   };
 
@@ -291,7 +299,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     if (data?.emp_image) {
       return `${storage_url}/${data.emp_image}`;
     }
-    return "https://i.pravatar.cc/40";
+    return "/images/profile.png";
   };
 
   // Close dropdowns when clicking outside
@@ -363,10 +371,10 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                     i18n.language === "en"
                       ? usFlag
                       : i18n.language === "fr"
-                      ? frFlag
-                      : i18n.language === "es"
-                      ? esFlag
-                      : deFlag
+                        ? frFlag
+                        : i18n.language === "es"
+                          ? esFlag
+                          : deFlag
                   }
                   width={20}
                   alt=""
@@ -376,10 +384,10 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                   {i18n.language === "en"
                     ? "English"
                     : i18n.language === "fr"
-                    ? "French"
-                    : i18n.language === "es"
-                    ? "Spanish"
-                    : "German"}
+                      ? "French"
+                      : i18n.language === "es"
+                        ? "Spanish"
+                        : "German"}
                 </span>
               </a>
               <div className="dropdown-menu dropdown-menu-end">
@@ -457,12 +465,15 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
 
               {/* Dropdown Menu */}
               <div className="dropdown-menu dropdown-menu-right">
-                <a
-                  className="dropdown-item"
-                  onClick={() => navigate("/profile")}
-                >
-                  Profile
-                </a>
+               
+                  <Link
+                    className="dropdown-item"
+                    // onClick={() => navigate("/profile")}
+                    to="/organization/employerprofile"
+                  >
+                    Profile
+                  </Link>
+               
                 <a className="dropdown-item" onClick={logoutUser}>
                   Logout
                 </a>

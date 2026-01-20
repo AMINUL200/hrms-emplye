@@ -2,8 +2,7 @@ import React, { useContext, useState } from 'react';
 import { logo2, car1, car2, car3 } from '../../assets';
 import DotLoader from '../../component/common/DotLoader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { faEye } from '@fortawesome/free-solid-svg-icons';
+import { faEyeSlash, faEye, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import Carousel from '../../component/common/Carousel';
 import { AuthContext } from '../../context/AuthContex';
@@ -44,7 +43,7 @@ const LoginPage = () => {
 
 								{/* <!-- Account Form --> */}
 								<div className="account-box">
-									<div children="account-wrapper">
+									<div className="account-wrapper">
 										<h3 className="account-title">Login</h3>
 										<p className="account-subtitle">Access to our dashboard</p>
 
@@ -85,6 +84,26 @@ const LoginPage = () => {
 													{isLoading ? <DotLoader /> : "Login"}
 												</button>
 											</div>
+											
+											{/* Add Guest Login Option Here */}
+											<div className="guest-login-option text-center mb-4">
+												<p className="text-muted mb-2" style={{ fontSize: '14px' }}>
+													<FontAwesomeIcon icon={faUserFriends} className="me-2" />
+													Just want to explore? 
+													<Link 
+														to="/guest-login" 
+														className="ms-1" 
+														style={{
+															color: '#FF902F', 
+															fontWeight: '600',
+															textDecoration: 'none'
+														}}
+													>
+														Login as Guest
+													</Link>
+												</p>
+											</div>
+											
 											<div className="account-footer">
 												<p>Don't have an account yet? <Link to="/register">Register</Link></p>
 											</div>

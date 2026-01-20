@@ -69,6 +69,8 @@ const ViewProjectPage = () => {
 
       if (response.data.status === 200) {
         const data = response.data.data;
+        console.log("response:",data);
+        
         setProjectData({
           project: data.project.project,
           members: data.project.members || [],

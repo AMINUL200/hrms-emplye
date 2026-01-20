@@ -328,6 +328,10 @@
     margin-bottom: 1rem;
 }
 
+.guest-login-page .input-block {
+    display: block;
+}
+
 .input-block.anime {
     position: relative;
     width: 100%;
@@ -737,57 +741,58 @@
 
 /* View Icon */
 .view-icon {
-  font-size: 18px;
-  color: #FC6075;
-  cursor: pointer;
-  position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%);
+    font-size: 18px;
+    color: #FC6075;
+    cursor: pointer;
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .view-icon:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 /* Notification Detail Modal */
 .notification-detail-modal {
-  width: 420px;
-  max-width: 95%;
-  padding-bottom: 20px;
-  border-radius: 10px;
+    width: 420px;
+    max-width: 95%;
+    padding-bottom: 20px;
+    border-radius: 10px;
 }
 
 .modal-body-content {
-  padding: 18px;
-  line-height: 1.6;
-  color: #444;
+    padding: 18px;
+    line-height: 1.6;
+    color: #444;
 }
 
 .modal-body-content p {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
+
 /* Unread Dot on LEFT */
 .unread-dot-left {
-  width: 10px;
-  height: 10px;
-  background: #dc3545;
-  border-radius: 50%;
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #dc3545;
+    border-radius: 50%;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* Adjust content padding so title doesn't overlap with dot */
 .notification-item .notification-content {
-  margin-left: 25px;
+    margin-left: 25px;
 }
 
 /* Time text style */
 .notification-content small {
-  color: #777;
-  font-size: 11px;
+    color: #777;
+    font-size: 11px;
 }
 
 
@@ -1332,160 +1337,168 @@
         max-height: 75vh;
     }
 }
+
 /* Preview Container */
 .file-preview-box {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  background: #fafafa;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
 }
 
 /* Image Preview */
 .file-preview-image {
-  width: 100px;
-  height: 60px;
-  border-radius: 6px;
-  object-fit: cover;
-  border: 2px solid #FC6075;
+    width: 100px;
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 2px solid #FC6075;
 }
 
 /* Icon Preview (PDF, DOC, etc.) */
 .file-preview-icon {
-  width: 55px;
-  height: 55px;
-  border-radius: 6px;
-  background: linear-gradient(to right, #FF902F, #FC6075);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: white;
+    width: 55px;
+    height: 55px;
+    border-radius: 6px;
+    background: linear-gradient(to right, #FF902F, #FC6075);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
 }
 
 /* File info section */
 .file-preview-info {
-  flex: 1;
+    flex: 1;
 }
 
 /* File name */
 .file-preview-name {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  word-break: break-all;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-all;
 }
 
 /* Remove button */
 .remove-file-btn {
-  margin-top: 5px;
-  background: transparent;
-  border: none;
-  color: #FC6075;
-  cursor: pointer;
-  font-size: 13px;
-  text-decoration: underline;
+    margin-top: 5px;
+    background: transparent;
+    border: none;
+    color: #FC6075;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: underline;
 }
 
 .remove-file-btn:hover {
-  color: #FF902F;
+    color: #FF902F;
 }
 
 
 /* Settings Modal */
 .settings-modal {
-  width: 420px;
-  max-width: 95%;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  animation: fadeIn 0.3s ease-in-out;
+    width: 420px;
+    max-width: 95%;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .modal-content-body {
-  padding: 20px;
+    padding: 20px;
 }
 
 /* Ringtone Box Styling */
 .ringtone-box {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 .ringtone-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #FC6075;
-  margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #FC6075;
+    margin-bottom: 15px;
 }
 
 /* Fancy Select Box */
 .select-wrapper {
-  width: 100%;
-  margin-bottom: 20px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .ringtone-select {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 15px;
-  background: #fafafa;
-  outline: none;
-  transition: 0.2s;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    background: #fafafa;
+    outline: none;
+    transition: 0.2s;
 }
 
 .ringtone-select:focus {
-  border-color: #FC6075;
-  box-shadow: 0 0 8px rgba(252, 96, 117, 0.3);
-  background: #fff;
+    border-color: #FC6075;
+    box-shadow: 0 0 8px rgba(252, 96, 117, 0.3);
+    background: #fff;
 }
 
 /* Buttons */
 .ringtone-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
 }
 
 .preview-btn,
 .save-btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: 0.3s;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.3s;
 }
 
 /* Preview Button */
 .preview-btn {
-  background: linear-gradient(to right, #FF902F, #FC6075);
-  color: white;
+    background: linear-gradient(to right, #FF902F, #FC6075);
+    color: white;
 }
 
 .preview-btn:hover {
-  opacity: 0.9;
+    opacity: 0.9;
 }
 
 /* Save Button */
 .save-btn {
-  background: #4caf50;
-  color: white;
+    background: #4caf50;
+    color: white;
 }
 
 .save-btn:hover {
-  background: #449d48;
+    background: #449d48;
 }
 
 /* Animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 
@@ -3677,4 +3690,196 @@ textarea {
     border-color: #d1d5db;
     border-style: solid;
     border-width: 1px 0 0 0;
+}
+
+
+
+
+/* Guest Login Specific Styles */
+
+/* Guest Badge */
+.guest-badge {
+    text-align: center;
+}
+
+.guest-tag {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #FF902F, #FF6B00);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 144, 47, 0.3);
+}
+
+/* Guest Features */
+.guest-features {
+    background-color: #f8f9fa;
+    border-left: 4px solid #FF902F;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.guest-note {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.guest-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.guest-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.guest-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #FF902F;
+    font-weight: bold;
+}
+
+/* Guest Input Fields */
+.guest-field {
+    position: relative;
+}
+
+.guest-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #FF902F;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.guest-input {
+    background-color: #f8f9fa !important;
+    border: 2px solid #e9ecef !important;
+}
+
+/* Guest Login Button */
+.guest-login-btn {
+    background: linear-gradient(135deg, #FF902F, #FF6B00) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 144, 47, 0.4) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.guest-login-btn:not(.disable-btn):hover {
+    background: linear-gradient(135deg, #FF6B00, #E55A00) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 144, 47, 0.5) !important;
+}
+
+.guest-login-btn:not(.disable-btn):active {
+    transform: translateY(0);
+}
+
+/* Divider */
+.guest-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #666;
+}
+
+.guest-divider::before,
+.guest-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.guest-divider span {
+    padding: 0 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Regular Login Button */
+.regular-login-btn {
+    width: 80%;
+    padding: 12px 0;
+    background-color: transparent !important;
+    border: 2px solid #FF902F !important;
+    color: #FF902F !important;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.regular-login-btn:hover {
+    background-color: #FF902F !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 144, 47, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .guest-tag {
+        padding: 6px 15px;
+        font-size: 12px;
+    }
+
+    .guest-list li {
+        font-size: 12px;
+    }
+
+    .guest-label {
+        font-size: 10px;
+        padding: 1px 6px;
+    }
+}
+
+
+/* Guest Login Link Styles */
+.guest-login-option {
+  border-top: 1px solid #e9ecef;
+  padding-top: 15px;
+  margin-top: 10px;
+}
+
+.guest-login-option p a {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.guest-login-option p a:hover {
+  color: #FF902F !important;
+  text-decoration: underline !important;
+}
+
+/* Optional: Add a badge effect for the guest link */
+.guest-login-option p a:after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #FF902F;
+  transition: width 0.3s ease;
+}
+
+.guest-login-option p a:hover:after {
+  width: 100%;
 }

@@ -23,6 +23,7 @@ const DashboardPage = () => {
   const api_url = import.meta.env.VITE_API_URL;
   const { token } = useContext(AuthContext);
   const { postsData, getPostData } = useContext(EmployeeContext);
+  const [showAlert, setShowAlert] = useState(true);
 
   // Card configuration with routes
   const smallCards = [
@@ -170,17 +171,24 @@ const DashboardPage = () => {
   return (
     <div className="dashboard-page-container container-fluid p-4 pt-1">
       {/* Alert Row */}
-      <div className="row g-3 mb-3">
-        <div className="col-12">
-          <div className="alert-card alert-success">
-            <div className="alert-content">
-              <div className="alert-icon">✅</div>
-              <div className="alert-message">{alertMessage}</div>
-              <button className="alert-close-btn">×</button>
+      {showAlert && (
+        <div className="row g-3 mb-3">
+          <div className="col-12">
+            <div className="alert-card alert-success">
+              <div className="alert-content">
+                <div className="alert-icon">✅</div>
+                <div className="alert-message">{alertMessage}</div>
+                <button
+                  className="alert-close-btn"
+                  onClick={() => setShowAlert(false)}
+                >
+                  ×
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Attendance + Bottom Cards + Calendar Row */}
       <div className="row g-3 mb-3 align-items-stretch">
@@ -429,18 +437,24 @@ const DashboardPage = () => {
                           </button>
                         </div>
                       ) : (
-                        <div 
+                        <div
                           className="upload-placeholder d-flex flex-column align-items-center justify-content-center"
-                          style={{ 
-                            cursor: 'pointer',
-                            border: '2px dashed #dee2e6',
-                            borderRadius: '8px',
-                            padding: '2rem'
+                          style={{
+                            cursor: "pointer",
+                            border: "2px dashed #dee2e6",
+                            borderRadius: "8px",
+                            padding: "2rem",
                           }}
-                          onClick={() => document.getElementById('post_file').click()}
+                          onClick={() =>
+                            document.getElementById("post_file").click()
+                          }
                         >
                           <div className="upload-icon-circle mb-2">
-                            <FontAwesomeIcon icon={faCloudUploadAlt} size="2x" className="text-muted" />
+                            <FontAwesomeIcon
+                              icon={faCloudUploadAlt}
+                              size="2x"
+                              className="text-muted"
+                            />
                           </div>
                           <span className="text-muted">
                             Click to upload image
@@ -481,8 +495,8 @@ const DashboardPage = () => {
                     disabled={createPostLoading}
                   >
                     {createPostLoading && (
-                      <div 
-                        className="spinner-border spinner-border-sm text-light" 
+                      <div
+                        className="spinner-border spinner-border-sm text-light"
                         role="status"
                         style={{ width: "1rem", height: "1rem" }}
                       >
