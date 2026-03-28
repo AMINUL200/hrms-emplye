@@ -4,6 +4,9 @@ import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
 import PageLoader from "../../../component/loader/PageLoader";
 import useProjectChatPusher from "../../../hooks/usePusherMessages";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 
 // Helper function to get file type
 const getFileType = (filename) => {
@@ -182,8 +185,8 @@ const MessageCenter = () => {
     (project) =>
       project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.members.some((member) =>
-        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
   // Handle project selection
@@ -195,8 +198,8 @@ const MessageCenter = () => {
 
     setProjects((prev) =>
       prev.map((p) =>
-        p.project_id === project.project_id ? { ...p, unread: 0 } : p
-      )
+        p.project_id === project.project_id ? { ...p, unread: 0 } : p,
+      ),
     );
 
     if (isMobileView) {
@@ -233,7 +236,7 @@ const MessageCenter = () => {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         if (response.status === 200) {
@@ -288,7 +291,7 @@ const MessageCenter = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { t: Date.now() }, // Prevent caching
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -327,7 +330,7 @@ const MessageCenter = () => {
               };
             }
             return project;
-          })
+          }),
         );
       }
     } catch (error) {
@@ -360,7 +363,7 @@ const MessageCenter = () => {
         `${api_url}/project-posts/${messageId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -462,7 +465,7 @@ const MessageCenter = () => {
   const getCurrentUserRole = () => {
     if (!selectedProject || !data?.employee_id) return "";
     const member = selectedProject.members.find(
-      (m) => m.emp_code === data.employee_id
+      (m) => m.emp_code === data.employee_id,
     );
     return member?.role || "Member";
   };
@@ -525,7 +528,7 @@ const MessageCenter = () => {
 
           // Check if message already exists to avoid duplicates
           const messageExists = prev.messages.some(
-            (msg) => msg.id === transformedMessage.id
+            (msg) => msg.id === transformedMessage.id,
           );
           if (messageExists) {
             console.log("Message already exists in chat, skipping");
@@ -546,7 +549,7 @@ const MessageCenter = () => {
             if (project.project_id === selectedProject.project_id) {
               // Update the selected project in sidebar
               const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id
+                (msg) => msg.id === transformedMessage.id,
               );
               if (messageExists) return project;
 
@@ -566,7 +569,7 @@ const MessageCenter = () => {
             // For other projects, increment unread count
             if (project.project_id === transformedMessage.project_id) {
               const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id
+                (msg) => msg.id === transformedMessage.id,
               );
               if (messageExists) return project;
 
@@ -584,14 +587,14 @@ const MessageCenter = () => {
             }
 
             return project;
-          })
+          }),
         );
       } else {
         /* =========================
       3️⃣ Message for a different project - update sidebar only
     ========================== */
         console.log(
-          `🔴 New message for project ${transformedMessage.project_id}, incrementing unread`
+          `🔴 New message for project ${transformedMessage.project_id}, incrementing unread`,
         );
 
         setProjects((prev) =>
@@ -599,7 +602,7 @@ const MessageCenter = () => {
             if (project.project_id === transformedMessage.project_id) {
               // Check if message already exists
               const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id
+                (msg) => msg.id === transformedMessage.id,
               );
               if (messageExists) return project;
 
@@ -616,10 +619,10 @@ const MessageCenter = () => {
               };
             }
             return project;
-          })
+          }),
         );
       }
-    }
+    },
   );
 
   if (loading) {
@@ -699,7 +702,9 @@ const MessageCenter = () => {
                       </div>
                       <div className="member-code">{member.emp_code}</div>
                     </div>
-                    <div className="member-role">{member.role} {member.user_type === 'guest' && '(Guest)'}</div>
+                    <div className="member-role">
+                      {member.role} {member.user_type === "guest" && "(Guest)"}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -966,7 +971,7 @@ const MessageCenter = () => {
                                 onClick={() =>
                                   window.open(
                                     `${stor_url}/${message.file}`,
-                                    "_blank"
+                                    "_blank",
                                   )
                                 }
                               >
@@ -1173,29 +1178,20 @@ const MessageCenter = () => {
                   {sendingMessage ? (
                     <div className="sending-spinner"></div>
                   ) : editingMessage ? (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                      <polyline points="17 21 17 13 7 13 7 21" />
-                      <polyline points="7 3 7 8 15 8" />
+                    <svg className="w-5 h-5 animate-spin" viewBox="0 0 50 50">
+                      <circle
+                        cx="25"
+                        cy="25"
+                        r="20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeDasharray="31.4 31.4"
+                      />
                     </svg>
                   ) : (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                    </svg>
+                    <FontAwesomeIcon icon={faCircleUp} />
                   )}
                 </button>
               </div>

@@ -27,6 +27,7 @@ import RingtoneSelector from "./RingtoneSelector";
 
 const Navbar = ({ toggleSidebar, isOpen }) => {
   const { logoutUser, data, token } = useContext(AuthContext);
+  console.log("Company Info ::", data);
   const api_url = import.meta.env.VITE_API_URL;
   const storage_url = import.meta.env.VITE_STORAGE_URL;
   const navigate = useNavigate();
