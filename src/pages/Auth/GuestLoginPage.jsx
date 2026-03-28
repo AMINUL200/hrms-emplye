@@ -13,8 +13,8 @@ import { AuthContext } from "../../context/AuthContex";
 
 const GuestLoginPage = () => {
   const { guestLogin, isLoading } = useContext(AuthContext);
-  const [email, setEmail] = useState("abhijitsaha@yopmail.com");
-  const [password, setPassword] = useState("784498");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [toggle, setToggle] = useState(false);
   const navigate = useNavigate();
 

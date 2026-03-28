@@ -182,3 +182,35 @@
         font-size: 2rem;
     }
 }
+
+/* Location Alert Styles */
+.attendance-container .alert-warning {
+    background-color: #fff3e0;
+    border-color: #ffe0b3;
+    color: #856404;
+}
+
+.attendance-container .btn-warning {
+    background-color: #FF902F;
+    border-color: #FF902F;
+    color: white;
+}
+
+.attendance-container .btn-warning:hover {
+    background-color: #ec7a16;
+    border-color: #ec7a16;
+}
+
+.attendance-container .btn-warning:disabled {
+    background-color: #ffb366;
+    border-color: #ffb366;
+}
+
+/* Location Status Indicator */
+.attendance-container .text-success {
+    color: #28a745 !important;
+}
+
+.attendance-container .bi {
+    font-size: 0.9rem;
+}

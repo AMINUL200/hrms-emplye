@@ -13,6 +13,8 @@ const EmployeeAttendance = () => {
   const { token, data } = useContext(AuthContext);
   const api_url = import.meta.env.VITE_API_URL;
   const [location, setLocation] = useState({ latitude: "", longitude: "" });
+  const [locationError, setLocationError] = useState(null);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [attendanceType, setAttendanceType] = useState("check-in");
@@ -58,21 +60,59 @@ const EmployeeAttendance = () => {
   }, []);
 
   const findGeolocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude.toFixed(6),
-            longitude: position.coords.longitude.toFixed(6),
-          });
-        },
-        (err) => {
-          // setError(err.message);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      setError("Geolocation is not supported by this browser.");
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocation({
+              latitude: position.coords.latitude.toFixed(6),
+              longitude: position.coords.longitude.toFixed(6),
+            });
+            setLocationError(null);
+            resolve({
+              latitude: position.coords.latitude.toFixed(6),
+              longitude: position.coords.longitude.toFixed(6)
+            });
+          },
+          (err) => {
+            let errorMessage = "";
+            switch(err.code) {
+              case err.PERMISSION_DENIED:
+                errorMessage = "Location permission denied. Please enable location access to mark attendance.";
+                break;
+              case err.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable. Please check your GPS.";
+                break;
+              case err.TIMEOUT:
+                errorMessage = "Location request timed out. Please try again.";
+                break;
+              default:
+                errorMessage = "An error occurred while getting location.";
+            }
+            setLocationError(errorMessage);
+            reject(errorMessage);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        const errorMessage = "Geolocation is not supported by this browser.";
+        setLocationError(errorMessage);
+        reject(errorMessage);
+      }
+    });
+  };
+
+  const requestLocation = async () => {
+    setIsRequestingLocation(true);
+    try {
+      const locationData = await findGeolocation();
+      // toast.success("Location obtained successfully!");
+      return locationData;
+    } catch (error) {
+      toast.error(error);
+      return null;
+    } finally {
+      setIsRequestingLocation(false);
     }
   };
 
@@ -295,7 +335,7 @@ const EmployeeAttendance = () => {
   };
 
   useEffect(() => {
-    findGeolocation();
+    requestLocation();
     getCurrentAttendanceStatus();
 
     // Cleanup on unmount
@@ -339,6 +379,14 @@ const EmployeeAttendance = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check location before submitting
+    if (!location.latitude || !location.longitude) {
+      toast.error("Please enable location access to mark attendance");
+      requestLocation();
+      return;
+    }
+    
     setIsSubmitting(true);
 
     const now = new Date();
@@ -476,10 +524,38 @@ const EmployeeAttendance = () => {
             </div>
 
             <div className="card-body p-4">
-              {/* Displayed punch in , punch out and break time*/}
+              {/* Location Error Alert */}
+              {locationError && (
+                <div className="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+                  <div className="d-flex align-items-center justify-content-between flex-wrap">
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-geo-alt-fill me-2 fs-4"></i>
+                      <span>{locationError}</span>
+                    </div>
+                    {/* <button
+                      onClick={requestLocation}
+                      disabled={isRequestingLocation}
+                      className="btn btn-sm btn-warning ms-3"
+                    >
+                      {isRequestingLocation ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                          Getting Location...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-send me-1"></i>
+                          Turn On Location
+                        </>
+                      )}
+                    </button> */}
+                  </div>
+                </div>
+              )}
 
+              {/* Displayed punch in , punch out and break time*/}
               {attendanceStatus === "IN" || attendanceStatus === "OUT" ? (
-                <div className="row text-center " >
+                <div className="row text-center" >
                   {/* Check In Card */}
                   <div className="col-md-4 ">
                     <div className=" shadow-lg p-3">
@@ -507,12 +583,6 @@ const EmployeeAttendance = () => {
               ) : null}
 
               <form onSubmit={handleSubmit}>
-                {error && (
-                  <div className="alert alert-danger">
-                    <p className="mb-0">{error}</p>
-                  </div>
-                )}
-
                 <div className="d-flex flex-wrap justify-content-center mb-4">
                   {showCheckIn && (
                     <button
@@ -562,6 +632,14 @@ const EmployeeAttendance = () => {
                       <strong>Time:</strong> {currentTime.toLocaleTimeString()}
                     </div>
                   </div>
+                  
+                  {/* Location Status Indicator */}
+                  {location.latitude && location.longitude && (
+                    <div className="mt-2 text-success small">
+                      <i className="bi bi-check-circle-fill me-1"></i>
+                      Location available
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-center">
@@ -570,14 +648,16 @@ const EmployeeAttendance = () => {
                     disabled={
                       !location.latitude ||
                       isSubmitting ||
-                      attendanceStatus === "OUT"
+                      attendanceStatus === "OUT" ||
+                      locationError
                     }
                     className={`btn btn-lg ${
-                      attendanceStatus === "OUT"
+                      attendanceStatus === "OUT" || locationError
                         ? "btn-secondary"
                         : "btn-primary"
                     } px-5`}
                     style={{ minWidth: "200px" }}
+                    title={locationError ? "Please enable location first" : ""}
                   >
                     {isSubmitting ? (
                       <>
@@ -590,6 +670,8 @@ const EmployeeAttendance = () => {
                       </>
                     ) : attendanceStatus === "OUT" ? (
                       <span>Day Complete</span>
+                    ) : locationError ? (
+                      <span>Location Required</span>
                     ) : (
                       `Record ${attendanceType.replace("-", " ")}`
                     )}
