@@ -133,7 +133,7 @@ const AuthContextProvider = (props) => {
       setToken("");
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
-      toast.info("Logged out successfully");
+      // toast.info("Logged out successfully");
     }
   };
 
