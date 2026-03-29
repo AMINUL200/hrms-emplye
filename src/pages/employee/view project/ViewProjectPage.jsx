@@ -8,6 +8,8 @@ import PageLoader from "../../../component/loader/PageLoader";
 import axios from "axios";
 import OverviewComponent from "../../../component/task/OverviewTab";
 import TasksComponent from "../../../component/task/TasksTab";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const ViewProjectPage = () => {
   const { id } = useParams();
@@ -69,8 +71,8 @@ const ViewProjectPage = () => {
 
       if (response.data.status === 200) {
         const data = response.data.data;
-        console.log("response:",data);
-        
+        console.log("response:", data);
+
         setProjectData({
           project: data.project.project,
           members: data.project.members || [],
@@ -274,7 +276,7 @@ const ViewProjectPage = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -300,7 +302,7 @@ const ViewProjectPage = () => {
         `${api_url}/project-posts/${messageId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -340,12 +342,12 @@ const ViewProjectPage = () => {
           type === "image"
             ? "image"
             : file.name.endsWith(".pdf")
-            ? "pdf"
-            : file.name.endsWith(".doc") || file.name.endsWith(".docx")
-            ? "word"
-            : file.name.endsWith(".xls") || file.name.endsWith(".xlsx")
-            ? "excel"
-            : "file",
+              ? "pdf"
+              : file.name.endsWith(".doc") || file.name.endsWith(".docx")
+                ? "word"
+                : file.name.endsWith(".xls") || file.name.endsWith(".xlsx")
+                  ? "excel"
+                  : "file",
         size: (file.size / 1024 / 1024).toFixed(1) + " MB",
         file: file,
         url: type === "image" ? URL.createObjectURL(file) : null,
@@ -376,7 +378,7 @@ const ViewProjectPage = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -400,7 +402,7 @@ const ViewProjectPage = () => {
         positionData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -476,7 +478,7 @@ const ViewProjectPage = () => {
         updatedTask.activities = [...updatedTask.activities, moveActivity];
 
         const updatedSourceTasks = tasks[sourceColumn].filter(
-          (task) => task.id !== taskId
+          (task) => task.id !== taskId,
         );
         const updatedTargetTasks = [...tasks[targetColumn], updatedTask];
 
@@ -518,7 +520,7 @@ const ViewProjectPage = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -542,7 +544,7 @@ const ViewProjectPage = () => {
         const updatedTasks = { ...tasks };
         const taskColumn = selectedTask.status;
         const taskInColumn = updatedTasks[taskColumn].findIndex(
-          (task) => task.id === selectedTask.id
+          (task) => task.id === selectedTask.id,
         );
 
         if (taskInColumn !== -1) {
@@ -569,7 +571,7 @@ const ViewProjectPage = () => {
 
   const handleRemoveAttachment = (attachmentId) => {
     setMessageAttachments(
-      messageAttachments.filter((att) => att.id !== attachmentId)
+      messageAttachments.filter((att) => att.id !== attachmentId),
     );
   };
 
@@ -611,7 +613,7 @@ const ViewProjectPage = () => {
       const currentColumn = selectedTaskForMenu.status;
 
       const taskIndex = updatedTasks[currentColumn].findIndex(
-        (task) => task.id === selectedTaskForMenu.id
+        (task) => task.id === selectedTaskForMenu.id,
       );
       if (taskIndex !== -1) {
         const taskToMove = updatedTasks[currentColumn][taskIndex];
@@ -648,7 +650,7 @@ const ViewProjectPage = () => {
     const updatedTasks = { ...tasks };
     const currentColumn = selectedTaskForMenu.status;
     const currentIndex = updatedTasks[currentColumn].findIndex(
-      (task) => task.id === selectedTaskForMenu.id
+      (task) => task.id === selectedTaskForMenu.id,
     );
 
     if (currentIndex !== -1) {
@@ -781,10 +783,10 @@ const ViewProjectPage = () => {
                             {attachment.type === "pdf"
                               ? "📄"
                               : attachment.type === "word"
-                              ? "📝"
-                              : attachment.type === "excel"
-                              ? "📊"
-                              : "📎"}
+                                ? "📝"
+                                : attachment.type === "excel"
+                                  ? "📊"
+                                  : "📎"}
                           </span>
                           <span className="attachment-name">
                             {attachment.name}
@@ -868,10 +870,10 @@ const ViewProjectPage = () => {
                         {attachment.type === "pdf"
                           ? "📄"
                           : attachment.type === "word"
-                          ? "📝"
-                          : attachment.type === "excel"
-                          ? "📊"
-                          : "📎"}
+                            ? "📝"
+                            : attachment.type === "excel"
+                              ? "📊"
+                              : "📎"}
                       </span>
                       <span className="file-name">{attachment.name}</span>
                     </div>
@@ -908,8 +910,16 @@ const ViewProjectPage = () => {
             <button
               disabled={handleSendMessageLoading}
               onClick={handleSendMessage}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
             >
-              Send Message
+              {handleSendMessageLoading ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  Sending...
+                </>
+              ) : (
+                "Send Message"
+              )}
             </button>
           </div>
         </div>
@@ -1067,12 +1077,12 @@ const ViewProjectPage = () => {
                         {activity.type === "created"
                           ? "➕"
                           : activity.type === "assigned"
-                          ? "👤"
-                          : activity.type === "moved"
-                          ? "🔄"
-                          : activity.type === "completed"
-                          ? "✅"
-                          : "📝"}
+                            ? "👤"
+                            : activity.type === "moved"
+                              ? "🔄"
+                              : activity.type === "completed"
+                                ? "✅"
+                                : "📝"}
                       </div>
                       <div className="activity-content">
                         <div className="activity-description">

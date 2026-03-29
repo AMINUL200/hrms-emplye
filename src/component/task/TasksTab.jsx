@@ -91,7 +91,7 @@ const TasksComponent = ({
                   </div>
                   
                   <div className="task-drag-handle" title="Drag to move">
-                    ⋯⋯
+                    View Details {"->"}
                   </div>
                 </div>
               ))}

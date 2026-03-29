@@ -1067,7 +1067,7 @@
 }
 
 .message-current-user .action-btn {
-  color: rgba(255, 255, 255, 0.9);
+  /* color: rgba(255, 255, 255, 0.9); */
 }
 
 .action-btn:hover {

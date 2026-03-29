@@ -365,7 +365,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
               <FontAwesomeIcon icon={faHeadset} />
             </button>
 
-            <div className="dropdown lang-dropdown">
+            {/* <div className="dropdown lang-dropdown">
               <a className="dropdown-toggle" data-bs-toggle="dropdown">
                 <img
                   src={
@@ -423,7 +423,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                   <img src={deFlag} width={20} alt="" /> &nbsp; German
                 </a>
               </div>
-            </div>
+            </div> */}
 
             {/* Use Notification Component */}
             <NotificationDropdown
