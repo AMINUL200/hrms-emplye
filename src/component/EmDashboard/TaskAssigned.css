@@ -445,15 +445,15 @@
     gap: 16px;
   }
   
-  .task-assigned-premium {
+  /* .task-assigned-premium {
     padding: 20px;
-  }
+  } */
 }
 
 @media (max-width: 768px) {
-  .task-assigned-premium {
+  /* .task-assigned-premium {
     padding: 16px;
-  }
+  } */
   
   .premium-header {
     flex-direction: column;
