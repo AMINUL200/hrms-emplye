@@ -280,13 +280,13 @@
 }
 
 @media (max-width: 767.98px) {
-  .dashboard-page-container {
+  /* .dashboard-page-container {
     padding: 1rem !important;
-  }
+  } */
   
   .dashboard-card {
     min-height: 80px;
-    padding: 1rem;
+    /* padding: 1rem; */
   }
   
   .small-card {

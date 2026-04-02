@@ -170,7 +170,7 @@ const DashboardPage = () => {
   }, [token]);
 
   return (
-    <div className="dashboard-page-container container-fluid p-4 pt-1">
+    <div className="dashboard-page-container container-fluid pt-1">
       {/* Alert Row */}
       {showAlert && (
         <div className="row g-3 mb-3">
