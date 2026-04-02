@@ -17,6 +17,7 @@ import "./DashboardPage.css";
 import EmployeeAttendance from "../Employee Attendance/EmployeeAttendance";
 import EmCalendar from "../../../component/EmDashboard/Calender";
 import Post from "../../../component/posts/Post";
+import TaskAssigned from "../../../component/EmDashboard/TaskAssigned";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -235,7 +236,8 @@ const DashboardPage = () => {
         {/* Right Column: Calendar */}
         <div className="col-12 col-lg-6 d-flex">
           <div className="dashboard-card flex-fill h-100">
-            <EmCalendar />
+            {/* <EmCalendar /> */}
+              <TaskAssigned />
           </div>
         </div>
       </div>

@@ -33,6 +33,8 @@ import AttendanceReport from './pages/employee/Attendance/AttendanceReport';
 import MessageCenter from './pages/employee/message_center/MessageCenter';
 import GuestLoginPage from './pages/Auth/GuestLoginPage';
 import ProfileRouter from './pages/employee/ProfilePage/ProfileRouter';
+import RecentTask from './component/task/RecentTask';
+import EmpAssignedTask from './component/task/EmpAssignedTask';
 
 const App = () => {
 
@@ -77,6 +79,8 @@ const App = () => {
             <Route path="assigned-project" element={<ProtectedRoute><AssignedProject /></ProtectedRoute>} />
             <Route path="assigned-project/:id" element={<ProtectedRoute><ViewProjectPage /></ProtectedRoute>} />
             <Route path="message-center" element={<ProtectedRoute><MessageCenter /></ProtectedRoute>} />
+            <Route path='assigned-task/:id' element={<ProtectedRoute><RecentTask /></ProtectedRoute>} />
+            <Route path='emp-assigned-task/:id' element={<ProtectedRoute><EmpAssignedTask /></ProtectedRoute>} />
           </Route>
 
           {/* Catch-all redirect */}

@@ -7,7 +7,9 @@ import {
   faUser, 
   faTasks,
   faArrowRight,
-  faClock
+  faClock,
+  faPlusCircle,
+  faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -26,7 +28,7 @@ const AssignedProject = () => {
     try {
       setLoading(true);
       const res = await axios.get(`${api_url}/project-list`, {
-        headers: { Authorization: `Bearer ${token}` } ,
+        headers: { Authorization: `Bearer ${token}` },
         params: {
           t: Date.now(), // prevent caching
         },
@@ -34,7 +36,6 @@ const AssignedProject = () => {
       console.log(res.data);
       
       if (res.data.status === 1) {
-
         setProjects(res.data.data);
       } else {
         setError(res.data.message || 'Failed to fetch projects');
@@ -72,6 +73,23 @@ const AssignedProject = () => {
     const deadline = new Date(dateString);
     const diffTime = Math.abs(deadline - today);
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  // Handle assign task click
+  const handleAssignTask = (project, e) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    // Check if user has permission to assign tasks
+    // You can add your permission check logic here
+    const hasPermission = true; // Replace with actual permission check
+    
+    if (hasPermission) {
+      // Navigate to assign task page with project details
+      navigate(`/organization/emp-assigned-task/${project.project_id}`, {
+        state: { project: project }
+      });
+    } else {
+      toast.error("You don't have permission to assign tasks");
+    }
   };
 
   if (loading) {
@@ -131,7 +149,6 @@ const AssignedProject = () => {
     <div className="assigned-projects-container">
       <div className="projects-header">
         <h2>My Projects</h2>
-       
       </div>
       
       <div className="projects-grid">
@@ -146,17 +163,28 @@ const AssignedProject = () => {
           const daysUntilDeadline = hasDeadline ? 
             getDaysUntilDeadline(project.tasks[0].expected_end_date) : null;
           
+          // Check if user has assign permission (you can add logic based on project_role or other conditions)
+          const hasAssignPermission = project.assign_permission === true || project.project_role === 'Manager' || project.project_role === 'Lead';
+          
           return (
             <div
               className="project-card"
               key={project.project_id}
-              onClick={() => navigate(`/organization/assigned-project/${project.project_id}`)}
             >
               <div className="card-header">
                 <span className={`status-badge ${project.project_status}`}>
                   {project.project_status}
                 </span>
                 
+                {/* Assign Task Button */}
+                <button 
+                  className="assign-task-btn"
+                  onClick={(e) => handleAssignTask(project, e)}
+                  title="Assign task to other employees"
+                >
+                  <FontAwesomeIcon icon={faUserPlus} />
+                  <span>Assign Task</span>
+                </button>
               </div>
               
               <div className="card-content">
@@ -202,7 +230,11 @@ const AssignedProject = () => {
                   <FontAwesomeIcon icon={faUser} />
                   <span>Role: <strong>{project.project_role}</strong></span>
                 </div>
-                <div className="view-project">
+                <div 
+                  className="view-project" 
+                  onClick={() => navigate(`/organization/assigned-project/${project.project_id}`)}
+                  style={{cursor:"pointer"}}
+                >
                   <span>View Project</span>
                   <FontAwesomeIcon icon={faArrowRight} />
                 </div>

@@ -52,7 +52,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   overflow: hidden;
-  cursor: pointer;
+  /* cursor: pointer; */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -392,3 +392,104 @@
   }
 }
 
+/* Add these styles to your existing AssignedProject.css */
+
+/* Assign Task Button */
+.assign-task-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.assign-task-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.assign-task-btn svg {
+  font-size: 12px;
+}
+
+/* Optional: Disabled state for assign button */
+.assign-task-btn.disabled,
+.assign-task-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Permission indicator - small badge showing assign permission */
+.permission-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: #fef5e7;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  color: #ed8936;
+  margin-left: 8px;
+}
+
+.permission-badge svg {
+  font-size: 10px;
+}
+
+/* Update card header to accommodate the assign button */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Make status badge and assign button align properly */
+.status-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Responsive adjustments for the assign button */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .assign-task-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+}
+
+/* Optional: Animation for the assign button */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.assign-task-btn:active {
+  transform: scale(0.98);
+}
