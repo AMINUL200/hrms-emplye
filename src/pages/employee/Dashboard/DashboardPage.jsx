@@ -237,7 +237,7 @@ const DashboardPage = () => {
         <div className="col-12 col-lg-6 d-flex">
           <div className="dashboard-card flex-fill h-100">
             {/* <EmCalendar /> */}
-              <TaskAssigned />
+            <TaskAssigned />
           </div>
         </div>
       </div>
@@ -350,13 +350,13 @@ const DashboardPage = () => {
         <div className="col-12 col-md-6 d-flex">
           <div className="dashboard-card h-100 flex-fill d-flex flex-column">
             <div className="d-flex justify-content-between align-items-center post-header mb-3">
-              <h3 className="m-0">Latest Posts</h3>
+              <h3 className="m-0 fs-6 fs-md-5 fs-lg-4">Latest Posts</h3>
               <button
-                className="btn btn-outline d-flex align-items-center gap-2 shadow-sm custom-add-post-btn"
+                className="btn btn-outline d-flex align-items-center gap-2 shadow-sm custom-add-post-btn fs-7 fs-md-6"
                 onClick={() => setShowModal(true)}
               >
                 <FontAwesomeIcon icon={faPlus} />
-                Add Post
+                <span className="d-none d-sm-inline">Add Post</span>
               </button>
             </div>
             <div
