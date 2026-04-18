@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { generateToken } from "../utils/generateToken";
 
 export const AuthContext = createContext();
 
@@ -33,9 +34,17 @@ const AuthContextProvider = (props) => {
 
     setIsLoading(true);
     try {
+      // 🔥 Step 1: Get FCM token first
+      const fcmToken = await generateToken();
+      console.log("Generated FCM Token in loginUser:", fcmToken);
       const response = await axios.post(
         "https://skilledworkerscloud.co.uk/hrms-v2/api/v1/login",
-        { email, password },
+        {
+          email,
+          password,
+          fcm_token: fcmToken, 
+          device_type: "web", 
+        },
       );
 
       console.log(response.data);
@@ -83,8 +92,7 @@ const AuthContextProvider = (props) => {
       if (resData.flag == 1) {
         const tokenFromResponse = resData?.data?.token;
         const userData = resData?.data?.user;
-      
-        
+
         if (tokenFromResponse) {
           setToken(tokenFromResponse);
           localStorage.setItem("token", tokenFromResponse);

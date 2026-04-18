@@ -1,0 +1,106 @@
+.ringtone-selector {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.ringtone-selector.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.ringtone-selector h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0 0 10px 0;
+}
+
+.ringtone-select-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.ringtone-select-wrapper select {
+  width: 100%;
+  padding: 10px 32px 10px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ringtone-select-wrapper select:hover:not(:disabled) {
+  border-color: #f472b6;
+  background: white;
+}
+
+.ringtone-select-wrapper select:focus {
+  outline: none;
+  border-color: #f472b6;
+  box-shadow: 0 0 0 2px rgba(244, 114, 182, 0.1);
+}
+
+.ringtone-select-wrapper::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #9ca3af;
+  pointer-events: none;
+}
+
+.ringtone-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-preview,
+.btn-save {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-preview svg,
+.btn-save svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-preview {
+  background: linear-gradient(135deg, #f97316, #f43f5e);
+  color: white;
+}
+
+.btn-preview:hover {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.btn-save {
+  background: #10b981;
+  color: white;
+}
+
+.btn-save:hover {
+  background: #059669;
+  transform: scale(0.98);
+}

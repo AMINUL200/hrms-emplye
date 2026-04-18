@@ -1,0 +1,55 @@
+
+
+/* Close Button */
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+
+/* Update the modal container to 80% screen size */
+.settings-modal-container {
+  position: relative;
+  width: 40%;
+  max-width: 900px;
+  height: 80vh;
+  max-height: 80vh;
+  background: #f9fafb;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+/* For smaller screens, adjust to 90% */
+@media (max-width: 768px) {
+  .settings-modal-container {
+    width: 40%;
+    height: 85vh;
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-modal-container {
+    width: 95%;
+    height: 90vh;
+    max-height: 90vh;
+  }
+}

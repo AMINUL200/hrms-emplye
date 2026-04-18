@@ -32,7 +32,7 @@ const EmployeeContextProvider = (props) => {
       });
 
       if (res.data.flag === 1 && res.status === 200) {
-        console.log(res.data.data.posts);
+        // console.log(res.data.data.posts);
         setPostsData(res.data.data.posts);
       } else {
         toast.error(res.data.message || "Failed to fetch posts");

@@ -39,7 +39,7 @@ const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
     if (notification.status === 0) {
       try {
         const res = await axios.get(
-          `${api_url}/notification/status/${notification.id}`,
+          `${api_url}/emp-notification/read/${notification.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -1043,7 +1043,7 @@
 /* Modal Box */
 .custom-modal {
     background: #fff;
-    padding: 25px;
+    /* padding: 25px; */
     border-radius: 12px;
     width: 600pxpx;
     max-width: 90%;
@@ -1172,12 +1172,13 @@
 }
 
 /* Modern Gradient Header */
+/* Replace your existing .modal-header-gradient with this */
 .modal-header-gradient {
-    background: linear-gradient(to right, #FF902F, #FC6075);
-    padding: 18px;
-    border-radius: 10px 10px 0 0;
-    color: white;
-    text-align: center;
+  background: linear-gradient(to right, #d7a273, #e58794);
+  padding: 18px;
+  border-radius: 10px 10px 0 0;
+  color: white;
+  text-align: center;
 }
 
 .modal-header-gradient h2 {
@@ -1413,92 +1414,6 @@
 
 .modal-content-body {
     padding: 20px;
-}
-
-/* Ringtone Box Styling */
-.ringtone-box {
-    margin-top: 10px;
-}
-
-.ringtone-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #FC6075;
-    margin-bottom: 15px;
-}
-
-/* Fancy Select Box */
-.select-wrapper {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-.ringtone-select {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 15px;
-    background: #fafafa;
-    outline: none;
-    transition: 0.2s;
-}
-
-.ringtone-select:focus {
-    border-color: #FC6075;
-    box-shadow: 0 0 8px rgba(252, 96, 117, 0.3);
-    background: #fff;
-}
-
-/* Buttons */
-.ringtone-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-.preview-btn,
-.save-btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-/* Preview Button */
-.preview-btn {
-    background: linear-gradient(to right, #FF902F, #FC6075);
-    color: white;
-}
-
-.preview-btn:hover {
-    opacity: 0.9;
-}
-
-/* Save Button */
-.save-btn {
-    background: #4caf50;
-    color: white;
-}
-
-.save-btn:hover {
-    background: #449d48;
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }
 
 

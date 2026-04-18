@@ -164,8 +164,7 @@ const AssignedProject = () => {
             getDaysUntilDeadline(project.tasks[0].expected_end_date) : null;
           
           // Check if user has assign permission (you can add logic based on project_role or other conditions)
-          const hasAssignPermission = project.assign_permission === true || project.project_role === 'Manager' || project.project_role === 'Lead';
-          
+          const hasAssignPermission = project.permission === 'both' || project.permission === 'assign';
           return (
             <div
               className="project-card"
@@ -177,6 +176,7 @@ const AssignedProject = () => {
                 </span>
                 
                 {/* Assign Task Button */}
+                {hasAssignPermission && (
                 <button 
                   className="assign-task-btn"
                   onClick={(e) => handleAssignTask(project, e)}
@@ -185,6 +185,7 @@ const AssignedProject = () => {
                   <FontAwesomeIcon icon={faUserPlus} />
                   <span>Assign Task</span>
                 </button>
+                )}
               </div>
               
               <div className="card-content">

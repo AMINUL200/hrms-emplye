@@ -16,6 +16,7 @@ import {
   faHeadset,
   faPaperclip,
   faSearch,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import BirthdayDropdown from "./BirthdayDropdown";
@@ -24,10 +25,15 @@ import axios from "axios";
 import useNoticeListener from "../../hooks/useNoticeListener";
 import { toast } from "react-toastify";
 import RingtoneSelector from "./RingtoneSelector";
+import { onMessage } from "firebase/messaging";
+import { messaging } from "../../firebase";
+import NotificationSettings from "./NotificationSettings";
+
+// Add this CSS import for modal styles
+import "./NavbarModal.css";
 
 const Navbar = ({ toggleSidebar, isOpen }) => {
   const { logoutUser, data, token } = useContext(AuthContext);
-  console.log("Company Info ::", data);
   const api_url = import.meta.env.VITE_API_URL;
   const storage_url = import.meta.env.VITE_STORAGE_URL;
   const navigate = useNavigate();
@@ -36,8 +42,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
 
   const [showSettings, setShowSettings] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-
-  console.log(localStorage.getItem("selectedRingtone"));
 
   // Support form state
   const [supportForm, setSupportForm] = useState({
@@ -66,14 +70,12 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("File size should be less than 5MB");
         e.target.value = "";
         return;
       }
 
-      // Validate file type
       const allowedTypes = [
         "image/jpeg",
         "image/jpg",
@@ -106,7 +108,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   const handleSupportSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!supportForm.name.trim()) {
       toast.error("Please enter your name");
       return;
@@ -117,7 +118,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       return;
     }
 
-    // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(supportForm.email)) {
       toast.error("Please enter a valid email address");
@@ -128,12 +128,10 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       toast.error("Please enter your message");
       return;
     }
-    console.log(supportForm);
 
     try {
       setIsSubmitting(true);
 
-      // Create FormData object
       const formData = new FormData();
       formData.append("name", supportForm.name);
       formData.append("email", supportForm.email);
@@ -142,19 +140,15 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
         formData.append("image", supportForm.image);
       }
 
-      // Make API call
-      const response = await axios.post(`${api_url}/raise-ticket `, formData, {
+      const response = await axios.post(`${api_url}/raise-ticket`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response);
 
       if (response.data.status === 200) {
         toast.success("Support ticket submitted successfully!");
-
-        // Reset form
         setSupportForm({
           name: "",
           email: "",
@@ -168,17 +162,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       }
     } catch (error) {
       console.error("Support ticket error:", error);
-
-      if (error.response) {
-        // Server responded with error
-        toast.error(error.response.data.message || "Server error occurred");
-      } else if (error.request) {
-        // Request made but no response
-        toast.error("Network error. Please check your connection.");
-      } else {
-        // Something else happened
-        toast.error("An error occurred. Please try again.");
-      }
+      toast.error("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -207,7 +191,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get(`${api_url}/emp-notice`, {
+        const res = await axios.get(`${api_url}/emp-notification/all`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -216,9 +200,10 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
           },
         });
 
-        // Make sure data exists
-        if (res?.data?.status === 1) {
-          setNotifications(res.data.data);
+        console.log("Fetched notifications:", res.data);
+
+        if (res?.data) {
+          setNotifications(res.data);
         }
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
@@ -226,14 +211,14 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     };
 
     fetchNotifications();
-  }, []); // Run once
+  }, []);
 
-  // Listen for live notification
   useNoticeListener(data?.emid, data?.employee_id, (newNotification) => {
-    // Add new notification at top
-    setNotifications((prev) => [newNotification, ...prev]);
-
-    // Optional popup
+    setNotifications((prev) => {
+      const exists = prev.some((n) => n.id === newNotification.id);
+      if (exists) return prev;
+      return [newNotification, ...prev];
+    });
     toast.info("📢 " + newNotification.title);
   });
 
@@ -243,7 +228,16 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     );
   };
 
-  // Sample birthday data - replace with your API data
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Message received. ", payload);
+      toast.info(payload.notification.title + " - " + payload.notification.body);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const [birthdays] = useState([
     {
       id: 1,
@@ -279,23 +273,15 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     i18n.changeLanguage(lang);
   };
 
-  // Helper function to format employee name
-  // Helper function to format user name
   const getFullName = () => {
     if (!data) return "Loading...";
-
-    // ✅ Guest user (has single name field)
     if (data.name) {
       return data.name;
     }
-
-    // ✅ Employee user (has separate fields)
     const { emp_fname, emp_mname, emp_lname } = data;
-
     return [emp_fname, emp_mname, emp_lname].filter(Boolean).join(" ");
   };
 
-  // Helper function to get profile image
   const getProfileImage = () => {
     if (data?.emp_image) {
       return `${storage_url}/${data.emp_image}`;
@@ -303,17 +289,13 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     return "/images/profile.png";
   };
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".notification-dropdown")) {
-        // This will be handled within the NotificationDropdown component
       }
       if (!event.target.closest(".birthday-dropdown")) {
-        // This will be handled within the BirthdayDropdown component
       }
     };
-
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
@@ -322,7 +304,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     <>
       <div className="header">
         <div className="header-left">
-          {/* Logo */}
           <div className="header-log">
             <a href="#" className="logo2">
               <img
@@ -334,7 +315,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
             </a>
           </div>
 
-          {/* Toggle Button */}
           <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar}>
             <span className="bar-icon">
               <span></span>
@@ -344,10 +324,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
           </div>
         </div>
 
-        {/* Right Side Menu */}
         <div className="hed-right">
           <div className="search-info">
-            {/* Settings Icon */}
             <button
               className="notification-btn"
               onClick={() => setShowSettings(true)}
@@ -356,7 +334,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
               <FontAwesomeIcon icon={faGear} />
             </button>
 
-            {/* Customer Support Icon */}
             <button
               className="notification-btn"
               onClick={() => setShowSupport(true)}
@@ -365,86 +342,22 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
               <FontAwesomeIcon icon={faHeadset} />
             </button>
 
-            {/* <div className="dropdown lang-dropdown">
-              <a className="dropdown-toggle" data-bs-toggle="dropdown">
-                <img
-                  src={
-                    i18n.language === "en"
-                      ? usFlag
-                      : i18n.language === "fr"
-                        ? frFlag
-                        : i18n.language === "es"
-                          ? esFlag
-                          : deFlag
-                  }
-                  width={20}
-                  alt=""
-                />
-                &nbsp;
-                <span>
-                  {i18n.language === "en"
-                    ? "English"
-                    : i18n.language === "fr"
-                      ? "French"
-                      : i18n.language === "es"
-                        ? "Spanish"
-                        : "German"}
-                </span>
-              </a>
-              <div className="dropdown-menu dropdown-menu-end">
-                <a
-                  className="dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                  style={{ color: "black" }}
-                  onClick={() => changeLanguage("en")}
-                >
-                  <img src={usFlag} width={20} alt="" />
-                  &nbsp; English
-                </a>
-                <a
-                  href=""
-                  className="dropdown-item"
-                  onClick={() => changeLanguage("fr")}
-                >
-                  <img src={frFlag} width={20} alt="" /> &nbsp; French
-                </a>
-                <a
-                  href=""
-                  className="dropdown-item"
-                  onClick={() => changeLanguage("es")}
-                >
-                  <img src={esFlag} width={20} alt="" /> &nbsp; Spanish
-                </a>
-                <a
-                  href=""
-                  className="dropdown-item"
-                  onClick={() => changeLanguage("de")}
-                >
-                  <img src={deFlag} width={20} alt="" /> &nbsp; German
-                </a>
-              </div>
-            </div> */}
-
-            {/* Use Notification Component */}
             <NotificationDropdown
               notifications={notifications}
               onStatusUpdate={updateStatus}
             />
 
-            {/* Use Birthday Component */}
             <BirthdayDropdown birthdays={birthdays} />
           </div>
 
           <div className="header-profile">
             <div className="dropdown mobile-user-menu">
-              {/* Entire profile trigger area */}
               <a
                 href="#"
                 className="nav-link dropdown-toggle d-flex align-items-center"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {/* Profile Image */}
                 <div className="user-img-wrapper me-2">
                   <img
                     src={getProfileImage()}
@@ -453,28 +366,23 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                   />
                 </div>
 
-                {/* User Name */}
                 <div className="user-name">
                   <span>{getFullName()}</span>
                 </div>
 
-                {/* Icon */}
                 <div className="icon">
                   <FontAwesomeIcon icon={faEllipsisVertical} />
                 </div>
               </a>
 
-              {/* Dropdown Menu */}
               <div className="dropdown-menu dropdown-menu-right">
-               
-                  <Link
-                    className="dropdown-item"
-                    // onClick={() => navigate("/profile")}
-                    to="/organization/employerprofile"
-                  >
-                    Profile
-                  </Link>
-               
+                <Link
+                  className="dropdown-item"
+                  to="/organization/employerprofile"
+                >
+                  Profile
+                </Link>
+
                 <a className="dropdown-item" onClick={logoutUser}>
                   Logout
                 </a>
@@ -484,34 +392,37 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
         </div>
       </div>
 
+      {/* Settings Modal with Notification Settings */}
       {showSettings && (
         <div
-          className="custom-modal-overlay"
+          className="custom-modal-overlay settings-modal-overlay"
           onClick={() => setShowSettings(false)}
         >
           <div
-            className="custom-modal settings-modal"
+            className="custom-modal settings-modal-container"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header-gradient">
-              <h2>Settings</h2>
-              <p>Customize your notification preferences</p>
+            <div className="modal-header-gradient settings-header">
+              <div className="header-content">
+                <h2>Settings</h2>
+                <p>Customize your notification preferences</p>
+              </div>
+              <button 
+                className="modal-close-btn"
+                onClick={() => setShowSettings(false)}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
 
-            <div className="modal-content-body">
-              <RingtoneSelector />
+            <div className="modal-content-body settings-content">
+              <NotificationSettings />
             </div>
-
-            <button
-              className="close-btn-modern"
-              onClick={() => setShowSettings(false)}
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
 
+      {/* Support Modal */}
       {showSupport && (
         <div
           className="custom-modal-overlay"
@@ -521,18 +432,21 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
             className="custom-modal support-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="modal-header-gradient">
               <h2>Customer Support</h2>
               <p>Submit your issue and our team will contact you soon.</p>
+              <button 
+                className="modal-close-btn"
+                onClick={handleCloseSupport}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
 
-            {/* Modern Form */}
             <form
-              className="support-form-modern "
+              className="support-form-modern"
               onSubmit={handleSupportSubmit}
             >
-              {/* Name + Email Row */}
               <div className="two-column-row">
                 <div className="input-group">
                   <label>Full Name</label>
@@ -559,7 +473,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 </div>
               </div>
 
-              {/* Message */}
               <div className="input-group">
                 <label>Message</label>
                 <textarea
@@ -572,10 +485,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 ></textarea>
               </div>
 
-              {/* Attach File */}
               <div className="input-group">
                 <label>Attach File (Optional): </label>
-
                 <div className="file-upload-box">
                   <input
                     type="file"
@@ -588,15 +499,13 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                     <span className="file-text">Choose File</span>
                   </label>
                 </div>
-
                 <small className="file-note">
                   Allowed: JPG, PNG, PDF, DOC, DOCX (Max: 5MB)
                 </small>
               </div>
-              {/* File Preview */}
+
               {fileName && (
                 <div className="file-preview-box">
-                  {/* If Image Preview */}
                   {supportForm.image?.type.startsWith("image/") ? (
                     <img
                       src={URL.createObjectURL(supportForm.image)}
@@ -608,10 +517,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                       <FontAwesomeIcon icon={faPaperclip} />
                     </div>
                   )}
-
                   <div className="file-preview-info">
                     <p className="file-preview-name">{fileName}</p>
-
                     <button
                       type="button"
                       className="remove-file-btn"
@@ -624,7 +531,6 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
               )}
 
               <div className="two-column-row">
-                {/* Submit Button */}
                 <button
                   type="submit"
                   className="submit-btn-modern"

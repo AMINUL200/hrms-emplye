@@ -1,59 +1,57 @@
 import { useEffect, useRef } from "react";
-import Pusher from "pusher-js";
+import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
+import { db } from "../firebase";
 
 export default function useNoticeListener(emid, employeeId, onMessage) {
   const audioRef = useRef(null);
-
-  const PUSHER_KEY = import.meta.env.VITE_PUSHER_KEY;
-const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_CLUSTER;
+  const processedIds = useRef(new Set());
+  const initialLoadComplete = useRef(false);
 
   useEffect(() => {
     if (!emid || !employeeId) return;
 
-    // Initialize reusable audio object
-    audioRef.current = new Audio();
-    audioRef.current.volume = 1;
+    audioRef.current = new Audio("/sounds/notification.mp3");
 
     const playSound = () => {
-      const ringtone =
-        localStorage.getItem("selectedRingtone") ||
-        "/public/sounds/Doraemon Notification Ringtone Download - MobCup.Com.Co.mp3";
-
-      audioRef.current.src = ringtone;
       audioRef.current.currentTime = 0;
-
-      audioRef.current
-        .play()
-        .catch((err) => console.warn("Audio play blocked:", err));
+      audioRef.current.play().catch(() => {});
     };
 
-    const pusher = new Pusher(PUSHER_KEY, {
-      cluster: PUSHER_CLUSTER,
-      forceTLS: true,
+    const q = query(
+      collection(db, "notifications"),
+      where("emid", "==", emid),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Skip initial load
+      if (!initialLoadComplete.current) {
+        initialLoadComplete.current = true;
+        return;
+      }
+
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = {
+            id: change.doc.id,
+            ...change.doc.data(),
+          };
+
+          // Skip duplicate
+          if (processedIds.current.has(data.id)) return;
+
+          console.log("✅ NEW NOTIFICATION:", data);
+
+          if (data.target === "all" || data.employeeId === employeeId) {
+            playSound();
+            onMessage?.(data);
+            processedIds.current.add(data.id);
+          }
+        }
+      });
     });
 
-    // ORG channel
-    const orgChannel = `notice-channel.${emid}.all`;
-    const chOrg = pusher.subscribe(orgChannel);
-
-    chOrg.bind("notice-live", (data) => {
-      playSound();
-      onMessage?.(data.notification);
-    });
-
-    // EMP channel
-    const empChannel = `notice-channel.${emid}.${employeeId}`;
-    const chEmp = pusher.subscribe(empChannel);
-
-    chEmp.bind("notice-live", (data) => {
-      playSound();
-      onMessage?.(data.notification);
-    });
-
-    return () => {
-      pusher.unsubscribe(orgChannel);
-      pusher.unsubscribe(empChannel);
-      pusher.disconnect();
-    };
+    return () => unsubscribe();
   }, [emid, employeeId, onMessage]);
 }

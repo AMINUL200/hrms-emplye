@@ -1,126 +1,157 @@
-import React, { useContext, useState } from 'react';
-import { logo2, car1, car2, car3 } from '../../assets';
-import DotLoader from '../../component/common/DotLoader';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEyeSlash, faEye, faUserFriends } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
-import Carousel from '../../component/common/Carousel';
-import { AuthContext } from '../../context/AuthContex';
+import React, { useContext, useEffect, useState } from "react";
+import { logo2, car1, car2, car3 } from "../../assets";
+import DotLoader from "../../component/common/DotLoader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEyeSlash,
+  faEye,
+  faUserFriends,
+} from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
+import Carousel from "../../component/common/Carousel";
+import { AuthContext } from "../../context/AuthContex";
+import { generateToken } from "../../utils/generateToken";
 
 const LoginPage = () => {
-	const { loginUser, isLoading } = useContext(AuthContext);
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const [toggle, setToggle] = useState(false);
+  const { loginUser, isLoading } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [toggle, setToggle] = useState(false);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    await loginUser(email, password);
+  };
+//   useEffect(() => {
+// 	console.log("Generating FCM token...");
+//     generateToken(a);
+//   }, []);
 
-	const handleLogin = async (e) => {
-		e.preventDefault();
-		await loginUser(email, password);
-	};
+  return (
+    <div className="main-wrapper">
+      <div className="account-content">
+        <div className="container">
+          <div className="row">
+            {/* Left side - Carousel */}
+            <div className="col-md-6  p-0">
+              <Carousel img1={car1} img2={car2} img3={car3} />
+            </div>
 
-	return (
-		<div className="main-wrapper">
-			<div className="account-content">
-				<div className="container">
-					<div className="row">
+            {/* Right side - Login form */}
+            <div className="col-md-6 login-form-wrapper">
+              <div className="account-details">
+                {/* <!-- Account Logo --> */}
+                <div className="account-logo">
+                  <img
+                    src={logo2}
+                    alt="Dreamguy's Technologies"
+                    className="login-logo"
+                  />
+                </div>
+                {/* <!-- /Account Logo --> */}
 
+                {/* <!-- Account Form --> */}
+                <div className="account-box">
+                  <div className="account-wrapper">
+                    <h3 className="account-title">Login</h3>
+                    <p className="account-subtitle">Access to our dashboard</p>
 
-						{/* Left side - Carousel */}
-						<div className="col-md-6  p-0">
-							<Carousel img1={car1} img2={car2} img3={car3} />
-						</div>
+                    <form onSubmit={handleLogin}>
+                      <div className="input-block mb-4">
+                        <label className="col-form-label">Email Address</label>
+                        <input
+                          className="form-control"
+                          type="mail"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          placeholder="Enter your Email.."
+                        />
+                      </div>
+                      <div className="input-block mb-4">
+                        <div className="row align-items-center">
+                          <div className="col">
+                            <label className="col-form-label">Password</label>
+                          </div>
+                        </div>
+                        <div className="position-relative">
+                          <input
+                            className="form-control"
+                            type={toggle ? "text" : "password"}
+                            value={password}
+                            id="password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder="Enter your Password"
+                          />
+                          <span
+                            className="toggle-icon"
+                            onClick={() => setToggle(!toggle)}
+                          >
+                            <FontAwesomeIcon
+                              icon={toggle ? faEye : faEyeSlash}
+                            />
+                          </span>
+                        </div>
 
-						{/* Right side - Login form */}
-						<div className="col-md-6 login-form-wrapper">
+                        <div className="forgot-block text-right mt-2">
+                          <a className="text-muted" href="forgot-password.html">
+                            Forgot password?
+                          </a>
+                        </div>
+                      </div>
+                      <div className="input-block mb-4 text-center">
+                        <button
+                          className={` account-btn ${isLoading ? "disable-btn" : ""}`}
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <DotLoader /> : "Login"}
+                        </button>
+                      </div>
 
-							<div className='account-details'>
-								{/* <!-- Account Logo --> */}
-								<div className="account-logo">
-									<img src={logo2} alt="Dreamguy's Technologies" className="login-logo" />
-								</div>
-								{/* <!-- /Account Logo --> */}
+                      {/* Add Guest Login Option Here */}
+                      <div className="guest-login-option text-center mb-4">
+                        <p
+                          className="text-muted mb-2"
+                          style={{ fontSize: "14px" }}
+                        >
+                          <FontAwesomeIcon
+                            icon={faUserFriends}
+                            className="me-2"
+                          />
+                          Just want to explore?
+                          <Link
+                            to="/guest-login"
+                            className="ms-1"
+                            style={{
+                              color: "#FF902F",
+                              fontWeight: "600",
+                              textDecoration: "none",
+                            }}
+                          >
+                            Login as Guest
+                          </Link>
+                        </p>
+                      </div>
 
-								{/* <!-- Account Form --> */}
-								<div className="account-box">
-									<div className="account-wrapper">
-										<h3 className="account-title">Login</h3>
-										<p className="account-subtitle">Access to our dashboard</p>
-
-
-										<form onSubmit={handleLogin}>
-											<div className="input-block mb-4">
-												<label className="col-form-label">Email Address</label>
-												<input className="form-control" type="mail" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder='Enter your Email..' />
-											</div>
-											<div className="input-block mb-4">
-												<div className="row align-items-center">
-													<div className="col">
-														<label className="col-form-label">Password</label>
-													</div>
-
-												</div>
-												<div className="position-relative">
-													<input className="form-control" type={toggle ? 'text' : 'password'} value={password} id="password" onChange={(e) => setPassword(e.target.value)} required placeholder='Enter your Password' />
-													<span className='toggle-icon'
-														onClick={() => setToggle(!toggle)}
-													>
-														<FontAwesomeIcon icon={toggle ? faEye : faEyeSlash} />
-													</span>
-												</div>
-
-												<div className="forgot-block text-right mt-2">
-													<a className="text-muted" href="forgot-password.html">
-														Forgot password?
-													</a>
-												</div>
-											</div>
-											<div className="input-block mb-4 text-center">
-												<button
-													className={` account-btn ${isLoading ? 'disable-btn' : ''}`}
-													type="submit"
-													disabled={isLoading}
-												>
-													{isLoading ? <DotLoader /> : "Login"}
-												</button>
-											</div>
-											
-											{/* Add Guest Login Option Here */}
-											<div className="guest-login-option text-center mb-4">
-												<p className="text-muted mb-2" style={{ fontSize: '14px' }}>
-													<FontAwesomeIcon icon={faUserFriends} className="me-2" />
-													Just want to explore? 
-													<Link 
-														to="/guest-login" 
-														className="ms-1" 
-														style={{
-															color: '#FF902F', 
-															fontWeight: '600',
-															textDecoration: 'none'
-														}}
-													>
-														Login as Guest
-													</Link>
-												</p>
-											</div>
-											
-											<div className="account-footer">
-												<p>Don't have an account yet? <Link to="/register">Register</Link></p>
-											</div>
-										</form>
-										{/* <!-- /Account Form --> */}
-
-
-									</div>
-								</div>
-							</div>
-
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+                      <div className="account-footer">
+                        <p>
+                          Don't have an account yet?{" "}
+                          <Link to="/register">Register</Link>
+                        </p>
+                      </div>
+                    </form>
+                    {/* <!-- /Account Form --> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default LoginPage;
