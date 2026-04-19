@@ -6,10 +6,10 @@ importScripts(
 );
 
 firebase.initializeApp({
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyB46Sz62UYBgx7xv8dhyYxeQ-Yyd0r6c_s",
+  projectId: "sponic-hr",
+  messagingSenderId: "G-R4KQ5VK9FW",
+  appId: "1:381369065854:web:485a01dfa1bd884db2132f",
 });
 
 const messaging = firebase.messaging();
