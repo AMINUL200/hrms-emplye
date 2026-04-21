@@ -6,17 +6,17 @@ import { AuthContext } from "../../context/AuthContex";
 
 const NotificationSettings = () => {
   const [muteAll, setMuteAll] = useState(false);
-   const { token } = useContext(AuthContext);
-   const api_url = import.meta.env.VITE_API_URL;
-  
+  const { token } = useContext(AuthContext);
+  const api_url = import.meta.env.VITE_API_URL;
+
   // API States
   const [notificationTypes, setNotificationTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
-  
+
   // Alert Tone States (Static)
   const [alertTone, setAlertTone] = useState("Default");
-  
+
   // Quiet Hours State
   const [quietHours, setQuietHours] = useState(false);
   const [quietStart, setQuietStart] = useState("22:00");
@@ -33,81 +33,129 @@ const NotificationSettings = () => {
   const fetchNotificationSettings = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${api_url}/emp-notification/modules`,{
+      const response = await axios.get(`${api_url}/emp-notification/modules`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       setNotificationTypes(response.data);
-      console.log('Fetched notification settings:', response.data);
+      console.log("Fetched notification settings:", response.data);
     } catch (error) {
-      console.error('Error fetching notification settings:', error);
+      console.error("Error fetching notification settings:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to update notification mute status
-  const updateNotificationMuteStatus = async (id, isEnabled) => {
-    setUpdatingId(id);
+  // Function to update notification mute status for single or multiple modules
+  const updateNotificationMuteStatus = async (moduleIds, isEnabled) => {
+    setUpdatingId(moduleIds.length === 1 ? moduleIds[0] : "multiple");
     try {
       const response = await axios.put(
-        `${api_url}/emp-notification/is-muted/${id}`,{},
+        `${api_url}/emp-notification/is-muted`,
+        { module_id: moduleIds },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
 
       if (response.status === 200) {
-        // Update local state
-        setNotificationTypes(prevTypes =>
-          prevTypes.map(notification =>
-            notification.id === id
+        // Update local state based on the modules updated
+        setNotificationTypes((prevTypes) =>
+          prevTypes.map((notification) =>
+            moduleIds.includes(notification.id)
               ? { ...notification, is_enabled: isEnabled ? 1 : 0 }
-              : notification
-          )
+              : notification,
+          ),
         );
+        return true;
       }
+      return false;
     } catch (error) {
-      console.error('Error updating notification mute status:', error);
-      alert('Failed to update notification setting. Please try again.');
+      console.error("Error updating notification mute status:", error);
+      alert("Failed to update notification setting. Please try again.");
+      return false;
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // Handle toggle for API-based notifications
-  const handleNotificationToggle = (id, currentStatus) => {
-    updateNotificationMuteStatus(id, !currentStatus);
+  // Handle toggle for individual notification
+  const handleNotificationToggle = async (id, currentStatus) => {
+    // Toggle the status
+    const newStatus = !currentStatus;
+    await updateNotificationMuteStatus([id], newStatus);
+  };
+
+  // Handle Mute All toggle
+  const handleMuteAllToggle = async () => {
+    const newMuteAllStatus = !muteAll;
+    setMuteAll(newMuteAllStatus);
+
+    // Filter IDs based on current state
+    const filteredModuleIds = notificationTypes
+      .filter(
+        (notification) =>
+          newMuteAllStatus
+            ? notification.is_enabled === 1 // mute → only enabled
+            : notification.is_enabled === 0, // unmute → only disabled
+      )
+      .map((notification) => notification.id);
+
+    console.log("Filtered IDs:", filteredModuleIds);
+0
+    // If nothing to update, skip API call
+    if (filteredModuleIds.length === 0) return;
+
+    await updateNotificationMuteStatus(filteredModuleIds, !newMuteAllStatus);
   };
 
   // Get icon based on notification name
   const getNotificationIcon = (name) => {
     const icons = {
-      'BIRTHDAY': '🎂',
-      'HOLIDAY': '🏖️',
-      'VISA_EXPIRY': '📄',
-      'PASSPORT_EXPIRY': '🛂',
-      'DBS_EXPIRY': '✅',
-      'EUSS_EXPIRY': '🇪🇺'
+      BIRTHDAY: "🎂",
+      HOLIDAY: "🏖️",
+      VISA_EXPIRY: "📄",
+      PASSPORT_EXPIRY: "🛂",
+      DBS_EXPIRY: "✅",
+      EUSS_EXPIRY: "🇪🇺",
     };
-    return icons[name] || '🔔';
+    return icons[name] || "🔔";
   };
 
   // Get description based on notification name
   const getNotificationDescription = (name) => {
     const descriptions = {
-      'BIRTHDAY': 'Get notified about team member birthdays',
-      'HOLIDAY': 'Receive updates about company holidays',
-      'VISA_EXPIRY': 'Alerts when visas are about to expire',
-      'PASSPORT_EXPIRY': 'Notifications for passport expiration dates',
-      'DBS_EXPIRY': 'Updates about DBS certificate expiry',
-      'EUSS_EXPIRY': 'EU Settlement Scheme expiry reminders'
+      BIRTHDAY: "Get notified about team member birthdays",
+      HOLIDAY: "Receive updates about company holidays",
+      VISA_EXPIRY: "Alerts when visas are about to expire",
+      PASSPORT_EXPIRY: "Notifications for passport expiration dates",
+      DBS_EXPIRY: "Updates about DBS certificate expiry",
+      EUSS_EXPIRY: "EU Settlement Scheme expiry reminders",
     };
-    return descriptions[name] || `Manage ${name.toLowerCase().replace('_', ' ')} notifications`;
+    return (
+      descriptions[name] ||
+      `Manage ${name.toLowerCase().replace("_", " ")} notifications`
+    );
   };
+
+  // Check if all notifications are muted (for initial muteAll state)
+  const checkIfAllMuted = () => {
+    if (notificationTypes.length === 0) return false;
+    return notificationTypes.every(
+      (notification) => notification.is_enabled === 0,
+    );
+  };
+
+  // Update muteAll state when notificationTypes change
+  useEffect(() => {
+    if (notificationTypes.length > 0) {
+      const allMuted = checkIfAllMuted();
+      setMuteAll(allMuted);
+    }
+  }, [notificationTypes]);
 
   return (
     <div className="notif-settings-popup">
@@ -122,8 +170,8 @@ const NotificationSettings = () => {
             </div>
             <button
               className={`toggle-switch ${muteAll ? "active" : ""}`}
-              onClick={() => setMuteAll(!muteAll)}
-              disabled={loading}
+              onClick={handleMuteAllToggle}
+              disabled={loading || notificationTypes.length === 0}
             >
               <span className="toggle-slider"></span>
             </button>
@@ -134,7 +182,7 @@ const NotificationSettings = () => {
         <div className={`notif-card ${muteAll ? "muted" : ""}`}>
           <div className="setting-group">
             <h4>Notification Types</h4>
-            
+
             {loading && notificationTypes.length === 0 ? (
               <div className="loading-state">
                 <p>Loading notification settings...</p>
@@ -148,7 +196,7 @@ const NotificationSettings = () => {
                         {getNotificationIcon(notification.name)}
                       </span>
                       <span className="setting-label">
-                        {notification.name.replace(/_/g, ' ').toLowerCase()}
+                        {notification.name.replace(/_/g, " ").toLowerCase()}
                       </span>
                     </div>
                     <p className="setting-sub">
@@ -157,11 +205,15 @@ const NotificationSettings = () => {
                   </div>
                   <button
                     className={`toggle-switch small ${notification.is_enabled === 1 ? "active" : ""}`}
-                    onClick={() => handleNotificationToggle(
-                      notification.id, 
-                      notification.is_enabled === 1
-                    )}
-                    disabled={muteAll || updatingId === notification.id}
+                    onClick={() =>
+                      handleNotificationToggle(
+                        notification.id,
+                        notification.is_enabled === 1,
+                      )
+                    }
+                    disabled={
+                      muteAll || updatingId === notification.id || loading
+                    }
                   >
                     <span className="toggle-slider"></span>
                   </button>
@@ -173,15 +225,11 @@ const NotificationSettings = () => {
           {/* Alert Tone Selection (Static) */}
           <RingtoneSelector disabled={muteAll} />
         </div>
-
-       
       </div>
 
       {/* Status Toast */}
       {muteAll && (
-        <div className="mute-toast-popup">
-          All notifications are muted
-        </div>
+        <div className="mute-toast-popup">All notifications are muted</div>
       )}
 
       {/* Loading Overlay for individual updates */}

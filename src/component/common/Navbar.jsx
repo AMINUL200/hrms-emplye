@@ -187,31 +187,44 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     setFileName("");
     setShowSupport(false);
   };
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(`${api_url}/emp-notification/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          t: Date.now(),
+        },
+      });
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await axios.get(`${api_url}/emp-notification/all`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            t: Date.now(),
-          },
-        });
+      console.log("Fetched notifications:", res.data);
 
-        console.log("Fetched notifications:", res.data);
-
-        if (res?.data) {
-          setNotifications(res.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
+      if (res?.data) {
+        setNotifications(res.data);
       }
-    };
-
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
+  useEffect(() => {
     fetchNotifications();
   }, []);
+
+  const playNotificationSound = () => {
+    let selectedTone = localStorage.getItem("selectedRingtone");
+
+    // fallback to default if not set
+    if (!selectedTone) {
+      selectedTone =
+        "/sounds/Doraemon Notification Ringtone Download - MobCup.Com.Co.mp3";
+    }
+
+    const audio = new Audio(selectedTone);
+    audio.play().catch((err) => {
+      console.warn("Audio play blocked:", err);
+    });
+  };
 
   useNoticeListener(data?.emid, data?.employee_id, (newNotification) => {
     setNotifications((prev) => {
@@ -219,6 +232,8 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       if (exists) return prev;
       return [newNotification, ...prev];
     });
+    console.log("Ringtone should play for notification:", newNotification);
+    playNotificationSound();
     toast.info("📢 " + newNotification.title);
   });
 
@@ -231,7 +246,9 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   useEffect(() => {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log("Message received. ", payload);
-      toast.info(payload.notification.title + " - " + payload.notification.body);
+      toast.info(
+        payload.notification.title + " - " + payload.notification.body,
+      );
     });
     return () => {
       unsubscribe();
@@ -345,9 +362,10 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
             <NotificationDropdown
               notifications={notifications}
               onStatusUpdate={updateStatus}
+              refreshNotifications={fetchNotifications}
             />
 
-            <BirthdayDropdown birthdays={birthdays} />
+            {/* <BirthdayDropdown birthdays={birthdays} /> */}
           </div>
 
           <div className="header-profile">
@@ -407,7 +425,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 <h2>Settings</h2>
                 <p>Customize your notification preferences</p>
               </div>
-              <button 
+              <button
                 className="modal-close-btn"
                 onClick={() => setShowSettings(false)}
               >
@@ -435,10 +453,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
             <div className="modal-header-gradient">
               <h2>Customer Support</h2>
               <p>Submit your issue and our team will contact you soon.</p>
-              <button 
-                className="modal-close-btn"
-                onClick={handleCloseSupport}
-              >
+              <button className="modal-close-btn" onClick={handleCloseSupport}>
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>

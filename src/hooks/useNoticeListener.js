@@ -1,5 +1,12 @@
 import { useEffect, useRef } from "react";
-import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function useNoticeListener(emid, employeeId, onMessage) {
@@ -9,6 +16,8 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
 
   useEffect(() => {
     if (!emid || !employeeId) return;
+
+    console.log("🚀 Listener start:", emid, employeeId); // ✅ ADD HERE
 
     audioRef.current = new Audio("/sounds/notification.mp3");
 
@@ -21,15 +30,13 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
       collection(db, "notifications"),
       where("emid", "==", emid),
       orderBy("createdAt", "desc"),
-      limit(20)
+      limit(20),
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      // Skip initial load
-      if (!initialLoadComplete.current) {
-        initialLoadComplete.current = true;
-        return;
-      }
+      // ✅ ADD THESE LOGS HERE
+      console.log("📦 Snapshot size:", snapshot.size);
+      console.log("🔄 Changes:", snapshot.docChanges());
 
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
@@ -38,8 +45,14 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
             ...change.doc.data(),
           };
 
-          // Skip duplicate
+          console.log("👉 Incoming data:", data); // ✅ DEBUG
+
           if (processedIds.current.has(data.id)) return;
+
+          if (!initialLoadComplete.current) {
+            processedIds.current.add(data.id);
+            return;
+          }
 
           console.log("✅ NEW NOTIFICATION:", data);
 
@@ -50,6 +63,8 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
           }
         }
       });
+
+      initialLoadComplete.current = true;
     });
 
     return () => unsubscribe();

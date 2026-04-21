@@ -4,7 +4,11 @@ import { faBell, faEye } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContex";
 
-const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
+const NotificationDropdown = ({
+  notifications,
+  onStatusUpdate,
+  refreshNotifications,
+}) => {
   const { token } = useContext(AuthContext);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -25,7 +29,7 @@ const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
   };
 
   const unreadNotificationCount = notifications.filter(
-    (n) => n.status === 0
+    (n) => n.status === 0,
   ).length;
 
   const toggleNotifications = () => {
@@ -36,20 +40,26 @@ const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
     setSelectedNotification(notification);
     setShowNotifications(false);
 
-    if (notification.status === 0) {
-      try {
-        const res = await axios.get(
-          `${api_url}/emp-notification/read/${notification.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+    // if (notification.is_read === 0) {
+    console.log("🔔 Marking as read:", notification.id); // ✅ DEBUG
+    try {
+      const res = await axios.put(
+        `${api_url}/emp-notification/read/${notification.id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
-        onStatusUpdate(notification.id); // update parent state
-      } catch (error) {
-        console.error("Status update failed", error);
-      }
+      // ✅ update local UI immediately
+      onStatusUpdate(notification.id);
+
+      // ✅ THEN refresh from backend
+      await refreshNotifications(); // update parent state
+    } catch (error) {
+      console.error("Status update failed", error);
     }
+    // }
   };
 
   // Close dropdown when clicking outside
@@ -71,7 +81,9 @@ const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
         <button className="notification-btn" onClick={toggleNotifications}>
           <FontAwesomeIcon icon={faBell} />
           {unreadNotificationCount > 0 && (
-            <span className="notification-badge">{unreadNotificationCount}</span>
+            <span className="notification-badge">
+              {unreadNotificationCount}
+            </span>
           )}
         </button>
 
@@ -90,7 +102,7 @@ const NotificationDropdown = ({ notifications, onStatusUpdate }) => {
                   className={`notification-item ${notification.status === 0 ? "unread" : ""}`}
                 >
                   {/* 🔴 Unread Dot LEFT SIDE */}
-                  {notification.status === 0 && (
+                  {notification.is_read === 0 && (
                     <div className="unread-dot-left"></div>
                   )}
 
