@@ -708,3 +708,317 @@
     margin-top: 0;
   }
 }
+
+
+/* Loading and Error States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  font-size: 3rem;
+  color: #4299e1;
+  margin-bottom: 1rem;
+}
+
+.loading-container p {
+  color: #718096;
+  font-size: 1rem;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+  margin: 2rem;
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: #e53e3e;
+  margin-bottom: 1rem;
+}
+
+.error-container h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.error-container p {
+  color: #718096;
+  margin-bottom: 1.5rem;
+}
+
+.retry-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+/* No Modules State */
+.no-modules-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+  margin: 2rem auto;
+  max-width: 500px;
+}
+
+.no-modules-icon {
+  font-size: 4rem;
+  color: #cbd5e0;
+  margin-bottom: 1rem;
+}
+
+.no-modules-container h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.no-modules-container p {
+  color: #718096;
+  margin-bottom: 1.5rem;
+}
+
+/* Module Order Badge */
+.module-order {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #edf2f7;
+  color: #4a5568;
+}
+
+/* Progress Bar Styles (if not already present) */
+.module-progress {
+  margin: 1rem 0;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: #4a5568;
+}
+
+.progress-percentage {
+  font-weight: 600;
+  color: #4299e1;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #edf2f7;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.low {
+  background-color: #f56565;
+}
+
+.progress-fill.medium {
+  background-color: #ecc94b;
+}
+
+.progress-fill.high {
+  background-color: #48bb78;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .error-container,
+  .no-modules-container {
+    margin: 1rem;
+    padding: 2rem 1rem;
+  }
+  
+  .loading-spinner {
+    font-size: 2rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Module Actions Container */
+.module-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Three Dots Menu Button */
+.menu-trigger-btn {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #718096;
+  transition: all 0.2s ease;
+}
+
+.menu-trigger-btn:hover {
+  background-color: #f7fafc;
+  color: #4a5568;
+}
+
+/* Dropdown Menu Container */
+.module-menu-container {
+  position: relative;
+}
+
+/* Dropdown Menu */
+.module-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Menu Items */
+.assigned-module-container .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: #4a5568;
+}
+
+/* .menu-item:hover {
+  background-color: #f7fafc;
+} */
+
+.menu-item svg {
+  font-size: 14px;
+  width: 16px;
+}
+
+.edit-item {
+  color: #4299e1;
+}
+
+.edit-item:hover {
+  background-color: #ebf8ff;
+}
+
+.delete-item {
+  color: #e53e3e;
+}
+
+.delete-item:hover {
+  background-color: #fff5f5;
+}
+
+/* Disabled Card */
+.disabled-card {
+  opacity: 0.7;
+  cursor: default !important;
+}
+
+.disabled-card:hover {
+  transform: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Update module-card-header to accommodate new structure */
+.module-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .module-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .assign-employee-btn {
+    flex: 1;
+  }
+  
+  .module-dropdown-menu {
+    position: fixed;
+    top: auto;
+    right: 16px;
+    left: 16px;
+    width: calc(100% - 32px);
+    min-width: auto;
+  }
+}

@@ -1,0 +1,366 @@
+/* EmpPermissionList.css - Permission List Styles */
+
+.emp-permission-list-container {
+  padding: 24px;
+  background: #ffffff;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header Section */
+.permission-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.permission-list-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.permission-list-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Controls Section */
+.permission-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #FF902F;
+  box-shadow: 0 0 0 2px rgba(255, 144, 47, 0.1);
+}
+
+.per-page-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.per-page-dropdown {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.per-page-dropdown:focus {
+  outline: none;
+  border-color: #FF902F;
+}
+
+/* Table Styles */
+.permission-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+}
+
+.permission-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.permission-table thead {
+  background: #adadadff;
+}
+
+.permission-table th {
+  padding: 12px 16px;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid #8e8d8dff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.permission-table td {
+  padding: 12px 16px;
+  border: 1px solid #8e8d8dff;
+  color: #6b7280;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.permission-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Column Widths */
+.col-sno {
+  width: 70px;
+  text-align: center;
+}
+
+.col-role {
+  width: 15%;
+}
+
+.col-permissions {
+  width: 50%;
+}
+
+.col-count {
+  width: 15%;
+  text-align: center;
+}
+
+.col-created {
+  width: 15%;
+  text-align: center;
+}
+
+/* Role Badge */
+.role-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  /* background: #FF902F; */
+  /* color: white; */
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Permissions List Cell */
+.permissions-list-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.permission-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.permission-tag:hover {
+  /* background: #FF902F; */
+  /* color: white; */
+  border-color: #FF902F;
+  transform: translateY(-1px);
+}
+
+/* Permission Count Badge */
+.permission-count-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 16px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #FF902F;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* No Data State */
+.no-data {
+  text-align: center;
+  padding: 60px 20px !important;
+}
+
+.no-data-message {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.no-data-message p {
+  font-size: 13px;
+  margin-top: 8px;
+  color: #d1d5db;
+}
+
+/* Pagination */
+.permission-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #FF902F;
+}
+
+.pagination-btn.active {
+  background: #FF902F;
+  color: white;
+  border-color: #FF902F;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .col-permissions {
+    width: 40%;
+  }
+  
+  .col-role {
+    width: 20%;
+  }
+}
+
+@media (max-width: 768px) {
+  .emp-permission-list-container {
+    padding: 16px;
+  }
+  
+  .permission-list-title {
+    font-size: 20px;
+  }
+  
+  .permission-table th,
+  .permission-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .col-sno {
+    width: 60px;
+  }
+  
+  .permission-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    max-width: 100%;
+  }
+  
+  .permission-pagination {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .pagination-controls {
+    justify-content: center;
+  }
+  
+  .pagination-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .permissions-list-cell {
+    gap: 6px;
+  }
+  
+  .permission-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .permission-table-container {
+    overflow-x: auto;
+  }
+  
+  .permission-table {
+    min-width: 700px;
+  }
+  
+  .role-badge {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .permission-count-badge {
+    font-size: 12px;
+  }
+}

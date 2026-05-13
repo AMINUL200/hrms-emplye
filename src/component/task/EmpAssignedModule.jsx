@@ -1,190 +1,193 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import './EmpAssignedModule.css';
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import "./EmpAssignedModule.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faArrowLeft, 
-  faSave, 
-  faUserPlus,
-  faTimes,
-  faUser,
-  faLayerGroup,
-  faCalendarAlt,
-  faSortNumericDown,
-  faInfoCircle,
-  faCheckCircle,
-  faEdit,
-  faPlus
+  faUserPlus, 
+  faTimes, 
+  faCheckCircle, 
+  faSpinner,
+  faUsers,
+  faSearch,
+  faSave,
+  faEdit
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../context/AuthContex';
 
 const EmpAssignedModule = () => {
-  const { id } = useParams(); // module_id
-  const [searchParams] = useSearchParams();
+  const { p_id, m_id } = useParams(); // projectId and moduleId
   const navigate = useNavigate();
   const location = useLocation();
-  const project = location.state?.project;
-  const module = location.state?.module;
-  
-  // Check if it's add mode (add=true) or edit mode (add=false)
-  const isAddMode = searchParams.get('add') === 'true';
-  
-  // Dummy module data for edit mode
-  const dummyModuleData = {
-    module_id: id || '1',
-    module_name: "User Authentication Module",
-    description: "Complete authentication system with JWT, OAuth, and role-based access control",
-    order_by: "1",
-    created_by: "John Doe",
-    created_at: "2024-01-15",
-    updated_at: "2024-02-01"
+  const { token } = useContext(AuthContext);
+  const api_url = import.meta.env.VITE_API_URL;
+
+  const [members, setMembers] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [alreadyAssignedEmployees, setAlreadyAssignedEmployees] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [fetchingPermissions, setFetchingPermissions] = useState(false);
+
+  // Check if this is from create module (no state passed) or edit mode (state passed)
+  const isFromCreateModule = location.state?.isEditMode;
+
+  // Fetch all members
+  const fetchMembers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${api_url}/all-members-for-project/employee`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status === 1) {
+        setMembers(response.data.members || []);
+      } else {
+        toast.error("Failed to fetch members");
+      }
+    } catch (err) {
+      console.error("Error fetching members:", err);
+      toast.error(err.response?.data?.message || "Failed to load members");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Form state
-  const [formData, setFormData] = useState({
-    module_id: '',
-    project_id: project?.project_id || '',
-    module_name: '',
-    description: '',
-    order_by: '',
-    created_by: '',
-    created_at: new Date().toISOString().split('T')[0],
-    updated_at: new Date().toISOString().split('T')[0]
-  });
+  // Fetch already assigned employees for this module
+  const fetchAssignedEmployees = async () => {
+    if (!isFromCreateModule && m_id) {
+      setFetchingPermissions(true);
+      try {
+        const response = await axios.get(
+          `${api_url}/project-module-permission/${m_id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
 
-  const [loading, setLoading] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Dummy employees data
-  const dummyEmployees = [
-    { id: 1, name: "John Doe", email: "john@example.com", role: "Developer", department: "Engineering" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Tester", department: "QA" },
-    { id: 3, name: "Mike Johnson", email: "mike@example.com", role: "Frontend Developer", department: "Engineering" },
-    { id: 4, name: "Sarah Wilson", email: "sarah@example.com", role: "Backend Developer", department: "Engineering" },
-    { id: 5, name: "Tom Brown", email: "tom@example.com", role: "DevOps", department: "Infrastructure" },
-    { id: 6, name: "Emily Davis", email: "emily@example.com", role: "Data Analyst", department: "Analytics" },
-    { id: 7, name: "Robert Taylor", email: "robert@example.com", role: "UI/UX Designer", department: "Design" },
-    { id: 8, name: "Lisa Anderson", email: "lisa@example.com", role: "Project Manager", department: "Management" }
-  ];
-
-  // Dummy assigned employees for edit mode
-  const dummyAssignedEmployees = [
-    { id: 1, name: "John Doe", email: "john@example.com", role: "Developer", department: "Engineering", status: "active" },
-    { id: 3, name: "Mike Johnson", email: "mike@example.com", role: "Frontend Developer", department: "Engineering", status: "active" },
-    { id: 6, name: "Emily Davis", email: "emily@example.com", role: "Data Analyst", department: "Analytics", status: "active" }
-  ];
+        if (response.data.status === 1) {
+          const assigned = response.data.permissions || [];
+          setAlreadyAssignedEmployees(assigned);
+          
+          // Convert assigned employees to the format expected by selectedEmployees
+          const assignedMembers = assigned.map(perm => ({
+            emp_code: perm.employee_id,
+            emp_fname: perm.employee_name?.replace(/([A-Z])/g, ' $1').trim() || perm.employee_id,
+            emp_lname: '',
+            emid: perm.employee_id,
+            isAlreadyAssigned: true,
+            permission_id: perm.id
+          }));
+          
+          setSelectedEmployees(assignedMembers);
+        }
+      } catch (err) {
+        console.error("Error fetching assigned employees:", err);
+        // Don't show error toast for this, just continue
+      } finally {
+        setFetchingPermissions(false);
+      }
+    }
+  };
 
   useEffect(() => {
-    // Fetch employees (simulate API call)
-    setEmployees(dummyEmployees);
-    
-    if (isAddMode) {
-      // ADD MODE: Clear all form fields
-      setFormData({
-        module_id: '',
-        project_id: project?.project_id || '',
-        module_name: '',
-        description: '',
-        order_by: '',
-        created_by: '',
-        created_at: new Date().toISOString().split('T')[0],
-        updated_at: new Date().toISOString().split('T')[0]
-      });
-      setSelectedEmployees([]);
-    } else {
-      // EDIT MODE: Populate with dummy data
-      setFormData({
-        module_id: id || dummyModuleData.module_id,
-        project_id: project?.project_id || 'PROJ-001',
-        module_name: module?.module_name || dummyModuleData.module_name,
-        description: module?.module_description || dummyModuleData.description,
-        order_by: module?.order_by || dummyModuleData.order_by,
-        created_by: module?.created_by || dummyModuleData.created_by,
-        created_at: module?.created_at || dummyModuleData.created_at,
-        updated_at: new Date().toISOString().split('T')[0]
-      });
-      
-      // If module has existing assigned employees, populate them
-      if (module?.assigned_employees && module.assigned_employees.length > 0) {
-        setSelectedEmployees(module.assigned_employees);
-      } else {
-        // Use dummy assigned employees for edit mode
-        setSelectedEmployees(dummyAssignedEmployees);
+    if (token) {
+      fetchMembers();
+      if (!isFromCreateModule) {
+        fetchAssignedEmployees();
       }
     }
-  }, [module, id, isAddMode, project]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-      updated_at: new Date().toISOString().split('T')[0]
-    }));
-  };
+  }, [token, m_id, isFromCreateModule]);
 
   const handleEmployeeSelect = (employee) => {
-    if (!selectedEmployees.find(emp => emp.id === employee.id)) {
+    if (!selectedEmployees.find(emp => emp.emp_code === employee.emp_code)) {
       setSelectedEmployees([...selectedEmployees, employee]);
-      toast.success(`${employee.name} added to module`);
+      toast.success(`${employee.emp_fname} ${employee.emp_lname} added`);
     } else {
-      toast.info(`${employee.name} is already assigned`);
+      toast.info(`${employee.emp_fname} ${employee.emp_lname} is already selected`);
     }
   };
 
-  const handleRemoveEmployee = (employeeId) => {
-    setSelectedEmployees(selectedEmployees.filter(emp => emp.id !== employeeId));
-    toast.info('Employee removed from module');
+  const handleRemoveEmployee = (empCode) => {
+    setSelectedEmployees(selectedEmployees.filter(emp => emp.emp_code !== empCode));
+    toast.info("Employee removed from selection");
   };
 
-  const filteredEmployees = employees.filter(emp =>
-    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    // Validate required fields
-    if (!formData.module_name) {
-      toast.error('Module name is required');
-      setLoading(false);
+  const handleSubmit = async () => {
+    if (selectedEmployees.length === 0) {
+      toast.warning("Please select at least one employee to assign");
       return;
     }
+
+    setSubmitting(true);
     
-    // Prepare data for submission
-    const submitData = {
-      ...formData,
-      assigned_employees: selectedEmployees.map(emp => emp.id),
-      module_name: formData.module_name,
-      description: formData.description,
-      mode: isAddMode ? 'create' : 'update'
-    };
-    
-    console.log('Submitting module data:', submitData);
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (isAddMode) {
-        toast.success('Module created successfully!');
+    try {
+      const submitData = {
+        project_id: parseInt(p_id),
+        project_module_id: parseInt(m_id),
+        employee_id: selectedEmployees.map(emp => emp.emp_code)
+      };
+
+      const response = await axios.post(
+        `${api_url}/project-module-permission-create`,
+        submitData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status === 1) {
+        toast.success("Employees assigned successfully!");
+        // Navigate to project modules page
+        navigate(`/organization/assigned-project/${p_id}`);
       } else {
-        toast.success('Module updated successfully!');
+        toast.error(response.data.message || "Failed to assign employees");
       }
-      setLoading(false);
-      navigate(`/organization/assigned-project/${formData.project_id}/modules`, {
-        state: { project: project }
-      });
-    }, 1500);
+    } catch (err) {
+      console.error("Error assigning employees:", err);
+      toast.error(err.response?.data?.message || "Failed to assign employees. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSkip = () => {
+    navigate(`/organization/assigned-project/${p_id}`);
   };
 
   const handleBack = () => {
     navigate(-1);
   };
+
+  // Filter available employees (not already selected)
+  const getAvailableEmployees = () => {
+    const selectedCodes = selectedEmployees.map(emp => emp.emp_code);
+    return members.filter(member => !selectedCodes.includes(member.emp_code));
+  };
+
+  const filteredAvailableEmployees = getAvailableEmployees().filter(member => {
+    const fullName = `${member.emp_fname} ${member.emp_lname}`.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    return fullName.includes(searchLower) || 
+           member.emp_code.toLowerCase().includes(searchLower);
+  });
+
+  const isLoading = loading || fetchingPermissions;
 
   return (
     <div className="emp-assigned-module-container">
@@ -194,200 +197,112 @@ const EmpAssignedModule = () => {
           <span>Back</span>
         </button>
         <h1>
-          {isAddMode ? (
-            <>
-              <FontAwesomeIcon icon={faPlus} />
-              Create New Module
-            </>
-          ) : (
-            <>
-              <FontAwesomeIcon icon={faEdit} />
-              Edit Module & Assign Employees
-            </>
-          )}
+          <FontAwesomeIcon icon={isFromCreateModule ? faUserPlus : faEdit} />
+          {isFromCreateModule ? 'Assign Employees to Module' : 'Edit Module Assignments'}
         </h1>
       </div>
 
       <div className="form-wrapper">
-        <form onSubmit={handleSubmit} className="module-assign-form">
-          {/* Module Information Section */}
-          <div className="form-section">
-            <h2 className="section-title">
-              <FontAwesomeIcon icon={faLayerGroup} />
-              {isAddMode ? 'Module Details' : 'Module Information'}
-            </h2>
-            
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="module_id">
-                  <FontAwesomeIcon icon={faInfoCircle} />
-                  Module ID
-                </label>
-                <input
-                  type="text"
-                  id="module_id"
-                  name="module_id"
-                  value={formData.module_id}
-                  onChange={handleChange}
-                  placeholder={isAddMode ? "Auto-generated" : "Module ID"}
-                  readOnly={!isAddMode}
-                  className={!isAddMode ? "readonly-input" : ""}
-                />
-                {isAddMode && (
-                  <small className="form-hint">Leave empty for auto-generation</small>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="project_id">
-                  <FontAwesomeIcon icon={faLayerGroup} />
-                  Project ID
-                </label>
-                <input
-                  type="text"
-                  id="project_id"
-                  name="project_id"
-                  value={formData.project_id}
-                  readOnly
-                  className="readonly-input"
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="module_name">
-                  <FontAwesomeIcon icon={faUser} />
-                  Module Name <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="module_name"
-                  name="module_name"
-                  value={formData.module_name}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter module name"
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="description">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder="Enter module description"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="order_by">
-                  <FontAwesomeIcon icon={faSortNumericDown} />
-                  Order By
-                </label>
-                <input
-                  type="number"
-                  id="order_by"
-                  name="order_by"
-                  value={formData.order_by}
-                  onChange={handleChange}
-                  placeholder="Display order"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="created_by">
-                  <FontAwesomeIcon icon={faUser} />
-                  Created By
-                </label>
-                <input
-                  type="text"
-                  id="created_by"
-                  name="created_by"
-                  value={formData.created_by}
-                  onChange={handleChange}
-                  placeholder="Enter creator name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="created_at">
-                  <FontAwesomeIcon icon={faCalendarAlt} />
-                  Created At
-                </label>
-                <input
-                  type="date"
-                  id="created_at"
-                  name="created_at"
-                  value={formData.created_at}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="updated_at">
-                  <FontAwesomeIcon icon={faCalendarAlt} />
-                  Updated At
-                </label>
-                <input
-                  type="date"
-                  id="updated_at"
-                  name="updated_at"
-                  value={formData.updated_at}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
+        <div className="module-info-card">
+          <div className="info-row">
+            <span className="info-label">Project ID:</span>
+            <span className="info-value">{p_id}</span>
           </div>
+          <div className="info-row">
+            <span className="info-label">Module ID:</span>
+            <span className="info-value">{m_id}</span>
+          </div>
+          {!isFromCreateModule && alreadyAssignedEmployees.length > 0 && (
+            <div className="info-row">
+              <span className="info-label">Already Assigned:</span>
+              <span className="info-value">{alreadyAssignedEmployees.length} employees</span>
+            </div>
+          )}
+        </div>
 
-          {/* Assign Employees Section */}
-          <div className="form-section">
-            <h2 className="section-title">
-              <FontAwesomeIcon icon={faUserPlus} />
-              {isAddMode ? 'Assign Employees (Optional)' : 'Assigned Employees'}
-            </h2>
+        <div className="assign-section">
+          <h2 className="section-title">
+            <FontAwesomeIcon icon={faUsers} />
+            Select Employees to Assign
+          </h2>
 
-            {/* Search Employees */}
-            <div className="search-container">
+          {/* Search Box */}
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <FontAwesomeIcon icon={faSearch} className="search-icon" />
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search employees by name, email, or role..."
+                placeholder="Search employees by name or employee code..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+          </div>
 
-            {/* Employees List */}
-            <div className="employees-list">
-              <h3>Available Employees</h3>
-              <div className="employees-grid">
-                {filteredEmployees.length > 0 ? (
-                  filteredEmployees.map(employee => (
-                    <div key={employee.id} className="employee-card">
+          {/* Selected Employees Summary - Show at top for better visibility */}
+          {selectedEmployees.length > 0 && (
+            <div className="selected-summary">
+              <h3>
+                <FontAwesomeIcon icon={faCheckCircle} />
+                Selected Employees ({selectedEmployees.length})
+              </h3>
+              <div className="selected-badges">
+                {selectedEmployees.map((employee) => (
+                  <div key={employee.emp_code} className="selected-badge">
+                    <span>{employee.emp_fname} {employee.emp_lname}</span>
+                    <span className="employee-code-badge">{employee.emp_code}</span>
+                    {employee.isAlreadyAssigned && (
+                      <span className="already-assigned-badge">Already Assigned</span>
+                    )}
+                    <button
+                      type="button"
+                      className="remove-badge"
+                      onClick={() => handleRemoveEmployee(employee.emp_code)}
+                    >
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Available Employees List */}
+          <div className="employees-list">
+            <h3>Available Employees ({filteredAvailableEmployees.length})</h3>
+            <div className="employees-grid">
+              {isLoading ? (
+                <div className="loading-state">
+                  <FontAwesomeIcon icon={faSpinner} spin className="loading-spinner-small" />
+                  <p>Loading employees...</p>
+                </div>
+              ) : filteredAvailableEmployees.length > 0 ? (
+                filteredAvailableEmployees.map((member) => {
+                  const isSelected = selectedEmployees.some(emp => emp.emp_code === member.emp_code);
+                  return (
+                    <div key={member.emp_code} className={`employee-card ${isSelected ? 'selected' : ''}`}>
                       <div className="employee-info">
                         <div className="employee-avatar">
-                          {employee.name.charAt(0)}
+                          {member.emp_fname?.charAt(0) || 'U'}
                         </div>
                         <div className="employee-details">
-                          <div className="employee-name">{employee.name}</div>
-                          <div className="employee-role">{employee.role}</div>
-                          <div className="employee-email">{employee.email}</div>
+                          <div className="employee-name">
+                            {member.emp_fname} {member.emp_lname}
+                          </div>
+                          <div className="employee-code">{member.emp_code}</div>
                         </div>
                       </div>
                       <button
                         type="button"
-                        className="add-employee-btn"
-                        onClick={() => handleEmployeeSelect(employee)}
-                        disabled={selectedEmployees.some(emp => emp.id === employee.id)}
+                        className={`assign-btn ${isSelected ? 'assigned' : ''}`}
+                        onClick={() => handleEmployeeSelect(member)}
+                        disabled={isSelected}
                       >
-                        {selectedEmployees.some(emp => emp.id === employee.id) ? (
+                        {isSelected ? (
                           <>
                             <FontAwesomeIcon icon={faCheckCircle} />
-                            Assigned
+                            Selected
                           </>
                         ) : (
                           <>
@@ -397,66 +312,49 @@ const EmpAssignedModule = () => {
                         )}
                       </button>
                     </div>
-                  ))
-                ) : (
-                  <div className="no-results">
-                    <p>No employees found matching "{searchTerm}"</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Selected Employees */}
-            {selectedEmployees.length > 0 && (
-              <div className="selected-employees">
-                <h3>
-                  <FontAwesomeIcon icon={faUserPlus} />
-                  Selected Employees ({selectedEmployees.length})
-                </h3>
-                <div className="selected-employees-list">
-                  {selectedEmployees.map(employee => (
-                    <div key={employee.id} className="selected-employee-card">
-                      <div className="selected-employee-info">
-                        <div className="employee-avatar small">
-                          {employee.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="employee-name">{employee.name}</div>
-                          <div className="employee-role">{employee.role}</div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        className="remove-employee-btn"
-                        onClick={() => handleRemoveEmployee(employee.id)}
-                      >
-                        <FontAwesomeIcon icon={faTimes} />
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                  );
+                })
+              ) : (
+                <div className="no-results">
+                  <p>
+                    {searchTerm 
+                      ? `No employees found matching "${searchTerm}"` 
+                      : "All employees have been assigned to this module"}
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Form Actions */}
-          <div className="form-actions">
-            <button type="button" className="cancel-btn" onClick={handleBack}>
-              Cancel
-            </button>
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? (
-                <>Processing...</>
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            {/* Show Skip button only when NOT from create module */}
+            {!isFromCreateModule && (
+              <button type="button" className="skip-btn" onClick={handleSkip}>
+                <FontAwesomeIcon icon={faTimes} />
+                Skip for Now
+              </button>
+            )}
+            <button 
+              type="button" 
+              className="submit-assign-btn" 
+              onClick={handleSubmit}
+              disabled={submitting || selectedEmployees.length === 0}
+            >
+              {submitting ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  Assigning...
+                </>
               ) : (
                 <>
                   <FontAwesomeIcon icon={faSave} />
-                  {isAddMode ? 'Create Module' : 'Update Module'}
+                  {isFromCreateModule ? 'Assign & Continue' : 'Update Assignments'}
                 </>
               )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

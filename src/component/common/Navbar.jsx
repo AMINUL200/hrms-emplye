@@ -209,7 +209,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
   };
   useEffect(() => {
     fetchNotifications();
-    playNotificationSound();
+    // playNotificationSound();
   }, []);
 
   const playNotificationSound = () => {

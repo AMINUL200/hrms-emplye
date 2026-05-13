@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './AssignedModule.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,191 +16,159 @@ import {
   faPauseCircle,
   faUserPlus,
   faUserCheck,
-  faPlusCircle
+  faPlusCircle,
+  faSpinner,
+  faEllipsisV,
+  faEdit,
+  faTrashAlt
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { AuthContext } from '../../../context/AuthContex';
+import { toast } from 'react-toastify';
 
 const AssignedModule = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const project = location.state?.project;
+  const { token } = useContext(AuthContext);
+  const api_url = import.meta.env.VITE_API_URL;
 
-  // Dummy modules data
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedModule, setSelectedModule] = useState(null);
+  const [totalModules, setTotalModules] = useState(0);
+  const [permissions, setPermissions] = useState([]);
+  const [permissionsLoading, setPermissionsLoading] = useState(true);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
-  // Check if user has permission to assign employees (you can add logic based on user role)
-  const hasAssignPermission = true; // Replace with actual permission check
-  
-  // Check if user has permission to create modules
-  const hasCreateModulePermission = true; // Replace with actual permission check
+  // Permission states
+  const [canCreateModule, setCanCreateModule] = useState(false);
+  const [canViewModule, setCanViewModule] = useState(false);
+  const [canUpdateModule, setCanUpdateModule] = useState(false);
+  const [canDeleteModule, setCanDeleteModule] = useState(false);
+  const [canAssignEmployee, setCanAssignEmployee] = useState(false);
 
-  // Dummy modules array of objects
-  const dummyModules = [
-    {
-      module_id: 1,
-      module_name: "User Authentication & Authorization",
-      module_description: "Implement login, registration, password reset, and role-based access control system with JWT tokens.",
-      module_status: "in-progress",
-      priority: "high",
-      start_date: "2024-01-15",
-      expected_end_date: "2024-02-15",
-      completed_tasks: 8,
-      total_tasks: 12,
-      assigned_team_members: 4,
-      assigned_employees: [
-        { id: 1, name: "John Doe", role: "Developer", status: "active" },
-        { id: 2, name: "Jane Smith", role: "Tester", status: "active" }
-      ],
-      tasks: [
-        { task_id: 101, task_name: "Design login UI", task_status: "Completed" },
-        { task_id: 102, task_name: "Implement JWT authentication", task_status: "Completed" },
-        { task_id: 103, task_name: "Create registration form", task_status: "Completed" },
-        { task_id: 104, task_name: "Password reset functionality", task_status: "In Progress" },
-        { task_id: 105, task_name: "Role-based access control", task_status: "Pending" },
-        { task_id: 106, task_name: "Session management", task_status: "Pending" },
-        { task_id: 107, task_name: "Two-factor authentication", task_status: "Pending" },
-        { task_id: 108, task_name: "OAuth integration", task_status: "Pending" },
-        { task_id: 109, task_name: "API security testing", task_status: "Pending" },
-        { task_id: 110, task_name: "User profile management", task_status: "Pending" },
-        { task_id: 111, task_name: "Activity logging", task_status: "Pending" },
-        { task_id: 112, task_name: "Documentation", task_status: "Pending" }
-      ]
-    },
-    {
-      module_id: 2,
-      module_name: "Dashboard & Analytics",
-      module_description: "Create interactive dashboard with charts, graphs, and real-time analytics for project metrics and KPIs.",
-      module_status: "in-progress",
-      priority: "medium",
-      start_date: "2024-01-20",
-      expected_end_date: "2024-02-28",
-      completed_tasks: 5,
-      total_tasks: 10,
-      assigned_team_members: 3,
-      assigned_employees: [
-        { id: 3, name: "Mike Johnson", role: "Frontend Developer", status: "active" }
-      ],
-      tasks: [
-        { task_id: 201, task_name: "Design dashboard layout", task_status: "Completed" },
-        { task_id: 202, task_name: "Implement charts using Chart.js", task_status: "Completed" },
-        { task_id: 203, task_name: "Create KPI widgets", task_status: "Completed" },
-        { task_id: 204, task_name: "Real-time data updates", task_status: "Completed" },
-        { task_id: 205, task_name: "Export reports", task_status: "Completed" },
-        { task_id: 206, task_name: "User activity tracking", task_status: "In Progress" },
-        { task_id: 207, task_name: "Performance optimization", task_status: "Pending" },
-        { task_id: 208, task_name: "Mobile responsive design", task_status: "Pending" },
-        { task_id: 209, task_name: "Custom widget builder", task_status: "Pending" },
-        { task_id: 210, task_name: "Analytics API integration", task_status: "Pending" }
-      ]
-    },
-    {
-      module_id: 3,
-      module_name: "Task Management System",
-      module_description: "Complete task management system with CRUD operations, task assignment, status tracking, and notifications.",
-      module_status: "not-started",
-      priority: "high",
-      start_date: "2024-02-01",
-      expected_end_date: "2024-03-15",
-      completed_tasks: 0,
-      total_tasks: 15,
-      assigned_team_members: 0,
-      assigned_employees: [],
-      tasks: [
-        { task_id: 301, task_name: "Design task board UI", task_status: "Pending" },
-        { task_id: 302, task_name: "Create task model", task_status: "Pending" },
-        { task_id: 303, task_name: "Implement task CRUD", task_status: "Pending" },
-        { task_id: 304, task_name: "Task assignment feature", task_status: "Pending" },
-        { task_id: 305, task_name: "Status update system", task_status: "Pending" },
-        { task_id: 306, task_name: "Due date tracking", task_status: "Pending" },
-        { task_id: 307, task_name: "Comment system", task_status: "Pending" },
-        { task_id: 308, task_name: "File attachments", task_status: "Pending" },
-        { task_id: 309, task_name: "Task dependencies", task_status: "Pending" },
-        { task_id: 310, task_name: "Email notifications", task_status: "Pending" },
-        { task_id: 311, task_name: "Task search & filter", task_status: "Pending" },
-        { task_id: 312, task_name: "Bulk operations", task_status: "Pending" },
-        { task_id: 313, task_name: "Task templates", task_status: "Pending" },
-        { task_id: 314, task_name: "Activity log", task_status: "Pending" },
-        { task_id: 315, task_name: "API documentation", task_status: "Pending" }
-      ]
-    },
-    {
-      module_id: 4,
-      module_name: "Notification Service",
-      module_description: "Real-time notification system for email, SMS, and in-app notifications with customizable preferences.",
-      module_status: "completed",
-      priority: "low",
-      start_date: "2024-01-10",
-      expected_end_date: "2024-02-10",
-      completed_tasks: 8,
-      total_tasks: 8,
-      assigned_team_members: 2,
-      assigned_employees: [
-        { id: 4, name: "Sarah Wilson", role: "Backend Developer", status: "active" },
-        { id: 5, name: "Tom Brown", role: "DevOps", status: "active" }
-      ],
-      tasks: [
-        { task_id: 401, task_name: "Design notification schema", task_status: "Completed" },
-        { task_id: 402, task_name: "Implement email service", task_status: "Completed" },
-        { task_id: 403, task_name: "Implement SMS service", task_status: "Completed" },
-        { task_id: 404, task_name: "In-app notifications", task_status: "Completed" },
-        { task_id: 405, task_name: "User preferences", task_status: "Completed" },
-        { task_id: 406, task_name: "Notification templates", task_status: "Completed" },
-        { task_id: 407, task_name: "Queue management", task_status: "Completed" },
-        { task_id: 408, task_name: "Testing & documentation", task_status: "Completed" }
-      ]
-    },
-    {
-      module_id: 5,
-      module_name: "Reporting Engine",
-      module_description: "Generate comprehensive reports for projects, tasks, team performance, and resource utilization.",
-      module_status: "in-progress",
-      priority: "medium",
-      start_date: "2024-02-05",
-      expected_end_date: "2024-03-20",
-      completed_tasks: 3,
-      total_tasks: 11,
-      assigned_team_members: 3,
-      assigned_employees: [
-        { id: 6, name: "Emily Davis", role: "Data Analyst", status: "active" }
-      ],
-      tasks: [
-        { task_id: 501, task_name: "Report templates", task_status: "Completed" },
-        { task_id: 502, task_name: "PDF generation", task_status: "Completed" },
-        { task_id: 503, task_name: "Excel export", task_status: "Completed" },
-        { task_id: 504, task_name: "Schedule reports", task_status: "In Progress" },
-        { task_id: 505, task_name: "Custom report builder", task_status: "Pending" },
-        { task_id: 506, task_name: "Data visualization", task_status: "Pending" },
-        { task_id: 507, task_name: "Report sharing", task_status: "Pending" },
-        { task_id: 508, task_name: "Archiving system", task_status: "Pending" },
-        { task_id: 509, task_name: "Performance metrics", task_status: "Pending" },
-        { task_id: 510, task_name: "API for reports", task_status: "Pending" },
-        { task_id: 511, task_name: "Documentation", task_status: "Pending" }
-      ]
+  // Fetch permissions from API
+  const fetchPermissions = async () => {
+    try {
+      setPermissionsLoading(true);
+      const response = await axios.get(
+        `${api_url}/project-permission/${projectId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status === 1) {
+        const permissionsList = response.data.permissions || [];
+        setPermissions(permissionsList);
+        
+        // Check module-related permissions
+        const hasCreateModule = permissionsList.some(p => p.permission_name === 'create_module');
+        const hasViewModule = permissionsList.some(p => p.permission_name === 'view_module');
+        const hasUpdateModule = permissionsList.some(p => p.permission_name === 'update_module');
+        const hasDeleteModule = permissionsList.some(p => p.permission_name === 'delete_module');
+        
+        setCanCreateModule(hasCreateModule);
+        setCanViewModule(hasViewModule);
+        setCanUpdateModule(hasUpdateModule);
+        setCanDeleteModule(hasDeleteModule);
+        
+        // For assign employee - you might have a separate permission or use update_module
+        setCanAssignEmployee(hasUpdateModule);
+      }
+    } catch (err) {
+      console.error('Error fetching permissions:', err);
+      // Set default permissions to false if API fails
+      setCanCreateModule(false);
+      setCanViewModule(true); // Default to true for viewing
+      setCanUpdateModule(false);
+      setCanDeleteModule(false);
+      setCanAssignEmployee(false);
+    } finally {
+      setPermissionsLoading(false);
     }
-  ];
+  };
+
+  // Fetch modules from API
+  const fetchModules = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get(
+        `${api_url}/project-emp-module/${projectId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status === 1) {
+        setModules(response.data.modules || []);
+        setTotalModules(response.data.total_modules || 0);
+      } else {
+        setError('Failed to fetch modules');
+      }
+    } catch (err) {
+      console.error('Error fetching modules:', err);
+      setError(err.response?.data?.message || 'Failed to load modules. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate API call with dummy data
-    setTimeout(() => {
-      setModules(dummyModules);
-      setLoading(false);
-    }, 1000);
-  }, [projectId]);
+    if (projectId && token) {
+      fetchPermissions();
+      fetchModules();
+    }
+  }, [projectId, token]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openMenuId && !event.target.closest('.module-menu-container')) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openMenuId]);
 
   const getModuleProgress = (module) => {
-    if (module.total_tasks === 0) return 0;
-    return Math.round((module.completed_tasks / module.total_tasks) * 100);
+    if (module.completed_tasks !== undefined && module.total_tasks !== undefined) {
+      if (module.total_tasks === 0) return 0;
+      return Math.round((module.completed_tasks / module.total_tasks) * 100);
+    }
+    
+    switch(module.status) {
+      case 'completed':
+      case 'closed':
+        return 100;
+      case 'in-progress':
+        return 50;
+      case 'new':
+      default:
+        return 0;
+    }
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch(status?.toLowerCase()) {
       case 'completed':
+      case 'closed':
         return 'status-completed';
       case 'in-progress':
         return 'status-in-progress';
-      case 'not-started':
+      case 'new':
         return 'status-not-started';
       default:
         return 'status-not-started';
@@ -208,37 +176,42 @@ const AssignedModule = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch(status?.toLowerCase()) {
       case 'completed':
+      case 'closed':
         return faCheckCircle;
       case 'in-progress':
         return faPlayCircle;
-      case 'not-started':
+      case 'new':
         return faPauseCircle;
       default:
         return faClock;
     }
   };
 
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'high':
-        return 'priority-high';
-      case 'medium':
-        return 'priority-medium';
-      case 'low':
-        return 'priority-low';
+  const getDisplayStatus = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'completed':
+        return 'Completed';
+      case 'closed':
+        return 'Closed';
+      case 'in-progress':
+        return 'In Progress';
+      case 'new':
+        return 'Not Started';
       default:
-        return 'priority-medium';
+        return status || 'Not Started';
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Not set';
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
   const getDaysRemaining = (endDate) => {
+    if (!endDate) return null;
     const today = new Date();
     const end = new Date(endDate);
     const diffTime = end - today;
@@ -247,44 +220,107 @@ const AssignedModule = () => {
   };
 
   const handleModuleClick = (module) => {
-    setSelectedModule(module);
-    // Navigate to task details page with module info
-    navigate(`/organization/assigned-project/${projectId}/module/${module.module_id}/tasks`, {
-      state: { 
-        project: project,
-        module: module 
-      }
-    });
+    // Check if user has view permission
+    if (canViewModule) {
+      setSelectedModule(module);
+      navigate(`/organization/assigned-project/${projectId}/module/${module.id}/tasks`, {
+        state: { 
+          project: project,
+          module: module 
+        }
+      });
+    }
   };
 
   const handleAssignEmployee = (module, e) => {
-    e.stopPropagation(); // Prevent triggering the card click
-    // Navigate with module_id and add=false (edit mode)
-    navigate(`/organization/emp-assigned-module/${module.module_id}?add=false`, {
-      state: { 
-        project: project,
-        module: module,
-        isEditMode: true
-      }
-    });
+    e.stopPropagation();
+    if (canAssignEmployee) {
+      navigate(`/organization/emp-assigned-module/${projectId}/${module.id}`, {
+        state: { 
+          project: project,
+          module: module,
+          isEditMode: true
+        }
+      });
+    }
   };
 
   const handleAddModule = () => {
-    // Navigate with add=true parameter for creating new module
-    // Use 0 or 'new' as ID for new module creation
-    navigate(`/organization/emp-assigned-module/new?add=true`, {
-      state: { 
-        project: project,
-        isAddMode: true
+    if (canCreateModule) {
+      navigate(`/organization/emp-add-module/${projectId}?add=true`, {
+        state: { 
+          project: project,
+          isAddMode: true
+        }
+      });
+    }
+  };
+
+  const handleEditModule = (module, e) => {
+    e.stopPropagation();
+    if (canUpdateModule) {
+      setOpenMenuId(null);
+      navigate(`/organization/emp-add-module/${projectId}?add=false&updateid=${module.id}`, {
+        state: { 
+          project: project,
+          module: module,
+          isEditMode: true
+        }
+      });
+    }
+  };
+
+  const handleDeleteModule = async (module, e) => {
+    e.stopPropagation();
+    if (!canDeleteModule) return;
+    
+    if (window.confirm(`Are you sure you want to delete module "${module.module_name}"? This action cannot be undone.`)) {
+      try {
+        const response = await axios.delete(
+          `${api_url}/project-module-delete/${module.id}/${projectId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        if (response.data.status === 1) {
+          toast.success('Module deleted successfully!');
+          // Refresh modules list
+          fetchModules();
+        } else {
+          toast.error(response.data.message || 'Failed to delete module');
+        }
+      } catch (err) {
+        console.error('Error deleting module:', err);
+        toast.error(err.response?.data?.message || 'Failed to delete module');
       }
-    });
+    }
+    setOpenMenuId(null);
   };
 
   const handleBackToProjects = () => {
     navigate('/organization/assigned-project');
   };
 
-  if (loading) {
+  const toggleMenu = (moduleId, e) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === moduleId ? null : moduleId);
+  };
+
+  // Calculate summary statistics
+  const getCompletedModulesCount = () => {
+    return modules.filter(m => m.status?.toLowerCase() === 'completed' || m.status?.toLowerCase() === 'closed').length;
+  };
+
+  const getOverallProgress = () => {
+    if (modules.length === 0) return 0;
+    return Math.round((getCompletedModulesCount() / modules.length) * 100);
+  };
+
+  if (loading || permissionsLoading) {
     return (
       <div className="assigned-module-container">
         <div className="module-header">
@@ -296,6 +332,10 @@ const AssignedModule = () => {
             <div className="skeleton-title"></div>
             <div className="skeleton-subtitle"></div>
           </div>
+        </div>
+        <div className="loading-container">
+          <FontAwesomeIcon icon={faSpinner} spin className="loading-spinner" />
+          <p>Loading modules...</p>
         </div>
         <div className="modules-grid">
           {[1, 2, 3, 4, 5].map((item) => (
@@ -320,6 +360,27 @@ const AssignedModule = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="assigned-module-container">
+        <div className="module-header">
+          <button className="back-button" onClick={handleBackToProjects}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+            <span>Back to Projects</span>
+          </button>
+        </div>
+        <div className="error-container">
+          <FontAwesomeIcon icon={faExclamationCircle} className="error-icon" />
+          <h3>Error Loading Modules</h3>
+          <p>{error}</p>
+          <button onClick={fetchModules} className="retry-btn">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="assigned-module-container">
       <div className="module-header">
@@ -329,8 +390,8 @@ const AssignedModule = () => {
             <span>Back to Projects</span>
           </button>
           
-          {/* Add Module Button */}
-          {hasCreateModulePermission && (
+          {/* Add Module Button - Only show if user has create permission */}
+          {canCreateModule && (
             <button className="add-module-btn" onClick={handleAddModule}>
               <FontAwesomeIcon icon={faPlusCircle} />
               <span>Add New Module</span>
@@ -351,108 +412,161 @@ const AssignedModule = () => {
           <div className="summary-card">
             <FontAwesomeIcon icon={faLayerGroup} />
             <div>
-              <span className="summary-number">{modules.length}</span>
+              <span className="summary-number">{totalModules || modules.length}</span>
               <span className="summary-label">Total Modules</span>
             </div>
           </div>
           <div className="summary-card">
             <FontAwesomeIcon icon={faCheckCircle} />
             <div>
-              <span className="summary-number">
-                {modules.filter(m => m.module_status === 'completed').length}
-              </span>
+              <span className="summary-number">{getCompletedModulesCount()}</span>
               <span className="summary-label">Completed</span>
             </div>
           </div>
           <div className="summary-card">
             <FontAwesomeIcon icon={faChartLine} />
             <div>
-              <span className="summary-number">
-                {Math.round((modules.filter(m => m.module_status === 'completed').length / modules.length) * 100)}%
-              </span>
+              <span className="summary-number">{getOverallProgress()}%</span>
               <span className="summary-label">Overall Progress</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="modules-grid">
-        {modules.map((module) => {
-          const progress = getModuleProgress(module);
-          const daysRemaining = getDaysRemaining(module.expected_end_date);
-          const isUrgent = daysRemaining <= 7 && module.module_status !== 'completed';
-          
-          return (
-            <div
-              className="module-card"
-              key={module.module_id}
-              onClick={() => handleModuleClick(module)}
-            >
-              <div className="module-card-header">
-                <div className="module-badges">
-                  <span className={`module-status ${getStatusColor(module.module_status)}`}>
-                    <FontAwesomeIcon icon={getStatusIcon(module.module_status)} />
-                    {module.module_status.replace('-', ' ')}
-                  </span>
-                  <span className={`module-priority ${getPriorityColor(module.priority)}`}>
-                    {module.priority} priority
-                  </span>
+      {modules.length === 0 ? (
+        <div className="no-modules-container">
+          <FontAwesomeIcon icon={faLayerGroup} className="no-modules-icon" />
+          <h3>No Modules Found</h3>
+          <p>This project doesn't have any modules yet.</p>
+          {canCreateModule && (
+            <button className="add-module-btn" onClick={handleAddModule}>
+              <FontAwesomeIcon icon={faPlusCircle} />
+              <span>Create First Module</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="modules-grid">
+          {modules.map((module) => {
+            const progress = getModuleProgress(module);
+            const daysRemaining = getDaysRemaining(module.end_date);
+            const isUrgent = daysRemaining !== null && daysRemaining <= 7 && module.status?.toLowerCase() !== 'completed' && module.status?.toLowerCase() !== 'closed';
+            const hasEditDeletePermission = canUpdateModule || canDeleteModule;
+            
+            return (
+              <div
+                className={`module-card ${!canViewModule ? 'disabled-card' : ''}`}
+                key={module.id}
+                onClick={() => handleModuleClick(module)}
+                style={{ cursor: canViewModule ? 'pointer' : 'default' }}
+              >
+                <div className="module-card-header">
+                  <div className="module-badges">
+                    <span className={`module-status ${getStatusColor(module.status)}`}>
+                      <FontAwesomeIcon icon={getStatusIcon(module.status)} />
+                      {getDisplayStatus(module.status)}
+                    </span>
+                  </div>
+                  
+                  <div className="module-actions">
+                    {/* Assign Employee Button - Only show if user has assign permission */}
+                    {canAssignEmployee && (
+                      <button 
+                        className="assign-employee-btn"
+                        onClick={(e) => handleAssignEmployee(module, e)}
+                        title="Assign employee to this module"
+                      >
+                        <FontAwesomeIcon icon={faUserPlus} />
+                        <span>Assign</span>
+                      </button>
+                    )}
+                    
+                    {/* Three Dots Menu for Edit/Delete - Only show if user has update or delete permission */}
+                    {hasEditDeletePermission && (
+                      <div className="module-menu-container">
+                        <button 
+                          className="menu-trigger-btn"
+                          onClick={(e) => toggleMenu(module.id, e)}
+                          title="Module options"
+                        >
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </button>
+                        
+                        {openMenuId === module.id && (
+                          <div className="module-dropdown-menu">
+                            {canUpdateModule && (
+                              <button 
+                                className="menu-item edit-item"
+                                onClick={(e) => handleEditModule(module, e)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                                <span>Edit Module</span>
+                              </button>
+                            )}
+                            {canDeleteModule && (
+                              <button 
+                                className="menu-item delete-item"
+                                onClick={(e) => handleDeleteModule(module, e)}
+                              >
+                                <FontAwesomeIcon icon={faTrashAlt} />
+                                <span>Delete Module</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                
-                {/* Assign Employee Button */}
-                {hasAssignPermission && (
-                  <button 
-                    className="assign-employee-btn"
-                    onClick={(e) => handleAssignEmployee(module, e)}
-                    title="Assign employee to this module"
-                  >
-                    <FontAwesomeIcon icon={faUserPlus} />
-                    <span>Assign</span>
-                  </button>
-                )}
-              </div>
 
-              <div className="module-card-content">
-                <h3 className="module-name">{module.module_name}</h3>
-                <p className="module-description">{module.module_description}</p>
-                
-                <div className="module-stats">
-                  <div className="stat-item">
-                    <FontAwesomeIcon icon={faCheckCircle} />
-                    <span>{module.completed_tasks}/{module.total_tasks} tasks</span>
+                <div className="module-card-content">
+                  <h3 className="module-name">{module.module_name}</h3>
+                  <p className="module-description">{module.description || "No description provided"}</p>
+                  
+                  <div className="module-stats">
+                    {module.total_tasks !== undefined && (
+                      <div className="stat-item">
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                        <span>{module.completed_tasks || 0}/{module.total_tasks} tasks</span>
+                      </div>
+                    )}
+                    {module.assigned_team_members !== undefined && (
+                      <div className="stat-item">
+                        <FontAwesomeIcon icon={faUsers} />
+                        <span>{module.assigned_team_members} members</span>
+                      </div>
+                    )}
+                    <div className={`stat-item ${isUrgent ? 'urgent' : ''}`}>
+                      <FontAwesomeIcon icon={faCalendarAlt} />
+                      <span>Ends: {formatDate(module.end_date)}</span>
+                    </div>
                   </div>
-                  <div className="stat-item">
-                    <FontAwesomeIcon icon={faUsers} />
-                    <span>{module.assigned_team_members} members</span>
-                  </div>
-                  <div className={`stat-item ${isUrgent ? 'urgent' : ''}`}>
-                    <FontAwesomeIcon icon={faCalendarAlt} />
-                    <span>{formatDate(module.expected_end_date)}</span>
-                  </div>
+
+                  {isUrgent && (
+                    <div className="urgent-warning">
+                      <FontAwesomeIcon icon={faExclamationCircle} />
+                      <span>{daysRemaining} days remaining</span>
+                    </div>
+                  )}
                 </div>
 
-                {isUrgent && (
-                  <div className="urgent-warning">
-                    <FontAwesomeIcon icon={faExclamationCircle} />
-                    <span>{daysRemaining} days remaining</span>
+                <div className="module-card-footer">
+                  <div className="start-date">
+                    <FontAwesomeIcon icon={faClock} />
+                    <span>Started: {formatDate(module.start_date)}</span>
                   </div>
-                )}
-              </div>
-
-              <div className="module-card-footer">
-                <div className="start-date">
-                  <FontAwesomeIcon icon={faClock} />
-                  <span>Started: {formatDate(module.start_date)}</span>
-                </div>
-                <div className="view-tasks">
-                  <span>View Tasks</span>
-                  <FontAwesomeIcon icon={faArrowRight} />
+                  {canViewModule && (
+                    <div className="view-tasks">
+                      <span>View Tasks</span>
+                      <FontAwesomeIcon icon={faArrowRight} />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

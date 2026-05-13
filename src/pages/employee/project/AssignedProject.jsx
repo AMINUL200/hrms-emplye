@@ -1,49 +1,57 @@
-import React, { useContext, useState, useEffect } from 'react';
-import './AssignedProject.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faEllipsis, 
-  faCalendarDays, 
-  faUser, 
+import React, { useContext, useState, useEffect } from "react";
+import "./AssignedProject.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCalendarDays,
+  faUser,
   faTasks,
   faArrowRight,
+  faEye,
   faClock,
-  faPlusCircle,
-  faUserPlus
-} from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { AuthContext } from '../../../context/AuthContex';
-import { toast } from 'react-toastify';
+  faBuilding,
+  faCheckCircle,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../../../context/AuthContex";
+import { toast } from "react-toastify";
 
 const AssignedProject = () => {
-  const { token } = useContext(AuthContext);
+  const { token, data: userData } = useContext(AuthContext);
   const api_url = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
+  const [totalProjects, setTotalProjects] = useState(0);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const fetchProjectsData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${api_url}/project-list`, {
+      const res = await axios.get(`${api_url}/permission-wise-project`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           t: Date.now(), // prevent caching
         },
       });
-      console.log(res.data);
-      
+      console.log("Permission-wise projects data:", res.data);
+
       if (res.data.status === 1) {
-        setProjects(res.data.data);
+        // Extract projects from the response
+        const projectList = res.data.data || [];
+        setProjects(projectList);
+        setTotalProjects(projectList.length);
       } else {
-        setError(res.data.message || 'Failed to fetch projects');
+        setError(res.data.message || "Failed to fetch projects");
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred while fetching projects');
-      console.error('Error fetching projects:', error);
-      toast.error(error.message || 'An error occurred while fetching projects')
+      setError(
+        error.response?.data?.message ||
+          "An error occurred while fetching projects",
+      );
+      console.error("Error fetching projects:", error);
+      toast.error(error.message || "An error occurred while fetching projects");
     } finally {
       setLoading(false);
     }
@@ -54,42 +62,77 @@ const AssignedProject = () => {
   }, []);
 
   const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    if (!dateString) return "No deadline";
+    const options = { day: "numeric", month: "short", year: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
-  const calculateProgress = (tasks) => {
-    if (!tasks || tasks.length === 0) return 0;
-    
-    const completedTasks = tasks.filter(task => 
-      task.task_status === 'Completed' || task.task_status === 'Resolved'
-    ).length;
-    
-    return Math.round((completedTasks / tasks.length) * 100);
-  };
-
-  const getDaysUntilDeadline = (dateString) => {
-    const today = new Date();
-    const deadline = new Date(dateString);
-    const diffTime = Math.abs(deadline - today);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  // Handle assign task click
-  const handleAssignTask = (project, e) => {
-    e.stopPropagation(); // Prevent triggering the card click
-    // Check if user has permission to assign tasks
-    // You can add your permission check logic here
-    const hasPermission = true; // Replace with actual permission check
-    
-    if (hasPermission) {
-      // Navigate to assign task page with project details
-      navigate(`/organization/emp-assigned-task/${project.project_id}`, {
-        state: { project: project }
-      });
-    } else {
-      toast.error("You don't have permission to assign tasks");
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return "status-open";
+      case "in-progress":
+      case "inprogress":
+        return "status-progress";
+      case "completed":
+        return "status-completed";
+      case "on-hold":
+        return "status-hold";
+      default:
+        return "status-open";
     }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return <FontAwesomeIcon icon={faClock} />;
+      case "in-progress":
+      case "inprogress":
+        return <FontAwesomeIcon icon={faTasks} />;
+      case "completed":
+        return <FontAwesomeIcon icon={faCheckCircle} />;
+      default:
+        return <FontAwesomeIcon icon={faExclamationCircle} />;
+    }
+  };
+
+  const getDaysRemaining = (endDate) => {
+    if (!endDate) return null;
+    const today = new Date();
+    const deadline = new Date(endDate);
+    const diffTime = deadline - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return "Overdue";
+    if (diffDays === 0) return "Today";
+    return `${diffDays} days left`;
+  };
+
+  const getProgressPercentage = (startDate, endDate) => {
+    if (!startDate || !endDate) return null;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+    
+    if (today < start) return 0;
+    if (today > end) return 100;
+    
+    const totalDuration = end - start;
+    const elapsed = today - start;
+    const percentage = (elapsed / totalDuration) * 100;
+    
+    return Math.min(Math.max(Math.round(percentage), 0), 100);
+  };
+
+  // Handle view project click
+  const handleViewProject = (project, e) => {
+    e.stopPropagation();
+    // navigate(`/organization/workspace/${project.id}`, {
+    //   state: { project: project }
+    // });
+    window.open(`/organization/workspace/${project.id}`, "_blank");
   };
 
   if (loading) {
@@ -107,9 +150,8 @@ const AssignedProject = () => {
               <div className="skeleton-title"></div>
               <div className="skeleton-code"></div>
               <div className="skeleton-description"></div>
-              <div className="skeleton-description"></div>
-              <div className="skeleton-stats"></div>
-              <div className="skeleton-progress"></div>
+              <div className="skeleton-description-short"></div>
+              <div className="skeleton-dates"></div>
               <div className="skeleton-footer"></div>
             </div>
           ))}
@@ -148,93 +190,94 @@ const AssignedProject = () => {
   return (
     <div className="assigned-projects-container">
       <div className="projects-header">
-        <h2>My Projects</h2>
+        <div className="header-left">
+          <h2>My Projects</h2>
+          {totalProjects > 0 && (
+            <div className="projects-summary">
+              <div className="total-projects">{totalProjects} Projects</div>
+            </div>
+          )}
+        </div>
       </div>
-      
+
       <div className="projects-grid">
         {projects.map((project) => {
-          const progress = calculateProgress(project.tasks);
-          const totalTasks = project.tasks?.length || 0;
-          const completedTasks = project.tasks?.filter(task => 
-            task.task_status === 'Completed' || task.task_status === 'Resolved'
-          ).length || 0;
-          
-          const hasDeadline = project.tasks && project.tasks.length > 0 && project.tasks[0].expected_end_date;
-          const daysUntilDeadline = hasDeadline ? 
-            getDaysUntilDeadline(project.tasks[0].expected_end_date) : null;
-          
-          // Check if user has assign permission (you can add logic based on project_role or other conditions)
-          const hasAssignPermission = project.permission === 'both' || project.permission === 'assign';
+          const daysRemaining = getDaysRemaining(project.project_end_date);
+          const progress = getProgressPercentage(project.project_start_date, project.project_end_date);
+          const isOverdue = daysRemaining === "Overdue";
+
           return (
-            <div
-              className="project-card"
-              key={project.project_id}
-            >
+            <div className="project-card" key={project.id}>
               <div className="card-header">
-                <span className={`status-badge ${project.project_status}`}>
-                  {project.project_status}
-                </span>
-                
-                {/* Assign Task Button */}
-                {hasAssignPermission && (
-                <button 
-                  className="assign-task-btn"
-                  onClick={(e) => handleAssignTask(project, e)}
-                  title="Assign task to other employees"
-                >
-                  <FontAwesomeIcon icon={faUserPlus} />
-                  <span>Assign Task</span>
-                </button>
-                )}
+                <div className={`status-badge ${getStatusColor(project.status)}`}>
+                  {getStatusIcon(project.status)}
+                  <span>{project.status || "Open"}</span>
+                </div>
+                <div className="project-identifier">
+                  <FontAwesomeIcon icon={faBuilding} />
+                  <span>{project.identifier}</span>
+                </div>
               </div>
-              
+
               <div className="card-content">
-                <h3 className="project-title" title={project.project_title}>
-                  {project.project_title}
+                <h3 className="project-title" title={project.title}>
+                  {project.title}
                 </h3>
-                <p className="project-code">{project.project_code}</p>
                 
+                {/* <div className="project-code">
+                  <span className="code-label">Project ID:</span>
+                  <span className="code-value">{project.emid}</span>
+                </div> */}
+
                 <p className="project-description">
-                  {project.project_description || "No description available"}
+                  {project.description || "No description available"}
                 </p>
-                
-                <div className="project-stats">
-                  <div className="stat-item">
-                    <FontAwesomeIcon icon={faTasks} />
-                    <span>{completedTasks}/{totalTasks} tasks</span>
+
+                <div className="project-dates">
+                  <div className="date-item">
+                    <FontAwesomeIcon icon={faCalendarDays} />
+                    <span>
+                      Start: <strong>{formatDate(project.project_start_date)}</strong>
+                    </span>
                   </div>
-                  
-                  {hasDeadline && (
-                    <div className={`stat-item ${daysUntilDeadline <= 3 ? 'urgent' : ''}`}>
-                      <FontAwesomeIcon icon={daysUntilDeadline <= 3 ? faClock : faCalendarDays} />
-                      <span>{formatDate(project.tasks[0].expected_end_date)}</span>
+                  <div className="date-item">
+                    <FontAwesomeIcon icon={faCalendarDays} />
+                    <span>
+                      End: <strong>{formatDate(project.project_end_date)}</strong>
+                    </span>
+                  </div>
+                </div>
+
+                {/* {progress !== null && (
+                  <div className="project-progress">
+                    <div className="progress-header">
+                      <span className="progress-label">Project Progress</span>
+                      <span className={`progress-value ${isOverdue ? "overdue" : ""}`}>
+                        {daysRemaining}
+                      </span>
                     </div>
-                  )}
-                </div>
-                
-                <div className="progress-container">
-                  <div className="progress-labels">
-                    <span>Progress</span>
-                    <span>{progress}%</span>
+                    <div className="progress-bar-container">
+                      <div 
+                        className={`progress-bar ${isOverdue ? "overdue" : ""}`}
+                        style={{ width: `${progress}%` }}
+                      >
+                        <span className="progress-percentage">{progress}%</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="progress-bar">
-                    <div 
-                      className={`progress-fill ${progress < 30 ? 'low' : progress < 70 ? 'medium' : 'high'}`}
-                      style={{ width: `${progress}%` }}
-                    ></div>
-                  </div>
-                </div>
+                )} */}
               </div>
-              
+
               <div className="card-footer">
-                <div className="role-info">
+                <div className="created-info">
                   <FontAwesomeIcon icon={faUser} />
-                  <span>Role: <strong>{project.project_role}</strong></span>
+                  <span>
+                    Created: <strong>ID {project.createdBy}</strong>
+                  </span>
                 </div>
                 <div 
-                  className="view-project" 
-                  onClick={() => navigate(`/organization/assigned-project/${project.project_id}`)}
-                  style={{cursor:"pointer"}}
+                  className="view-project"
+                  onClick={(e) => handleViewProject(project, e)}
                 >
                   <span>View Project</span>
                   <FontAwesomeIcon icon={faArrowRight} />

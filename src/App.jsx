@@ -44,11 +44,18 @@ import AssignedModule from "./pages/employee/project/AssignedModule";
 import EmpAssignedModule from "./component/task/EmpAssignedModule";
 import ModuleDetailsPage from "./component/task/ModuleDetailsPage";
 import { generateToken } from "./utils/generateToken";
+import EmpRollMaster from "./pages/employee/emp_roll/EmpRollMaster";
+import EmpProjectPermissionMaster from "./pages/employee/emp_roll/EmpProjectPermissionMaster";
+import EmpPermissionList from "./pages/employee/emp_roll/EmpPermissionList";
+import CreateModule from "./component/task/CreateModule";
+import EmpAssignTasks from "./pages/employee/project/EmpAssignTasks";
+import EmpAdminViewTask from "./pages/employee/project/EmpAdminViewTask";
+import WorkspacePage from "./pages/employee/project/WorkspacePage";
+import WorkspaceLayout from "./layout/WorkspaceLayout";
 
 const App = () => {
   const { isAuthenticated } = useContext(AuthContext);
 
- 
   return (
     <>
       <ToastContainer />
@@ -235,6 +242,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+            {/* Assigned Projects Route  */}
             <Route
               path="assigned-project"
               element={
@@ -251,6 +260,18 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="assigned-task/:projectId"
+              element={
+                <ProtectedRoute>
+                  <EmpAssignTasks />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><EmpAdminViewTask /></ProtectedRoute>} /> */}
+            {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><WorkspacePage /></ProtectedRoute>} /> */}
+
             <Route
               path="assigned-project/:projectId/module/:moduleId/tasks"
               element={
@@ -285,10 +306,56 @@ const App = () => {
               }
             />
             <Route
-              path="emp-assigned-module/:id"
+              path="emp-add-module/:p_id"
+              element={
+                <ProtectedRoute>
+                  {/* <EmpAssignedModule /> */}
+                  <CreateModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="emp-assigned-module/:p_id/:m_id"
               element={
                 <ProtectedRoute>
                   <EmpAssignedModule />
+                  {/* <CreateModule/> */}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="master-roll"
+              element={
+                <ProtectedRoute>
+                  <EmpRollMaster />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="project-permission"
+              element={
+                <ProtectedRoute>
+                  <EmpProjectPermissionMaster />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="permission-list"
+              element={
+                <ProtectedRoute>
+                  <EmpPermissionList />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+              {/* Workspace Route */}
+          <Route path="/organization" element={<WorkspaceLayout />}>
+            <Route
+              path="workspace/:projectId"
+              element={
+                <ProtectedRoute>
+                  <WorkspacePage />
                 </ProtectedRoute>
               }
             />
