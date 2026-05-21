@@ -368,3 +368,220 @@
     text-align: center;
   }
 }
+
+/* Additional styles for group permissions */
+
+/* Loading small */
+.pp-loading-small {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pp-loading-small svg {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Head Actions */
+.pp-head-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Permission Groups */
+.pp-perm-groups {
+  padding: 8px;
+}
+
+.pp-perm-group {
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+
+.pp-perm-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pp-perm-group-header:hover {
+  background: #f3f4f6;
+}
+
+.pp-group-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pp-group-icon {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  background: rgba(255, 144, 47, 0.1);
+  border-radius: 8px;
+  color: #FF902F;
+}
+
+.pp-group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 2px 0;
+}
+
+.pp-group-count {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.pp-group-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pp-group-select-btn {
+  padding: 4px 12px;
+  border: 1px solid #FF902F;
+  background: transparent;
+  color: #FF902F;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pp-group-select-btn:hover {
+  background: #FF902F;
+  color: white;
+}
+
+.pp-group-arrow {
+  color: #9ca3af;
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+/* Permission Group Content */
+.pp-perm-group-content {
+  padding: 16px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Updated Checkbox for FontAwesome icons */
+.pp-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  background: #ffffff;
+}
+
+.pp-checkbox svg {
+  width: 12px;
+  height: 12px;
+  color: white;
+}
+
+.pp-checkbox.checked {
+  background: #FF902F;
+  border-color: #FF902F;
+}
+
+/* Footer Stats */
+.pp-footer-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.pp-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pp-stat-icon {
+  font-size: 14px;
+}
+
+.pp-stat-item:first-child .pp-stat-icon {
+  color: #10b981;
+}
+
+.pp-stat-item:last-child .pp-stat-icon {
+  color: #ef4444;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pp-perm-group-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .pp-group-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .pp-group-select-btn {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .pp-footer-stats {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .pp-perm-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pp-group-info {
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .pp-perm-group-header {
+    text-align: center;
+  }
+}

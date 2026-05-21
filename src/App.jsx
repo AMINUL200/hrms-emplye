@@ -52,6 +52,8 @@ import EmpAssignTasks from "./pages/employee/project/EmpAssignTasks";
 import EmpAdminViewTask from "./pages/employee/project/EmpAdminViewTask";
 import WorkspacePage from "./pages/employee/project/WorkspacePage";
 import WorkspaceLayout from "./layout/WorkspaceLayout";
+import EmpCreateProject from "./pages/employee/project/EmpCreateProject";
+import AssignWorkItem from "./component/task/AssignWorkItem";
 
 const App = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -252,14 +254,17 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+            <Route path="create-project" element={<ProtectedRoute><EmpCreateProject /></ProtectedRoute>} />
+
+
+            {/* <Route
               path="assigned-project/:projectId"
               element={
                 <ProtectedRoute>
                   <AssignedModule />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             <Route
               path="assigned-task/:projectId"
@@ -271,15 +276,23 @@ const App = () => {
             />
             {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><EmpAdminViewTask /></ProtectedRoute>} /> */}
             {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><WorkspacePage /></ProtectedRoute>} /> */}
+             {/* <Route
+              path="emp-assigned-task/:id"
+              element={
+                <ProtectedRoute>
+                  <EmpAssignedTask />
+                </ProtectedRoute>
+              }
+            /> */}
 
-            <Route
+            {/* <Route
               path="assigned-project/:projectId/module/:moduleId/tasks"
               element={
                 <ProtectedRoute>
                   <ModuleDetailsPage />
                 </ProtectedRoute>
               }
-            />
+            /> */}
             {/* <Route path="assigned-project/:id" element={<ProtectedRoute><ViewProjectPage /></ProtectedRoute>} /> */}
             <Route
               path="message-center"
@@ -297,14 +310,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="emp-assigned-task/:id"
-              element={
-                <ProtectedRoute>
-                  <EmpAssignedTask />
-                </ProtectedRoute>
-              }
-            />
+           
             <Route
               path="emp-add-module/:p_id"
               element={
@@ -314,6 +320,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="emp-assign-work-item/:p_id" element={<ProtectedRoute><AssignWorkItem /></ProtectedRoute>} />
             <Route
               path="emp-assigned-module/:p_id/:m_id"
               element={

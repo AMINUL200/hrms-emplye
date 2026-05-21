@@ -11,6 +11,10 @@ import {
   faBuilding,
   faCheckCircle,
   faExclamationCircle,
+  faEllipsisV,
+  faTrash,
+  faPlus,
+  faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -24,21 +28,39 @@ const AssignedProject = () => {
   const [projects, setProjects] = useState([]);
   const [totalProjects, setTotalProjects] = useState(0);
   const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const navigate = useNavigate();
 
+  // Check if user has specific permission for a project
+  const hasPermission = (project, permissionName) => {
+    if (!project.roles || project.roles.length === 0) return false;
+    
+    return project.roles.some(role => 
+      role.permissions && role.permissions.some(permission => 
+        permission.name === permissionName
+      )
+    );
+  };
+
+  // Check if user has create permission on any project (for global create button)
+  const hasAnyCreatePermission = () => {
+    return projects.some(project => hasPermission(project, "create_project"));
+  };
+
+  // Fetch projects data
   const fetchProjectsData = async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${api_url}/permission-wise-project`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
-          t: Date.now(), // prevent caching
+          t: Date.now(),
         },
       });
       console.log("Permission-wise projects data:", res.data);
 
       if (res.data.status === 1) {
-        // Extract projects from the response
         const projectList = res.data.data || [];
         setProjects(projectList);
         setTotalProjects(projectList.length);
@@ -55,6 +77,39 @@ const AssignedProject = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Delete project
+  const handleDeleteProject = async (project) => {
+    try {
+      const response = await axios.delete(`${api_url}/projects/${project.project.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (response.data.status === 1) {
+        toast.success("Project deleted successfully");
+        fetchProjectsData(); // Refresh the list
+        setDeleteConfirm(null);
+        setMenuOpen(null);
+      } else {
+        toast.error(response.data.message || "Failed to delete project");
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error(error.response?.data?.message || "An error occurred while deleting project");
+    }
+  };
+
+  // Navigate to edit project page
+  const handleEditProject = (project) => {
+    navigate(`/organization/create-project?update=${project.project.id}`, {
+      state: { project: project.project }
+    });
+  };
+
+  // Navigate to create project page
+  const handleCreateProject = () => {
+    navigate("/organization/create-project");
   };
 
   useEffect(() => {
@@ -129,11 +184,25 @@ const AssignedProject = () => {
   // Handle view project click
   const handleViewProject = (project, e) => {
     e.stopPropagation();
-    // navigate(`/organization/workspace/${project.id}`, {
-    //   state: { project: project }
-    // });
-    window.open(`/organization/workspace/${project.id}`, "_blank");
+    window.open(`/organization/workspace/${project.project.id}`, "_blank");
   };
+
+  // Toggle menu for a specific project
+  const toggleMenu = (projectId, e) => {
+    e.stopPropagation();
+    setMenuOpen(menuOpen === projectId ? null : projectId);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setMenuOpen(null);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -178,6 +247,17 @@ const AssignedProject = () => {
   if (!projects || projects.length === 0) {
     return (
       <div className="assigned-projects-container">
+        {hasAnyCreatePermission() && (
+          <div className="projects-header">
+            <div className="header-left">
+              <h2>My Projects</h2>
+              <button className="create-project-btn" onClick={handleCreateProject}>
+                <FontAwesomeIcon icon={faPlus} />
+                <span>Create Project</span>
+              </button>
+            </div>
+          </div>
+        )}
         <div className="empty-state">
           <div className="empty-icon">📋</div>
           <h3>No projects assigned</h3>
@@ -198,13 +278,22 @@ const AssignedProject = () => {
             </div>
           )}
         </div>
+        {hasAnyCreatePermission() && (
+          <button className="create-project-btn" onClick={handleCreateProject}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Create Project</span>
+          </button>
+        )}
       </div>
 
       <div className="projects-grid">
-        {projects.map((project) => {
+        {projects.map((item) => {
+          const project = item.project;
           const daysRemaining = getDaysRemaining(project.project_end_date);
           const progress = getProgressPercentage(project.project_start_date, project.project_end_date);
           const isOverdue = daysRemaining === "Overdue";
+          const canDelete = hasPermission(item, "delete_project");
+          const canUpdate = hasPermission(item, "update_project");
 
           return (
             <div className="project-card" key={project.id}>
@@ -213,9 +302,43 @@ const AssignedProject = () => {
                   {getStatusIcon(project.status)}
                   <span>{project.status || "Open"}</span>
                 </div>
-                <div className="project-identifier">
-                  <FontAwesomeIcon icon={faBuilding} />
-                  <span>{project.identifier}</span>
+                <div className="header-right-actions">
+                  <div className="project-identifier">
+                    <FontAwesomeIcon icon={faBuilding} />
+                    <span>{project.identifier}</span>
+                  </div>
+                  {(canDelete || canUpdate) && (
+                    <div className="card-menu-container">
+                      <button 
+                        className="menu-trigger"
+                        onClick={(e) => toggleMenu(project.id, e)}
+                      >
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </button>
+                      {menuOpen === project.id && (
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                          {canUpdate && (
+                            <button 
+                              className="menu-item edit"
+                              onClick={() => handleEditProject(item)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                              <span>Edit Project</span>
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button 
+                              className="menu-item delete"
+                              onClick={() => setDeleteConfirm(item)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                              <span>Delete Project</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -223,11 +346,6 @@ const AssignedProject = () => {
                 <h3 className="project-title" title={project.title}>
                   {project.title}
                 </h3>
-                
-                {/* <div className="project-code">
-                  <span className="code-label">Project ID:</span>
-                  <span className="code-value">{project.emid}</span>
-                </div> */}
 
                 <p className="project-description">
                   {project.description || "No description available"}
@@ -247,37 +365,18 @@ const AssignedProject = () => {
                     </span>
                   </div>
                 </div>
-
-                {/* {progress !== null && (
-                  <div className="project-progress">
-                    <div className="progress-header">
-                      <span className="progress-label">Project Progress</span>
-                      <span className={`progress-value ${isOverdue ? "overdue" : ""}`}>
-                        {daysRemaining}
-                      </span>
-                    </div>
-                    <div className="progress-bar-container">
-                      <div 
-                        className={`progress-bar ${isOverdue ? "overdue" : ""}`}
-                        style={{ width: `${progress}%` }}
-                      >
-                        <span className="progress-percentage">{progress}%</span>
-                      </div>
-                    </div>
-                  </div>
-                )} */}
               </div>
 
               <div className="card-footer">
                 <div className="created-info">
                   <FontAwesomeIcon icon={faUser} />
                   <span>
-                    Created: <strong>ID {project.createdBy}</strong>
+                    Created by: <strong>ID {project.createdBy}</strong>
                   </span>
                 </div>
                 <div 
                   className="view-project"
-                  onClick={(e) => handleViewProject(project, e)}
+                  onClick={(e) => handleViewProject(item, e)}
                 >
                   <span>View Project</span>
                   <FontAwesomeIcon icon={faArrowRight} />
@@ -287,6 +386,30 @@ const AssignedProject = () => {
           );
         })}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Project</h3>
+              <button className="modal-close" onClick={() => setDeleteConfirm(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete the project <strong>"{deleteConfirm.project.title}"</strong>?</p>
+              <p className="warning-text">This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-btn cancel" onClick={() => setDeleteConfirm(null)}>
+                Cancel
+              </button>
+              <button className="modal-btn delete" onClick={() => handleDeleteProject(deleteConfirm)}>
+                Delete Project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

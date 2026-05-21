@@ -1491,3 +1491,79 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     justify-content: center;
   }
 }
+
+/* Navigation to Assignment Page */
+.navigate-assignment-section {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.navigate-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.navigate-icon {
+  font-size: 2rem;
+  color: #0ea5e9;
+}
+
+.navigate-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.navigate-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.navigate-assign-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.navigate-assign-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+}
+
+@media (max-width: 768px) {
+  .navigate-assignment-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .navigate-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .navigate-assign-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

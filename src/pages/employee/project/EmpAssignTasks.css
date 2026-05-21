@@ -700,7 +700,7 @@
     transform: rotate(180deg);
 }
 
-.dropdown-menu {
+.emp-tasks-container .dropdown-menu {
     position: absolute;
     top: 100%;
     left: 0;

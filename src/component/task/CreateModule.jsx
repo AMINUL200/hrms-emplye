@@ -82,17 +82,6 @@ const CreateModule = () => {
   const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
   const [createdWorkItemId, setCreatedWorkItemId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  
-  // Separate assignment states (for existing work items)
-  const [workItemsList, setWorkItemsList] = useState([]);
-  const [showWorkItemSelector, setShowWorkItemSelector] = useState(false);
-  const [selectedWorkItem, setSelectedWorkItem] = useState(null);
-  const [selectedWorkItemId, setSelectedWorkItemId] = useState("");
-  const [expandedWorkItems, setExpandedWorkItems] = useState(new Set());
-  const [assignLoading, setAssignLoading] = useState(false);
-  const [separateAssignEmployees, setSeparateAssignEmployees] = useState([]);
-  const [separateSearchTerm, setSeparateSearchTerm] = useState("");
-  const [showSeparateEmployeeSelector, setShowSeparateEmployeeSelector] = useState(false);
 
   const typeOptions = [
     { value: "module", label: "Module", icon: faLayerGroup, color: "#4299e1" },
@@ -134,68 +123,7 @@ const CreateModule = () => {
     }
   };
 
-  // Fetch work items list for separate assignment
- const fetchWorkItemsList =
-  async () => {
-
-    try {
-
-      const response =
-        await axios.get(
-          `${api_url}/project-tree/${p_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-      console.log(
-        "WORK ITEM TREE:",
-        response.data
-      );
-
-      let workItems = [];
-
-      // TYPE 1
-      if (
-        response?.data?.data?.project
-          ?.modules
-      ) {
-
-        workItems =
-          response.data.data.project
-            .modules;
-
-      }
-
-      // TYPE 2
-      else if (
-        Array.isArray(
-          response?.data?.data
-        )
-      ) {
-
-        workItems =
-          response.data.data;
-
-      }
-
-      setWorkItemsList(workItems);
-
-    } catch (err) {
-
-      console.error(
-        "Error fetching work items:",
-        err
-      );
-
-    }
-};
-
-  // Fetch currently assigned employees for a work item (for separate assignment)
+  // Fetch currently assigned employees for a work item
   const fetchAssignedEmployeesForWorkItem = async (workItemId) => {
     try {
       const response = await axios.get(
@@ -211,7 +139,7 @@ const CreateModule = () => {
       if (response.data.status === 1) {
         const assigned = response.data.employees || [];
         setCurrentlyAssignedEmployees(assigned);
-        setSeparateAssignEmployees(assigned);
+        setSelectedEmployees(assigned);
         if (assigned.length > 0) {
           toast.info(`Found ${assigned.length} already assigned employee(s)`);
         }
@@ -219,7 +147,7 @@ const CreateModule = () => {
     } catch (err) {
       console.error("Error fetching assigned employees:", err);
       setCurrentlyAssignedEmployees([]);
-      setSeparateAssignEmployees([]);
+      setSelectedEmployees([]);
     }
   };
 
@@ -249,6 +177,9 @@ const CreateModule = () => {
             end_date: workItem.end_date ? workItem.end_date.split('T')[0] : "",
             status: workItem.status || "open",
           });
+          
+          // Fetch assigned employees for this work item
+          await fetchAssignedEmployeesForWorkItem(updateId);
         } else {
           toast.error("Failed to fetch work item details");
         }
@@ -263,86 +194,38 @@ const CreateModule = () => {
 
   // Fetch project tree for parent selection
   const fetchProjectTree = async () => {
+    if (isAddMode && formData.type !== "module") {
+      setFetchingData(true);
+      try {
+        const response = await axios.get(`${api_url}/project-tree/${p_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-  if (
-    isAddMode &&
-    formData.type !== "module"
-  ) {
+        console.log("PROJECT TREE:", response.data);
 
-    setFetchingData(true);
+        let treeItems = [];
 
-    try {
+        if (response?.data?.data?.project?.modules) {
+          treeItems = response.data.data.project.modules;
+        } else if (Array.isArray(response?.data?.data)) {
+          treeItems = response.data.data;
+        }
 
-      const response =
-        await axios.get(
-          `${api_url}/project-tree/${p_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-      console.log(
-        "PROJECT TREE:",
-        response.data
-      );
-
-      let treeItems = [];
-
-      // =========================
-      // TYPE 1
-      // =========================
-
-      if (
-        response?.data?.data?.project
-          ?.modules
-      ) {
-
-        treeItems =
-          response.data.data.project
-            .modules;
-
+        setProjectTree(treeItems);
+      } catch (err) {
+        console.error("Error fetching project tree:", err);
+      } finally {
+        setFetchingData(false);
       }
-
-      // =========================
-      // TYPE 2
-      // =========================
-
-      else if (
-        Array.isArray(
-          response?.data?.data
-        )
-      ) {
-
-        treeItems =
-          response.data.data;
-
-      }
-
-      setProjectTree(treeItems);
-
-    } catch (err) {
-
-      console.error(
-        "Error fetching project tree:",
-        err
-      );
-
-    } finally {
-
-      setFetchingData(false);
-
     }
-  }
-};
+  };
 
   useEffect(() => {
     if (token) {
       fetchMembers();
-      fetchWorkItemsList(); // Fetch work items for separate assignment
       
       if (!isAddMode && updateId) {
         // Edit mode - fetch existing work item
@@ -387,80 +270,7 @@ const CreateModule = () => {
     toast.info("Employee removed from selection");
   };
 
-  // Separate assignment - employee selection handlers
-  const handleSeparateEmployeeSelect = (employee) => {
-    if (!separateAssignEmployees.find(emp => emp.emp_code === employee.emp_code)) {
-      setSeparateAssignEmployees([...separateAssignEmployees, employee]);
-      toast.success(`${employee.emp_fname} ${employee.emp_lname} added`);
-    } else {
-      toast.info(`${employee.emp_fname} ${employee.emp_lname} is already selected`);
-    }
-  };
-
-  const handleSeparateRemoveEmployee = (empCode) => {
-    setSeparateAssignEmployees(separateAssignEmployees.filter(emp => emp.emp_code !== empCode));
-    toast.info("Employee removed from selection");
-  };
-
-  // Handle work item selection for separate assignment
-  const handleWorkItemSelect = async (workItem) => {
-    setSelectedWorkItem(workItem);
-    setSelectedWorkItemId(workItem.id);
-    setShowWorkItemSelector(false);
-    await fetchAssignedEmployeesForWorkItem(workItem.id);
-  };
-
-  // Separate assignment submit handler
-  const handleSeparateAssignment = async () => {
-    if (!selectedWorkItemId) {
-      toast.error("Please select a work item");
-      return;
-    }
-
-    if (separateAssignEmployees.length === 0) {
-      toast.error("Please select at least one employee to assign");
-      return;
-    }
-
-    setAssignLoading(true);
-    try {
-      const assignData = {
-        work_item_id: selectedWorkItemId,
-        employee_ids: separateAssignEmployees.map(emp => emp.emp_code)
-      };
-      
-      const response = await axios.post(
-        `${api_url}/assign-work-item`,
-        assignData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data.status === 1) {
-        toast.success(`${separateAssignEmployees.length} employee(s) assigned successfully!`);
-        // Reset separate assignment form
-        setSelectedWorkItem(null);
-        setSelectedWorkItemId("");
-        setSeparateAssignEmployees([]);
-        setCurrentlyAssignedEmployees([]);
-        // Refresh work items list
-        fetchWorkItemsList();
-      } else {
-        toast.warning("Employee assignment failed");
-      }
-    } catch (err) {
-      console.error("Error assigning employees:", err);
-      toast.error("Failed to assign employees");
-    } finally {
-      setAssignLoading(false);
-    }
-  };
-
-  // Assign employees to newly created work item
+  // Assign employees to work item
   const assignEmployees = async (workItemId) => {
     if (selectedEmployees.length === 0) return;
 
@@ -617,16 +427,14 @@ const CreateModule = () => {
     navigate(-1);
   };
 
+  const handleGoToAssignmentPage = () => {
+    // Navigate to the separate assignment page
+    navigate(`/organization/emp-assign-work-item/${p_id}`);
+  };
+
   const filteredEmployees = members.filter(member => {
     const fullName = `${member.emp_fname} ${member.emp_lname}`.toLowerCase();
     const searchLower = searchTerm.toLowerCase();
-    return fullName.includes(searchLower) || 
-           member.emp_code.toLowerCase().includes(searchLower);
-  });
-
-  const filteredSeparateEmployees = members.filter(member => {
-    const fullName = `${member.emp_fname} ${member.emp_lname}`.toLowerCase();
-    const searchLower = separateSearchTerm.toLowerCase();
     return fullName.includes(searchLower) || 
            member.emp_code.toLowerCase().includes(searchLower);
   });
@@ -643,67 +451,6 @@ const CreateModule = () => {
       newExpanded.add(nodeId);
     }
     setExpandedNodes(newExpanded);
-  };
-
-  const toggleWorkItemNode = (nodeId) => {
-    const newExpanded = new Set(expandedWorkItems);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
-    }
-    setExpandedWorkItems(newExpanded);
-  };
-
-  const renderWorkItemsTree = (items, level = 0) => {
-    return items.map((item) => (
-      <div key={item.id} style={{ marginLeft: `${level * 20}px` }}>
-        <div
-          className={`tree-node ${selectedWorkItem?.id === item.id ? "selected" : ""}`}
-          onClick={() => handleWorkItemSelect(item)}
-        >
-          <div className="tree-node-content">
-            {item.children && item.children.length > 0 && (
-              <button
-                className="tree-toggle"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleWorkItemNode(item.id);
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={
-                    expandedWorkItems.has(item.id) ? faChevronDown : faChevronRight
-                  }
-                />
-              </button>
-            )}
-            <FontAwesomeIcon
-              icon={
-                item.type === "module"
-                  ? faLayerGroup
-                  : item.type === "submodule"
-                    ? faSitemap
-                    : item.type === "task"
-                      ? faTasks
-                      : faList
-              }
-              className={`tree-icon type-${item.type}`}
-            />
-            <span className="tree-title">{item.title}</span>
-            <span className="tree-type">{item.type}</span>
-            <span className="tree-id">ID: {item.id}</span>
-          </div>
-        </div>
-        {item.children &&
-          item.children.length > 0 &&
-          expandedWorkItems.has(item.id) && (
-            <div className="tree-children">
-              {renderWorkItemsTree(item.children, level + 1)}
-            </div>
-          )}
-      </div>
-    ));
   };
 
   const renderTree = (items, level = 0) => {
@@ -1016,6 +763,9 @@ const CreateModule = () => {
                       <div key={employee.emp_code} className="selected-badge">
                         <span>{employee.emp_fname} {employee.emp_lname}</span>
                         <span className="employee-code-badge">{employee.emp_code}</span>
+                        {currentlyAssignedEmployees.some(emp => emp.emp_code === employee.emp_code) && (
+                          <span className="already-assigned-badge">Already Assigned</span>
+                        )}
                         <button
                           type="button"
                           className="remove-badge"
@@ -1090,6 +840,27 @@ const CreateModule = () => {
             </div>
           </div>
 
+          {/* Navigation to Separate Assignment Page */}
+          <div className="form-section">
+            <div className="navigate-assignment-section">
+              <div className="navigate-info">
+                <FontAwesomeIcon icon={faUserFriends} className="navigate-icon" />
+                <div>
+                  <h4>Want to assign employees to existing work items?</h4>
+                  <p>Go to the Employee Assignment page to manage assignments for modules, submodules, tasks, and subtasks</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="navigate-assign-btn"
+                onClick={handleGoToAssignmentPage}
+              >
+                <FontAwesomeIcon icon={faUserCheck} />
+                Go to Employee Assignment
+              </button>
+            </div>
+          </div>
+
           {/* Form Actions for Create/Update */}
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={handleBack}>
@@ -1110,194 +881,6 @@ const CreateModule = () => {
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Separate Employee Assignment Section (Bottom) */}
-      <div className="separate-assignment-wrapper">
-        <div className="separate-assignment-header">
-          <h2>
-            <FontAwesomeIcon icon={faUserFriends} />
-            Assign Employees to Existing Work Item
-          </h2>
-          <p>Select any module, submodule, task, or subtask to assign employees independently</p>
-        </div>
-
-        <div className="separate-assignment-content">
-          {/* Work Item Selection */}
-          <div className="form-section">
-            <h3 className="section-title-small">
-              <FontAwesomeIcon icon={faSitemap} />
-              Select Work Item
-            </h3>
-
-            <div className="form-group full-width">
-              <div className="parent-selector">
-                <input
-                  type="text"
-                  value={
-                    selectedWorkItem
-                      ? `${selectedWorkItem.title} (ID: ${selectedWorkItem.id}) - ${selectedWorkItem.type}`
-                      : selectedWorkItemId
-                  }
-                  onClick={() => setShowWorkItemSelector(!showWorkItemSelector)}
-                  placeholder="Select a work item (Module, Submodule, Task, or Subtask)"
-                  readOnly
-                  className="parent-input"
-                />
-                {showWorkItemSelector && (
-                  <div className="parent-dropdown">
-                    <div className="parent-dropdown-header">
-                      <h4>Select Work Item</h4>
-                      <button
-                        type="button"
-                        onClick={() => setShowWorkItemSelector(false)}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="parent-tree">
-                      {workItemsList.length > 0 ? (
-                        renderWorkItemsTree(workItemsList)
-                      ) : (
-                        <div className="no-data">No work items available</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <small className="form-hint">
-                Select the module, submodule, task, or subtask to assign employees to
-              </small>
-            </div>
-          </div>
-
-          {/* Currently Assigned Info */}
-          {currentlyAssignedEmployees.length > 0 && (
-            <div className="info-banner">
-              <FontAwesomeIcon icon={faUsers} />
-              <span>This work item currently has {currentlyAssignedEmployees.length} assigned employee(s)</span>
-            </div>
-          )}
-
-          {/* Separate Assignment - Employee Selection */}
-          <div className="form-section">
-            <h3 className="section-title-small">
-              <FontAwesomeIcon icon={faUserPlus} />
-              Select Employees to Assign
-            </h3>
-
-            <div className="employee-assignment-area">
-              {/* Selected Employees Summary for Separate Assignment */}
-              {separateAssignEmployees.length > 0 && (
-                <div className="selected-employees-summary">
-                  <h3>
-                    <FontAwesomeIcon icon={faCheckCircle} />
-                    Selected Employees ({separateAssignEmployees.length})
-                  </h3>
-                  <div className="selected-badges">
-                    {separateAssignEmployees.map((employee) => (
-                      <div key={employee.emp_code} className="selected-badge">
-                        <span>{employee.emp_fname} {employee.emp_lname}</span>
-                        <span className="employee-code-badge">{employee.emp_code}</span>
-                        {currentlyAssignedEmployees.some(emp => emp.emp_code === employee.emp_code) && (
-                          <span className="already-assigned-badge">Already Assigned</span>
-                        )}
-                        <button
-                          type="button"
-                          className="remove-badge"
-                          onClick={() => handleSeparateRemoveEmployee(employee.emp_code)}
-                        >
-                          <FontAwesomeIcon icon={faTimes} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Search and Add Employees for Separate Assignment */}
-              <div className="add-employee-section">
-                <div className="search-box-small">
-                  <FontAwesomeIcon icon={faSearch} className="search-icon-small" />
-                  <input
-                    type="text"
-                    placeholder="Search employees by name or code..."
-                    value={separateSearchTerm}
-                    onChange={(e) => setSeparateSearchTerm(e.target.value)}
-                    className="search-input-small"
-                  />
-                </div>
-                
-                <div className="available-employees-list">
-                  <h4>Available Employees</h4>
-                  <div className="employees-mini-grid">
-                    {filteredSeparateEmployees.slice(0, 5).map((employee) => {
-                      const isSelected = separateAssignEmployees.some(emp => emp.emp_code === employee.emp_code);
-                      return (
-                        <div key={employee.emp_code} className="employee-mini-card">
-                          <div className="employee-mini-info">
-                            <div className="employee-mini-avatar">
-                              {employee.emp_fname?.charAt(0) || 'U'}
-                            </div>
-                            <div>
-                              <div className="employee-mini-name">
-                                {employee.emp_fname} {employee.emp_lname}
-                              </div>
-                              <div className="employee-mini-code">{employee.emp_code}</div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            className={`assign-mini-btn ${isSelected ? 'assigned' : ''}`}
-                            onClick={() => handleSeparateEmployeeSelect(employee)}
-                            disabled={isSelected}
-                          >
-                            {isSelected ? (
-                              <FontAwesomeIcon icon={faCheckCircle} />
-                            ) : (
-                              <FontAwesomeIcon icon={faUserPlus} />
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {members.length > 5 && (
-                    <button
-                      type="button"
-                      className="view-all-btn"
-                      onClick={() => setShowSeparateEmployeeSelector(true)}
-                    >
-                      View all {members.length} employees
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Separate Assignment Action Buttons */}
-          <div className="separate-assign-actions">
-            <button 
-              type="button" 
-              className="separate-assign-btn"
-              onClick={handleSeparateAssignment}
-              disabled={assignLoading || !selectedWorkItemId || separateAssignEmployees.length === 0}
-            >
-              {assignLoading ? (
-                <>
-                  <FontAwesomeIcon icon={faSpinner} spin />
-                  Assigning...
-                </>
-              ) : (
-                <>
-                  <FontAwesomeIcon icon={faUserCheck} />
-                  Assign Employees to Selected Work Item
-                </>
-              )}
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Full Employee Selection Modal for Main Form */}
@@ -1369,81 +952,6 @@ const CreateModule = () => {
                 onClick={() => setShowEmployeeSelector(false)}
               >
                 Done ({selectedEmployees.length} selected)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Full Employee Selection Modal for Separate Assignment */}
-      {showSeparateEmployeeSelector && (
-        <div className="modal-overlay" onClick={() => setShowSeparateEmployeeSelector(false)}>
-          <div className="employee-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="employee-modal-header">
-              <h3>
-                <FontAwesomeIcon icon={faUserPlus} />
-                Select Employees to Assign
-              </h3>
-              <button onClick={() => setShowSeparateEmployeeSelector(false)}>✕</button>
-            </div>
-            <div className="employee-modal-search">
-              <FontAwesomeIcon icon={faSearch} />
-              <input
-                type="text"
-                placeholder="Search employees..."
-                value={separateSearchTerm}
-                onChange={(e) => setSeparateSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="employee-modal-list">
-              {filteredSeparateEmployees.map((employee) => {
-                const isSelected = separateAssignEmployees.some(emp => emp.emp_code === employee.emp_code);
-                return (
-                  <div key={employee.emp_code} className="employee-modal-item">
-                    <div className="employee-modal-info">
-                      <div className="employee-modal-avatar">
-                        {employee.emp_fname?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <div className="employee-modal-name">
-                          {employee.emp_fname} {employee.emp_lname}
-                        </div>
-                        <div className="employee-modal-code">{employee.emp_code}</div>
-                      </div>
-                    </div>
-                    <button
-                      className={`employee-modal-select ${isSelected ? 'selected' : ''}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          handleSeparateRemoveEmployee(employee.emp_code);
-                        } else {
-                          handleSeparateEmployeeSelect(employee);
-                        }
-                      }}
-                    >
-                      {isSelected ? (
-                        <>
-                          <FontAwesomeIcon icon={faCheckCircle} />
-                          Selected
-                        </>
-                      ) : (
-                        <>
-                          <FontAwesomeIcon icon={faUserPlus} />
-                          Select
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="employee-modal-footer">
-              <button onClick={() => setShowSeparateEmployeeSelector(false)}>Close</button>
-              <button 
-                className="confirm-btn"
-                onClick={() => setShowSeparateEmployeeSelector(false)}
-              >
-                Done ({separateAssignEmployees.length} selected)
               </button>
             </div>
           </div>

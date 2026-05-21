@@ -1189,3 +1189,68 @@
     min-width: 600px;
   }
 }
+
+
+/* ========================================
+   ACTION BUTTONS
+======================================== */
+
+.workspace-action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.workspace-create-btn,
+.workspace-assign-btn {
+  border: none;
+  outline: none;
+
+  padding: 14px 24px;
+
+  border-radius: 14px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.workspace-create-btn {
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #1d4ed8
+  );
+
+  color: white;
+
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+}
+
+.workspace-create-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+}
+
+.workspace-assign-btn {
+  background: white;
+
+  color: #2563eb;
+
+  border: 1px solid #dbeafe;
+}
+
+.workspace-assign-btn:hover {
+  background: #eff6ff;
+
+  transform: translateY(-2px);
+}

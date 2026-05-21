@@ -418,6 +418,48 @@ const WorkspacePage = () => {
               </div>
             </div>
 
+            {/* ========================================
+    ACTION BUTTONS
+======================================== */}
+
+            <div className="workspace-action-buttons">
+              {/* CREATE BUTTON */}
+
+              <button
+                className="workspace-create-btn"
+                onClick={() =>
+                  navigate(
+                    `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}`,
+                  )
+                }
+              >
+                <FontAwesomeIcon icon={faLayerGroup} />
+
+                {selectedItem.type === "module" ||
+                selectedItem.type === "submodule"
+                  ? "Create Module"
+                  : "Create Task"}
+              </button>
+
+              {/* ASSIGNED BUTTON */}
+
+              <button
+                className="workspace-assign-btn"
+                onClick={() =>
+                  navigate(
+                    `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}`,
+                  )
+                }
+              >
+                <FontAwesomeIcon icon={faUsers} />
+
+                {selectedItem.type === "module" ||
+                selectedItem.type === "submodule"
+                  ? "Assigned Module"
+                  : "Assigned Task"}
+              </button>
+            </div>
+
             {details?.description && (
               <div className="description-box">
                 <h4>
