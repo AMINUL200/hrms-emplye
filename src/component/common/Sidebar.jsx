@@ -125,32 +125,32 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       icon: faProjectDiagram,
       type: "single",
     },
-    {
-      key: "project-mangement",
-      title: "Project Management",
-      icon: faProjectDiagram,
-      type: "dropdown",
-      submenu: [
-        {
-          title: "Master Roll",
-          path: "/organization/master-roll",
-          icon: faListAlt,
-          type: "single",
-        },
-        {
-          title: "Project Permission Master",
-          path: "/organization/project-permission",
-          icon: faListAlt,
-          type: "single",
-        },
-        {
-          title: "Permission List",
-          path: "/organization/permission-list",
-          icon: faListAlt,
-          type: "single",
-        }
-      ]
-    },
+    // {
+    //   key: "project-mangement",
+    //   title: "Project Management",
+    //   icon: faProjectDiagram,
+    //   type: "dropdown",
+    //   submenu: [
+    //     {
+    //       title: "Master Roll",
+    //       path: "/organization/master-roll",
+    //       icon: faListAlt,
+    //       type: "single",
+    //     },
+    //     {
+    //       title: "Project Permission Master",
+    //       path: "/organization/project-permission",
+    //       icon: faListAlt,
+    //       type: "single",
+    //     },
+    //     {
+    //       title: "Permission List",
+    //       path: "/organization/permission-list",
+    //       icon: faListAlt,
+    //       type: "single",
+    //     }
+    //   ]
+    // },
     {
       key: "calendar-holidays",
       title: "Calendar & Holidays",

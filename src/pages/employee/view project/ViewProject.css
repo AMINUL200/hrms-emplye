@@ -60,9 +60,9 @@ body {
   font-weight: 600;
 }
 
-.chat-header svg {
+/* .chat-header svg {
   color: var(--primary);
-}
+} */
 
 .chat-box {
   flex: 1;

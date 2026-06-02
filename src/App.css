@@ -1079,7 +1079,7 @@
 }
 
 /* Buttons */
-.close-btn {
+/* .close-btn {
     margin-top: 15px;
     width: 100%;
     padding: 10px;
@@ -1087,7 +1087,7 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
-}
+} */
 
 .submit-btn {
     background: linear-gradient(to right, #FF902F, #FC6075);

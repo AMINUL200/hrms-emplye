@@ -772,3 +772,94 @@
     margin: 16px;
   }
 }
+
+/* Add to AssignedProject.css - Master Roll Button Styles */
+
+/* Header Buttons Container */
+.assigned-projects-container .header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Master Roll Button */
+.assigned-projects-container .master-roll-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.assigned-projects-container .master-roll-btn svg {
+  font-size: 14px;
+}
+
+.assigned-projects-container .master-roll-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+/* Create Project Button */
+.assigned-projects-container .create-project-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ff902f 0%, #fc6075 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.assigned-projects-container .create-project-btn svg {
+  font-size: 14px;
+}
+
+.assigned-projects-container .create-project-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 144, 47, 0.3);
+}
+
+/* Update header-left to work with buttons */
+.assigned-projects-container .header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assigned-projects-container .projects-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .assigned-projects-container .header-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .assigned-projects-container .master-roll-btn,
+  .assigned-projects-container .create-project-btn {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .assigned-projects-container .header-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

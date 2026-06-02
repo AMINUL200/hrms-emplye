@@ -1567,3 +1567,59 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     justify-content: center;
   }
 }
+
+
+
+/* Auto-select badge styles */
+.auto-select-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #c6f6d5;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #22543d;
+  margin-left: auto;
+}
+
+.auto-select-badge svg {
+  color: #48bb78;
+  font-size: 0.875rem;
+}
+
+/* Parent input with value styling */
+.parent-input.has-value {
+  border-color: #48bb78;
+  background-color: #f0fff4;
+}
+
+.parent-input.has-value:hover {
+  border-color: #38a169;
+}
+
+/* Form hint with success indication */
+.form-hint svg {
+  margin-right: 4px;
+}
+
+/* Animation for auto-select */
+.tree-node.selected {
+  animation: highlight-pulse 0.5s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background-color: #ebf8ff;
+    border-left-color: #4299e1;
+  }
+  50% {
+    background-color: #bee3f8;
+    border-left-color: #3182ce;
+  }
+  100% {
+    background-color: #ebf8ff;
+    border-left-color: #4299e1;
+  }
+}

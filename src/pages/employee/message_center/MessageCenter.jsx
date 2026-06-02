@@ -3,10 +3,11 @@ import "./MessageCenter.css";
 import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
 import PageLoader from "../../../component/loader/PageLoader";
-import useProjectChatPusher from "../../../hooks/usePusherMessages";
+// import useProjectChatPusher from "../../../hooks/usePusherMessages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
+import { listenProjectMessages } from "../../../service/projectChatService";
 
 // Helper function to get file type
 const getFileType = (filename) => {
@@ -482,148 +483,192 @@ const MessageCenter = () => {
       return `Reply to ${replyingTo.user_name || replyingTo.employee_code}...`;
     return `Message in ${selectedProject?.project_name || "project"}...`;
   };
-  useProjectChatPusher(
-    data?.emid,
-    selectedProject?.project_id,
-    (pusherData) => {
-      console.log("📨 Pusher callback received:", pusherData);
+  // useProjectChatPusher(
+  //   data?.emid,
+  //   selectedProject?.project_id,
+  //   (pusherData) => {
+  //     console.log("📨 Pusher callback received:", pusherData);
 
-      // 🚫 Ignore my own messages (avoid duplicates)
-      //   if (pusherData.data.emid === data?.emid) {
-      //     console.log("Ignoring own message");
-      //     return;
-      //   }
+  //     // 🚫 Ignore my own messages (avoid duplicates)
+  //     //   if (pusherData.data.emid === data?.emid) {
+  //     //     console.log("Ignoring own message");
+  //     //     return;
+  //     //   }
 
-      // Extract post data from Pusher response
-      const post = pusherData.data.post;
+  //     // Extract post data from Pusher response
+  //     const post = pusherData.data.post;
 
-      // Transform the message to match your expected format
-      const transformedMessage = {
-        id: post?.id,
-        message: post?.title || "", // Using title field from your data
-        employee_code: post?.employee_code,
-        user_name: `${post?.name}`, // Format name from employee code
-        created_at: post?.created_at,
-        file: post?.file,
-        title: post?.title,
-        project_id: post?.project_id || pusherData.project_id,
-        emid: post?.emid,
-        parent_id: post?.parent_id,
-      };
+  //     // Transform the message to match your expected format
+  //     const transformedMessage = {
+  //       id: post?.id,
+  //       message: post?.title || "", // Using title field from your data
+  //       employee_code: post?.employee_code,
+  //       user_name: `${post?.name}`, // Format name from employee code
+  //       created_at: post?.created_at,
+  //       file: post?.file,
+  //       title: post?.title,
+  //       project_id: post?.project_id || pusherData.project_id,
+  //       emid: post?.emid,
+  //       parent_id: post?.parent_id,
+  //     };
 
-      console.log("🔄 Transformed message:", transformedMessage);
+  //     console.log("🔄 Transformed message:", transformedMessage);
 
-      // Check if this message is for the currently selected project
-      const selectedId = Number(selectedProject?.project_id);
-      const incomingId = Number(transformedMessage.project_id);
+  //     // Check if this message is for the currently selected project
+  //     const selectedId = Number(selectedProject?.project_id);
+  //     const incomingId = Number(transformedMessage.project_id);
 
-      const isForSelectedProject = selectedId === incomingId;
+  //     const isForSelectedProject = selectedId === incomingId;
 
-      if (isForSelectedProject) {
-        /* =========================
-      1️⃣ Update OPEN CHAT
-    ========================== */
+  //     if (isForSelectedProject) {
+  //       /* =========================
+  //     1️⃣ Update OPEN CHAT
+  //   ========================== */
+  //       setSelectedProject((prev) => {
+  //         if (!prev) return prev;
+
+  //         // Check if message already exists to avoid duplicates
+  //         const messageExists = prev.messages.some(
+  //           (msg) => msg.id === transformedMessage.id,
+  //         );
+  //         if (messageExists) {
+  //           console.log("Message already exists in chat, skipping");
+  //           return prev;
+  //         }
+
+  //         return {
+  //           ...prev,
+  //           messages: [...prev.messages, transformedMessage],
+  //         };
+  //       });
+
+  //       /* =========================
+  //     2️⃣ Update LEFT SIDEBAR for the selected project
+  //   ========================== */
+  //       setProjects((prev) =>
+  //         prev.map((project) => {
+  //           if (project.project_id === selectedProject.project_id) {
+  //             // Update the selected project in sidebar
+  //             const messageExists = project.messages.some(
+  //               (msg) => msg.id === transformedMessage.id,
+  //             );
+  //             if (messageExists) return project;
+
+  //             return {
+  //               ...project,
+  //               lastMessage: `${
+  //                 transformedMessage.user_name
+  //               }: ${transformedMessage.message?.substring(0, 30)}${
+  //                 transformedMessage.message?.length > 30 ? "..." : ""
+  //               }`,
+  //               timestamp: "Just now",
+  //               unread: 0, // No unread since we're viewing it
+  //               messages: [...project.messages, transformedMessage],
+  //             };
+  //           }
+
+  //           // For other projects, increment unread count
+  //           if (project.project_id === transformedMessage.project_id) {
+  //             const messageExists = project.messages.some(
+  //               (msg) => msg.id === transformedMessage.id,
+  //             );
+  //             if (messageExists) return project;
+
+  //             return {
+  //               ...project,
+  //               lastMessage: `${
+  //                 transformedMessage.user_name
+  //               }: ${transformedMessage.message?.substring(0, 30)}${
+  //                 transformedMessage.message?.length > 30 ? "..." : ""
+  //               }`,
+  //               timestamp: "Just now",
+  //               unread: (project.unread || 0) + 1, // Increment unread count
+  //               messages: [...project.messages, transformedMessage],
+  //             };
+  //           }
+
+  //           return project;
+  //         }),
+  //       );
+  //     } else {
+  //       /* =========================
+  //     3️⃣ Message for a different project - update sidebar only
+  //   ========================== */
+  //       console.log(
+  //         `🔴 New message for project ${transformedMessage.project_id}, incrementing unread`,
+  //       );
+
+  //       setProjects((prev) =>
+  //         prev.map((project) => {
+  //           if (project.project_id === transformedMessage.project_id) {
+  //             // Check if message already exists
+  //             const messageExists = project.messages.some(
+  //               (msg) => msg.id === transformedMessage.id,
+  //             );
+  //             if (messageExists) return project;
+
+  //             return {
+  //               ...project,
+  //               lastMessage: `${
+  //                 transformedMessage.user_name
+  //               }: ${transformedMessage.message?.substring(0, 30)}${
+  //                 transformedMessage.message?.length > 30 ? "..." : ""
+  //               }`,
+  //               timestamp: "Just now",
+  //               unread: (project.unread || 0) + 1, // Increment unread count
+  //               messages: [...project.messages, transformedMessage],
+  //             };
+  //           }
+  //           return project;
+  //         }),
+  //       );
+  //     }
+  //   },
+  // );
+
+  useEffect(() => {
+    if (!selectedProject?.project_id) return;
+
+    const unsubscribe = listenProjectMessages(
+      selectedProject.project_id,
+      (firebaseMessage) => {
+        console.log("📨 Firebase Project Message:", firebaseMessage);
+
+        const transformedMessage = {
+          id: firebaseMessage.id,
+          message: firebaseMessage.message,
+          employee_code: firebaseMessage.employee_code,
+
+          user_name: firebaseMessage.employee_name,
+
+          created_at: firebaseMessage.created_at,
+
+          project_id: firebaseMessage.project_id,
+
+          parent_id: firebaseMessage.parent_id,
+
+          replies: firebaseMessage.replies || null,
+        };
+
         setSelectedProject((prev) => {
           if (!prev) return prev;
 
-          // Check if message already exists to avoid duplicates
-          const messageExists = prev.messages.some(
+          const exists = prev.messages.some(
             (msg) => msg.id === transformedMessage.id,
           );
-          if (messageExists) {
-            console.log("Message already exists in chat, skipping");
-            return prev;
-          }
+
+          if (exists) return prev;
 
           return {
             ...prev,
             messages: [...prev.messages, transformedMessage],
           };
         });
+      },
+    );
 
-        /* =========================
-      2️⃣ Update LEFT SIDEBAR for the selected project
-    ========================== */
-        setProjects((prev) =>
-          prev.map((project) => {
-            if (project.project_id === selectedProject.project_id) {
-              // Update the selected project in sidebar
-              const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id,
-              );
-              if (messageExists) return project;
-
-              return {
-                ...project,
-                lastMessage: `${
-                  transformedMessage.user_name
-                }: ${transformedMessage.message?.substring(0, 30)}${
-                  transformedMessage.message?.length > 30 ? "..." : ""
-                }`,
-                timestamp: "Just now",
-                unread: 0, // No unread since we're viewing it
-                messages: [...project.messages, transformedMessage],
-              };
-            }
-
-            // For other projects, increment unread count
-            if (project.project_id === transformedMessage.project_id) {
-              const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id,
-              );
-              if (messageExists) return project;
-
-              return {
-                ...project,
-                lastMessage: `${
-                  transformedMessage.user_name
-                }: ${transformedMessage.message?.substring(0, 30)}${
-                  transformedMessage.message?.length > 30 ? "..." : ""
-                }`,
-                timestamp: "Just now",
-                unread: (project.unread || 0) + 1, // Increment unread count
-                messages: [...project.messages, transformedMessage],
-              };
-            }
-
-            return project;
-          }),
-        );
-      } else {
-        /* =========================
-      3️⃣ Message for a different project - update sidebar only
-    ========================== */
-        console.log(
-          `🔴 New message for project ${transformedMessage.project_id}, incrementing unread`,
-        );
-
-        setProjects((prev) =>
-          prev.map((project) => {
-            if (project.project_id === transformedMessage.project_id) {
-              // Check if message already exists
-              const messageExists = project.messages.some(
-                (msg) => msg.id === transformedMessage.id,
-              );
-              if (messageExists) return project;
-
-              return {
-                ...project,
-                lastMessage: `${
-                  transformedMessage.user_name
-                }: ${transformedMessage.message?.substring(0, 30)}${
-                  transformedMessage.message?.length > 30 ? "..." : ""
-                }`,
-                timestamp: "Just now",
-                unread: (project.unread || 0) + 1, // Increment unread count
-                messages: [...project.messages, transformedMessage],
-              };
-            }
-            return project;
-          }),
-        );
-      }
-    },
-  );
+    return () => unsubscribe();
+  }, [selectedProject?.project_id]);
 
   if (loading) {
     return <PageLoader />;
@@ -984,6 +1029,7 @@ const MessageCenter = () => {
                               </div>
                             </div>
                           )}
+                          {console.log("Message replies:", message.replies)}
                           {message.replies && message.replies.length > 0 && (
                             <div className="message-replies">
                               {message.replies.map((reply) => (

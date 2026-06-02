@@ -1254,3 +1254,626 @@
 
   transform: translateY(-2px);
 }
+
+
+/* ========================================
+   WHATSAPP STYLE CHAT COMMENTS
+   All classes are scoped under .workspace-main
+======================================== */
+
+.workspace-main .comments-whatsapp-container {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  max-height: 600px;
+  overflow: hidden;
+}
+
+/* Chat Header */
+.workspace-main .chat-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #0022b9 0%, #128c7e 100%);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.workspace-main .chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.workspace-main .chat-header-icon {
+  font-size: 28px;
+}
+
+.workspace-main .chat-header-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.workspace-main .chat-header-info p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Chat Messages Area */
+.workspace-main .chat-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #efeae2;
+  background-image: radial-gradient(circle at 25% 40%, rgba(255, 255, 255, 0.1) 2%, transparent 2.5%);
+  background-size: 40px 40px;
+}
+
+/* Date Divider */
+.workspace-main .chat-date-divider {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.workspace-main .chat-date-divider span {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #54656f;
+  backdrop-filter: blur(4px);
+}
+
+/* Message Wrapper */
+.workspace-main .message-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  animation: messageSlideIn 0.3s ease;
+}
+
+.workspace-main .message-wrapper.message-own {
+  justify-content: flex-end;
+}
+
+.workspace-main .message-wrapper.message-other {
+  justify-content: flex-start;
+}
+
+.workspace-main .message-wrapper.message-reply {
+  margin-left: 40px;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Message Avatar */
+.workspace-main .message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #075e54 0%, #128c7e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.workspace-main .message-avatar-own {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Message Bubble Container */
+.workspace-main .message-bubble-container {
+  max-width: 70%;
+  position: relative;
+}
+
+/* Message Sender Name (for other messages) */
+.workspace-main .message-sender-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #075e54;
+  margin-bottom: 4px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.workspace-main .sender-role {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.workspace-main .sender-role.role-admin {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.workspace-main .sender-role.role-members {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Message Bubble */
+.workspace-main .message-bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.workspace-main .bubble-own {
+  background: #dcf8c5;
+  color: #1f2c3e;
+  border-bottom-right-radius: 4px;
+}
+
+.workspace-main .bubble-other {
+  background: white;
+  color: #1f2c3e;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Reply Context in Message */
+.workspace-main .message-reply-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: #667085;
+}
+
+.workspace-main .message-reply-context svg {
+  font-size: 10px;
+}
+
+.workspace-main .message-reply-context em {
+  font-style: normal;
+  font-weight: 500;
+  color: #075e54;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Message Text */
+.workspace-main .message-text {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Message Attachment */
+.workspace-main .message-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 12px;
+  color: #075e54;
+  transition: all 0.2s;
+}
+
+.workspace-main .message-attachment:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.workspace-main .message-attachment svg:first-child {
+  font-size: 16px;
+}
+
+/* Message Meta (Time & Status) */
+.workspace-main .message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #8696a0;
+}
+
+.workspace-main .message-status {
+  display: inline-flex;
+}
+
+.workspace-main .message-status svg {
+  font-size: 10px;
+}
+
+/* Message Actions (Reply & Menu) */
+.workspace-main .message-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.workspace-main .message-bubble-container:hover .message-actions {
+  opacity: 1;
+}
+
+.workspace-main .message-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8696a0;
+  transition: all 0.2s;
+}
+
+.workspace-main .message-action-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #075e54;
+}
+
+/* Message Menu Dropdown */
+.workspace-main .message-menu-container {
+  position: relative;
+}
+
+.workspace-main .message-menu-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 100px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.workspace-main .message-menu-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  color: #dc2626;
+  transition: background 0.2s;
+}
+
+.workspace-main .message-menu-dropdown button:hover {
+  background: #fee2e2;
+}
+
+/* Message Thread & Replies */
+.workspace-main .message-thread {
+  margin-bottom: 8px;
+}
+
+.workspace-main .message-replies {
+  margin-left: 46px;
+  margin-top: 8px;
+  padding-left: 12px;
+  border-left: 2px solid #e5e7eb;
+}
+
+.workspace-main .toggle-replies-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #075e54;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.workspace-main .toggle-replies-btn:hover {
+  text-decoration: underline;
+}
+
+.workspace-main .replies-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Reply Indicator */
+.workspace-main .reply-indicator {
+  background: #f0f2f5;
+  padding: 10px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.workspace-main .reply-indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #075e54;
+}
+
+.workspace-main .reply-indicator-content button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8696a0;
+  margin-left: auto;
+  padding: 4px;
+}
+
+/* Chat Input Area */
+.workspace-main .chat-input-area {
+  background: #f0f2f5;
+  padding: 12px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.workspace-main .file-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  width: fit-content;
+}
+
+.workspace-main .file-preview button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #dc2626;
+}
+
+.workspace-main .chat-input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: white;
+  border-radius: 28px;
+  padding: 6px 16px;
+}
+
+.workspace-main .chat-emoji-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8696a0;
+  font-size: 22px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.workspace-main .chat-emoji-btn:hover {
+  color: #ffb300;
+}
+
+/* Emoji Picker */
+.workspace-main .emoji-picker {
+  position: absolute;
+  bottom: 70px;
+  left: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  z-index: 100;
+}
+
+.workspace-main .emoji-picker button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.workspace-main .emoji-picker button:hover {
+  background: #f0f2f5;
+  transform: scale(1.1);
+}
+
+.workspace-main .chat-input-wrapper textarea {
+  flex: 1;
+  border: none;
+  padding: 10px 0;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  max-height: 100px;
+  background: transparent;
+}
+
+.workspace-main .chat-input-wrapper textarea:focus {
+  outline: none;
+}
+
+.workspace-main .chat-attach-wrapper {
+  position: relative;
+}
+
+.workspace-main .chat-attach-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8696a0;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.workspace-main .chat-attach-btn:hover {
+  color: #075e54;
+}
+
+.workspace-main .chat-send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #075e54;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.workspace-main .chat-send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.workspace-main .chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Chat Empty State */
+.workspace-main .chat-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.workspace-main .chat-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.workspace-main .chat-empty h4 {
+  margin: 0 0 8px 0;
+  color: #1f2c3e;
+}
+
+.workspace-main .chat-empty p {
+  margin: 0;
+  color: #8696a0;
+  font-size: 14px;
+}
+
+/* Chat Loading */
+.workspace-main .chat-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+
+.workspace-main .loading-spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #075e54;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Scrollbar for Chat */
+.workspace-main .chat-messages-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workspace-main .chat-messages-area::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.workspace-main .chat-messages-area::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.workspace-main .chat-messages-area::-webkit-scrollbar-thumb:hover {
+  background: #075e54;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .workspace-main .message-bubble-container {
+    max-width: 85%;
+  }
+  
+  .workspace-main .message-wrapper.message-reply {
+    margin-left: 20px;
+  }
+  
+  .workspace-main .chat-input-wrapper {
+    padding: 6px 12px;
+  }
+  
+  .workspace-main .emoji-picker {
+    grid-template-columns: repeat(4, 1fr);
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-main .message-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  
+  .workspace-main .message-bubble {
+    padding: 8px 12px;
+  }
+  
+  .workspace-main .message-text {
+    font-size: 13px;
+  }
+  
+  .workspace-main .chat-messages-area {
+    padding: 12px;
+  }
+}

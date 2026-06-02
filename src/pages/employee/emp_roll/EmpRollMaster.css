@@ -528,3 +528,186 @@
     text-align: center;
   }
 }
+
+/* Add these styles to your existing EmpRollMaster.css */
+
+/* Header Buttons Container */
+.rm-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Project Permissions Button */
+.rm-btn-permissions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.rm-btn-permissions svg {
+  font-size: 14px;
+}
+
+.rm-btn-permissions:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+}
+
+/* Update Add Role Button to match new design */
+.rm-btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FF902F;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.rm-btn-add svg {
+  font-size: 13px;
+}
+
+.rm-btn-add:hover {
+  background: #e6821a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 144, 47, 0.3);
+}
+
+.rm-btn-add.cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.rm-btn-add.cancel:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Update action buttons to include icons */
+.btn-edit,
+.btn-del {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.btn-edit svg,
+.btn-del svg {
+  font-size: 11px;
+}
+
+.btn-edit {
+  background: rgba(255, 144, 47, 0.10);
+  color: #c96a0a;
+}
+
+.btn-edit:hover {
+  background: rgba(255, 144, 47, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-del {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.btn-del:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* Update save button to include icons */
+.rm-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FF902F;
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+
+.rm-btn-save svg {
+  font-size: 13px;
+}
+
+.rm-btn-save:hover:not(:disabled) {
+  background: #e6821a;
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rm-header-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .rm-btn-permissions,
+  .rm-btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .rm-header {
+    flex-direction: column;
+  }
+  
+  .rm-header > div {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-edit span,
+  .btn-del span {
+    display: none;
+  }
+  
+  .btn-edit,
+  .btn-del {
+    padding: 6px 8px;
+  }
+  
+  .btn-edit svg,
+  .btn-del svg {
+    margin: 0;
+  }
+}

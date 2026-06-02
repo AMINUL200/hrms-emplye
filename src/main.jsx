@@ -8,13 +8,17 @@ import AuthContextProvider from './context/AuthContex.jsx';
 import '../src/i18n/index.js'
 import './index.css'
 import EmployeeContextProvider from './context/EmployeeContext.jsx';
+import { ChatProvider } from './context/ChatContext.jsx';
 
 
 createRoot(document.getElementById('root')).render(
   <AuthContextProvider>
     <EmployeeContextProvider>
-      {/* <StrictMode> */}
+      <ChatProvider>
         <App />
+
+      </ChatProvider>
+      {/* <StrictMode> */}
       {/* </StrictMode>, */}
     </EmployeeContextProvider>
 

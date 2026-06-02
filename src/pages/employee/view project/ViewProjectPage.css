@@ -627,7 +627,7 @@
   font-weight: 600;
 }
 
-.close-btn {
+.messages-content .close-btn {
   background: none;
   border: none;
   font-size: 24px;

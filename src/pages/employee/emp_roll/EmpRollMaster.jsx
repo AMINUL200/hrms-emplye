@@ -3,6 +3,17 @@ import "./EmpRollMaster.css";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { AuthContext } from "../../../context/AuthContex";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faShieldAlt,
+  faPlus,
+  faEdit,
+  faTrash,
+  faSearch,
+  faTimes,
+  faSave,
+} from "@fortawesome/free-solid-svg-icons";
 
 const EmpRollMaster = () => {
   const [roles, setRoles] = useState([]);
@@ -18,6 +29,7 @@ const EmpRollMaster = () => {
   
   const { token } = useContext(AuthContext);
   const api_url = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
 
   // Fetch roles from API
   const fetchRoles = async () => {
@@ -184,6 +196,11 @@ const EmpRollMaster = () => {
     setCurrentPage(1);
   };
 
+  // Navigate to project permissions page
+  const handleProjectPermissions = () => {
+    navigate("/organization/project-permission");
+  };
+
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = getCurrentPageData();
@@ -221,15 +238,34 @@ const EmpRollMaster = () => {
           <h1 className="rm-title">Role Master</h1>
           <p className="rm-subtitle">Manage user roles and permissions</p>
         </div>
-        <button
-          className={`rm-btn-add ${showForm ? "cancel" : ""}`}
-          onClick={() => {
-            if (showForm) resetForm();
-            else setShowForm(true);
-          }}
-        >
-          {showForm ? "✕ Close" : "+ Add New Role"}
-        </button>
+        <div className="rm-header-buttons">
+          <button
+            className="rm-btn-permissions"
+            onClick={handleProjectPermissions}
+          >
+            <FontAwesomeIcon icon={faShieldAlt} />
+            <span>Project Permissions</span>
+          </button>
+          <button
+            className={`rm-btn-add ${showForm ? "cancel" : ""}`}
+            onClick={() => {
+              if (showForm) resetForm();
+              else setShowForm(true);
+            }}
+          >
+            {showForm ? (
+              <>
+                <FontAwesomeIcon icon={faTimes} />
+                <span>Close</span>
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faPlus} />
+                <span>Add New Role</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Form */}
@@ -251,7 +287,19 @@ const EmpRollMaster = () => {
             </div>
             <div className="rm-form-btns">
               <button type="submit" className="rm-btn-save" disabled={submitting}>
-                {submitting ? "Saving..." : editingId ? "Update Role" : "Create Role"}
+                {submitting ? (
+                  "Saving..."
+                ) : editingId ? (
+                  <>
+                    <FontAwesomeIcon icon={faSave} />
+                    <span>Update Role</span>
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faSave} />
+                    <span>Create Role</span>
+                  </>
+                )}
               </button>
               <button type="button" className="rm-btn-cancel" onClick={resetForm}>
                 Cancel
@@ -264,10 +312,7 @@ const EmpRollMaster = () => {
       {/* Controls */}
       <div className="rm-controls">
         <div className="rm-search-wrap">
-          <svg className="rm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
+          <FontAwesomeIcon icon={faSearch} className="rm-search-icon" />
           <input
             type="text"
             className="rm-search-input"
@@ -321,10 +366,12 @@ const EmpRollMaster = () => {
                     <td className="col-act">
                       <div className="act-group">
                         <button className="btn-edit" onClick={() => handleEdit(role)}>
-                          Edit
+                          <FontAwesomeIcon icon={faEdit} />
+                          <span>Edit</span>
                         </button>
                         <button className="btn-del" onClick={() => handleDelete(role.id, role.name)}>
-                          Delete
+                          <FontAwesomeIcon icon={faTrash} />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </td>

@@ -796,3 +796,85 @@
     max-width: 100%;
   }
 }
+
+/* Guest Badge Styles */
+.guest-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: #fef5e7;
+  border-radius: 12px;
+  color: #e67e22;
+  font-weight: 500;
+}
+
+.guest-badge-modal {
+  font-size: 0.75rem;
+  color: #e67e22;
+  font-weight: normal;
+}
+
+.guest-indicator {
+  font-size: 0.7rem;
+  color: #e67e22;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+.employee-mini-company {
+  font-size: 0.65rem;
+  color: #e67e22;
+  margin-top: 2px;
+}
+
+.employee-modal-company {
+  font-size: 0.7rem;
+  color: #e67e22;
+  margin-top: 2px;
+}
+
+.employee-modal-role {
+  font-size: 0.7rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+/* Member Type Selector Styling */
+#member_type_select {
+  width: 100%;
+  max-width: 320px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+#member_type_select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#member_type_select:hover {
+  border-color: #667eea;
+}
+
+/* Responsive adjustments for guest display */
+@media (max-width: 768px) {
+  .guest-badge,
+  .already-assigned-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+  
+  .employee-mini-name {
+    font-size: 0.8rem;
+  }
+  
+  .employee-mini-company {
+    font-size: 0.6rem;
+  }
+}

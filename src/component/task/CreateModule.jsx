@@ -54,6 +54,10 @@ const CreateModule = () => {
   const parentId = searchParams.get("parent_id"); // For submodule/task/subtask
   const itemType = searchParams.get("type"); // module, submodule, task, subtask
 
+  // Auto-select work item from URL (for quick creation)
+  const autoSelectWorkItemId = searchParams.get("workitem_id");
+  const autoSelectType = searchParams.get("type");
+
   // Form state
   const [formData, setFormData] = useState({
     project_id: project?.project_id || p_id || "",
@@ -73,15 +77,8 @@ const CreateModule = () => {
   const [selectedParent, setSelectedParent] = useState(null);
   const [showParentSelector, setShowParentSelector] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState(new Set());
-  
-  // Employee assignment states
-  const [members, setMembers] = useState([]);
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [currentlyAssignedEmployees, setCurrentlyAssignedEmployees] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
-  const [createdWorkItemId, setCreatedWorkItemId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [autoSelectAttempted, setAutoSelectAttempted] = useState(false);
 
   const typeOptions = [
     { value: "module", label: "Module", icon: faLayerGroup, color: "#4299e1" },
@@ -102,53 +99,108 @@ const CreateModule = () => {
     { value: "closed", label: "Closed", color: "#718096" },
   ];
 
-  // Fetch all members for employee assignment
-  const fetchMembers = async () => {
-    try {
-      const response = await axios.get(
-        `${api_url}/all-members-for-project/employee`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // Helper: Recursively find item by ID in the project tree
+  const findItemById = (items, id) => {
+    if (!items || !id) return null;
 
-      if (response.data.status === 1) {
-        setMembers(response.data.members || []);
+    for (const item of items) {
+      if (item.id === parseInt(id)) {
+        return item;
       }
-    } catch (err) {
-      console.error("Error fetching members:", err);
+      if (item.children && item.children.length > 0) {
+        const found = findItemById(item.children, id);
+        if (found) return found;
+      }
     }
+    return null;
   };
 
-  // Fetch currently assigned employees for a work item
-  const fetchAssignedEmployeesForWorkItem = async (workItemId) => {
-    try {
-      const response = await axios.get(
-        `${api_url}/work-item-assigned-employees/${workItemId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // Helper: Recursively collect all parent IDs to expand the tree
+  const collectParentIds = (items, targetId, parents = []) => {
+    if (!items || !targetId) return [];
 
-      if (response.data.status === 1) {
-        const assigned = response.data.employees || [];
-        setCurrentlyAssignedEmployees(assigned);
-        setSelectedEmployees(assigned);
-        if (assigned.length > 0) {
-          toast.info(`Found ${assigned.length} already assigned employee(s)`);
+    for (const item of items) {
+      if (item.id === parseInt(targetId)) {
+        return parents;
+      }
+      if (item.children && item.children.length > 0) {
+        const newParents = [...parents, item.id];
+        const found = collectParentIds(item.children, targetId, newParents);
+        if (found.length > 0) {
+          return found;
         }
       }
-    } catch (err) {
-      console.error("Error fetching assigned employees:", err);
-      setCurrentlyAssignedEmployees([]);
-      setSelectedEmployees([]);
     }
+    return [];
+  };
+
+  // Helper: Expand all parent nodes of a selected item
+  const expandParentNodes = (tree, itemId) => {
+    const parentIds = collectParentIds(tree, itemId);
+    const newExpanded = new Set(expandedNodes);
+    parentIds.forEach((id) => newExpanded.add(id));
+    setExpandedNodes(newExpanded);
+  };
+
+  // Auto-select parent from URL parameters
+  const autoSelectParent = async (treeData, workItemId, itemTypeParam) => {
+    if (!workItemId || !itemTypeParam || autoSelectAttempted) return false;
+
+    console.log("Auto-selecting parent:", { workItemId, itemTypeParam });
+
+    // Determine what type of parent we need based on the type we're creating
+    let requiredParentType = null;
+    if (itemTypeParam === "submodule") {
+      requiredParentType = "module";
+    } else if (itemTypeParam === "task") {
+      requiredParentType = "submodule";
+    } else if (itemTypeParam === "subtask") {
+      requiredParentType = "task";
+    }
+
+    if (!requiredParentType) return false;
+
+    // Find the selected work item in the tree
+    const selectedItem = findItemById(treeData, workItemId);
+
+    if (!selectedItem) {
+      console.warn(`Work item with ID ${workItemId} not found in tree`);
+      return false;
+    }
+
+    // Check if the selected item matches the required parent type
+    if (selectedItem.type !== requiredParentType) {
+      console.warn(
+        `Selected item type ${selectedItem.type} does not match required parent type ${requiredParentType}`,
+      );
+      toast.warning(
+        `Selected ${selectedItem.type} cannot be parent for ${itemTypeParam}. Please select appropriate parent.`,
+      );
+      return false;
+    }
+
+    // Auto-select the parent
+    setSelectedParent(selectedItem);
+    setFormData((prev) => ({
+      ...prev,
+
+      parent_id: selectedItem.id,
+
+      type: itemTypeParam,
+    }));
+
+    setSelectedParent(selectedItem);
+
+    setShowParentSelector(false);
+
+    // Expand parent nodes
+    expandParentNodes(treeData, selectedItem.id);
+
+    toast.success(
+      `Parent auto-selected: ${selectedItem.title} (${selectedItem.type})`,
+    );
+    setAutoSelectAttempted(true);
+    return true;
   };
 
   // Fetch work item data for edit mode
@@ -173,69 +225,143 @@ const CreateModule = () => {
             title: workItem.title || "",
             description: workItem.description || "",
             order_by: workItem.order_by || "",
-            start_date: workItem.start_date ? workItem.start_date.split('T')[0] : "",
-            end_date: workItem.end_date ? workItem.end_date.split('T')[0] : "",
+            start_date: workItem.start_date
+              ? workItem.start_date.split("T")[0]
+              : "",
+            end_date: workItem.end_date ? workItem.end_date.split("T")[0] : "",
             status: workItem.status || "open",
           });
-          
-          // Fetch assigned employees for this work item
-          await fetchAssignedEmployeesForWorkItem(updateId);
+
+          // If parent_id exists, fetch parent details to display selected parent
+          if (workItem.parent_id && workItem.type !== "module") {
+            await fetchParentDetails(workItem.parent_id);
+          }
         } else {
           toast.error("Failed to fetch work item details");
         }
       } catch (err) {
         console.error("Error fetching work item:", err);
-        toast.error(err.response?.data?.message || "Failed to load work item data");
+        toast.error(
+          err.response?.data?.message || "Failed to load work item data",
+        );
       } finally {
         setFetchingData(false);
       }
     }
   };
 
-  // Fetch project tree for parent selection
-  const fetchProjectTree = async () => {
-    if (isAddMode && formData.type !== "module") {
-      setFetchingData(true);
-      try {
-        const response = await axios.get(`${api_url}/project-tree/${p_id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        console.log("PROJECT TREE:", response.data);
-
-        let treeItems = [];
-
-        if (response?.data?.data?.project?.modules) {
-          treeItems = response.data.data.project.modules;
-        } else if (Array.isArray(response?.data?.data)) {
-          treeItems = response.data.data;
-        }
-
-        setProjectTree(treeItems);
-      } catch (err) {
-        console.error("Error fetching project tree:", err);
-      } finally {
-        setFetchingData(false);
+  // Fetch parent details for edit mode
+  const fetchParentDetails = async (parentId) => {
+    try {
+      const response = await axios.get(`${api_url}/work-item/${parentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.status === 1) {
+        setSelectedParent(response.data.data);
       }
+    } catch (err) {
+      console.error("Error fetching parent:", err);
+    }
+  };
+
+  // Fetch project tree for parent selection - FIXED for the actual API response structure
+  const fetchProjectTree = async () => {
+    // Only fetch if we need parent selection (non-module items)
+    // if (formData.type === "module") {
+    //   return;
+    // }
+
+    setFetchingData(true);
+    try {
+      const response = await axios.get(`${api_url}/project-tree/${p_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("PROJECT TREE RESPONSE:", response.data);
+
+      let treeItems = [];
+
+      // Parse the actual API response structure: data.project.modules
+      if (response?.data?.data?.project?.modules) {
+        treeItems = response.data.data.project.modules;
+      }
+      // Fallback for other possible structures
+      else if (response?.data?.data && Array.isArray(response.data.data)) {
+        treeItems = response.data.data;
+      } else if (response?.data?.modules) {
+        treeItems = response.data.modules;
+      } else if (Array.isArray(response?.data)) {
+        treeItems = response.data;
+      }
+
+      setProjectTree(treeItems);
+
+      // After tree is loaded, attempt auto-selection if in add mode and URL params exist
+      if (
+        isAddMode &&
+        autoSelectWorkItemId &&
+        autoSelectType &&
+        !autoSelectAttempted &&
+        treeItems.length > 0
+      ) {
+        await autoSelectParent(treeItems, autoSelectWorkItemId, autoSelectType);
+      }
+
+      if (treeItems.length === 0 && formData.type !== "module") {
+        toast.info("No modules available. Please create a module first.");
+      }
+    } catch (err) {
+      console.error("Error fetching project tree:", err);
+      toast.error("Failed to load parent items");
+    } finally {
+      setFetchingData(false);
     }
   };
 
   useEffect(() => {
     if (token) {
-      fetchMembers();
-      
       if (!isAddMode && updateId) {
         // Edit mode - fetch existing work item
         fetchWorkItemData();
-      } else if (isAddMode && formData.type !== "module") {
-        // Add mode with parent requirement
-        fetchProjectTree();
       }
+      // Fetch project tree for parent selection
+      fetchProjectTree();
     }
-  }, [token, isAddMode, formData.type, p_id, updateId]);
+  }, [token, isAddMode, p_id, updateId]);
+
+  // Refetch tree when type changes to module (no need for parent)
+  useEffect(() => {
+    // AUTO URL MODE
+    if (autoSelectWorkItemId && autoSelectType) {
+      fetchProjectTree();
+
+      return;
+    }
+
+    // NORMAL MODE
+    if (formData.type !== "module") {
+      fetchProjectTree();
+    } else {
+      setSelectedParent(null);
+
+      setFormData((prev) => ({
+        ...prev,
+        parent_id: "",
+      }));
+    }
+  }, [formData.type]);
+
+  useEffect(() => {
+    if (selectedParent && formData.parent_id) {
+      console.log("AUTO SELECT SUCCESS", selectedParent);
+    }
+  }, [selectedParent, formData.parent_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -246,92 +372,14 @@ const CreateModule = () => {
   };
 
   const handleTypeChange = (type) => {
-    setProjectTree([]);
     setSelectedParent(null);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       type: type,
-      parent_id: ''
+      parent_id: "",
     }));
-  };
-
-  // Employee selection handlers for main form
-  const handleEmployeeSelect = (employee) => {
-    if (!selectedEmployees.find(emp => emp.emp_code === employee.emp_code)) {
-      setSelectedEmployees([...selectedEmployees, employee]);
-      toast.success(`${employee.emp_fname} ${employee.emp_lname} added`);
-    } else {
-      toast.info(`${employee.emp_fname} ${employee.emp_lname} is already selected`);
-    }
-  };
-
-  const handleRemoveEmployee = (empCode) => {
-    setSelectedEmployees(selectedEmployees.filter(emp => emp.emp_code !== empCode));
-    toast.info("Employee removed from selection");
-  };
-
-  // Assign employees to work item
-  const assignEmployees = async (workItemId) => {
-    if (selectedEmployees.length === 0) return;
-
-    try {
-      const assignData = {
-        work_item_id: workItemId,
-        employee_ids: selectedEmployees.map(emp => emp.emp_code)
-      };
-      
-      const response = await axios.post(
-        `${api_url}/assign-work-item`,
-        assignData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data.status === 1) {
-        toast.success(`${selectedEmployees.length} employee(s) assigned successfully!`);
-        return true;
-      } else {
-        toast.warning("Employee assignment failed");
-        return false;
-      }
-    } catch (err) {
-      console.error("Error assigning employees:", err);
-      toast.error("Failed to assign employees");
-      return false;
-    }
-  };
-
-  // Update work item (for edit mode)
-  const updateWorkItem = async () => {
-    const updateData = {
-      title: formData.title,
-      description: formData.description,
-      order_by: parseInt(formData.order_by) || 0,
-      start_date: formData.start_date,
-      end_date: formData.end_date,
-      status: formData.status,
-    };
-
-    if (formData.type !== "module" && formData.parent_id) {
-      updateData.parent_id = parseInt(formData.parent_id);
-    }
-
-    const response = await axios.post(
-      `${api_url}/work-item-update/${updateId}`,
-      updateData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response;
+    // Reset auto-select attempt when type changes manually
+    setAutoSelectAttempted(false);
   };
 
   const handleSubmit = async (e) => {
@@ -359,13 +407,33 @@ const CreateModule = () => {
 
     try {
       let response;
-      let workItemId;
 
       if (isEditMode && updateId) {
         // Update existing work item
-        response = await updateWorkItem();
-        workItemId = updateId;
-        
+        const updateData = {
+          title: formData.title,
+          description: formData.description,
+          order_by: parseInt(formData.order_by) || 0,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          status: formData.status,
+        };
+
+        if (formData.type !== "module" && formData.parent_id) {
+          updateData.parent_id = parseInt(formData.parent_id);
+        }
+
+        response = await axios.post(
+          `${api_url}/work-item-update/${updateId}`,
+          updateData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
         if (response.data.status === 1) {
           toast.success("Work item updated successfully!");
         } else {
@@ -384,7 +452,8 @@ const CreateModule = () => {
         }
 
         if (formData.description) submitData.description = formData.description;
-        if (formData.order_by) submitData.order_by = parseInt(formData.order_by);
+        if (formData.order_by)
+          submitData.order_by = parseInt(formData.order_by);
         if (formData.start_date) submitData.start_date = formData.start_date;
         if (formData.end_date) submitData.end_date = formData.end_date;
         if (formData.status) submitData.status = formData.status;
@@ -397,24 +466,15 @@ const CreateModule = () => {
         });
 
         if (response.data.status === 1) {
-          workItemId = response.data.data.id;
-          setCreatedWorkItemId(workItemId);
-          toast.success(`${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} created successfully!`);
+          toast.success(
+            `${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} created successfully!`,
+          );
+          navigate(`/organization/emp-assign-work-item/${p_id}`);
+          return; // Exit early to avoid navigating again
         } else {
           throw new Error(response.data.message || "Creation failed");
         }
       }
-
-      // Assign employees if any selected
-      if (selectedEmployees.length > 0) {
-        await assignEmployees(workItemId);
-      }
-
-      // Navigate back to project page
-      navigate(`/organization/assigned-project/${p_id}`, {
-        state: { project: project }
-      });
-
     } catch (err) {
       console.error("Error saving work item:", err);
       toast.error(err.message || "Failed to save. Please try again.");
@@ -426,18 +486,6 @@ const CreateModule = () => {
   const handleBack = () => {
     navigate(-1);
   };
-
-  const handleGoToAssignmentPage = () => {
-    // Navigate to the separate assignment page
-    navigate(`/organization/emp-assign-work-item/${p_id}`);
-  };
-
-  const filteredEmployees = members.filter(member => {
-    const fullName = `${member.emp_fname} ${member.emp_lname}`.toLowerCase();
-    const searchLower = searchTerm.toLowerCase();
-    return fullName.includes(searchLower) || 
-           member.emp_code.toLowerCase().includes(searchLower);
-  });
 
   const currentTypeInfo = typeOptions.find(
     (opt) => opt.value === formData.type,
@@ -454,6 +502,14 @@ const CreateModule = () => {
   };
 
   const renderTree = (items, level = 0) => {
+    if (!items || items.length === 0) {
+      return (
+        <div className="no-data">
+          No modules available. Please create a module first.
+        </div>
+      );
+    }
+
     return items.map((item) => (
       <div key={item.id} style={{ marginLeft: `${level * 20}px` }}>
         <div
@@ -508,7 +564,18 @@ const CreateModule = () => {
     ));
   };
 
-  if (fetchingData) {
+  // Get display text for selected parent
+  const getSelectedParentDisplayText = () => {
+    if (selectedParent) {
+      return `${selectedParent.title} • ${selectedParent.type} • ID: ${selectedParent.id}`;
+    }
+    if (formData.parent_id) {
+      return `Parent ID: ${formData.parent_id}`;
+    }
+    return "";
+  };
+
+  if (fetchingData && !projectTree.length && isEditMode) {
     return (
       <div className="emp-assigned-module-container">
         <div className="loading-container">
@@ -527,9 +594,19 @@ const CreateModule = () => {
           <span>Back</span>
         </button>
         <h1>
-          <FontAwesomeIcon icon={isEditMode ? faEdit : currentTypeInfo?.icon || faPlus} />
-          {isEditMode ? `Edit ${currentTypeInfo?.label}` : `Create New ${currentTypeInfo?.label || "Work Item"}`}
+          <FontAwesomeIcon
+            icon={isEditMode ? faEdit : currentTypeInfo?.icon || faPlus}
+          />
+          {isEditMode
+            ? `Edit ${currentTypeInfo?.label}`
+            : `Create New ${currentTypeInfo?.label || "Work Item"}`}
         </h1>
+        {autoSelectWorkItemId && isAddMode && selectedParent && (
+          <div className="auto-select-badge">
+            <FontAwesomeIcon icon={faCheckCircle} />
+            Parent auto-selected
+          </div>
+        )}
       </div>
 
       <div className="form-wrapper">
@@ -554,11 +631,16 @@ const CreateModule = () => {
                       key={option.value}
                       type="button"
                       className={`type-btn ${formData.type === option.value ? "active" : ""}`}
-                      onClick={() => !isEditMode && handleTypeChange(option.value)}
+                      onClick={() =>
+                        !isEditMode && handleTypeChange(option.value)
+                      }
                       disabled={isEditMode}
                       style={{
-                        opacity: isEditMode && formData.type !== option.value ? 0.5 : 1,
-                        cursor: isEditMode ? 'not-allowed' : 'pointer',
+                        opacity:
+                          isEditMode && formData.type !== option.value
+                            ? 0.5
+                            : 1,
+                        cursor: isEditMode ? "not-allowed" : "pointer",
                         borderColor:
                           formData.type === option.value
                             ? option.color
@@ -597,13 +679,26 @@ const CreateModule = () => {
                       type="text"
                       value={
                         selectedParent
-                          ? `${selectedParent.title} (ID: ${selectedParent.id})`
-                          : formData.parent_id
+                          ? `${selectedParent.title} • ${selectedParent.type} • ID: ${selectedParent.id}`
+                          : ""
                       }
-                      onClick={() => !isEditMode && setShowParentSelector(!showParentSelector)}
-                      placeholder={`Select parent ${formData.type === "submodule" ? "module" : formData.type === "task" ? "parent item" : "task"}`}
+                      onClick={() =>
+                        !isEditMode &&
+                        setShowParentSelector(!showParentSelector)
+                      }
+                      placeholder={
+                        fetchingData
+                          ? "Loading parent..."
+                          : `Select parent ${
+                              formData.type === "submodule"
+                                ? "module"
+                                : formData.type === "task"
+                                  ? "submodule"
+                                  : "task"
+                            }`
+                      }
                       readOnly
-                      className="parent-input"
+                      className={`parent-input ${selectedParent ? "has-value" : ""}`}
                       disabled={isEditMode}
                     />
                     {!isEditMode && showParentSelector && (
@@ -626,7 +721,13 @@ const CreateModule = () => {
                           ) : projectTree.length > 0 ? (
                             renderTree(projectTree)
                           ) : (
-                            <div className="no-data">No items available</div>
+                            <div className="no-data">
+                              <p>No modules available.</p>
+                              <small>
+                                Please create a module first before adding
+                                submodules, tasks, or subtasks.
+                              </small>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -635,6 +736,9 @@ const CreateModule = () => {
                   <small className="form-hint">
                     Select the parent item under which this {formData.type} will
                     be created
+                    {autoSelectWorkItemId &&
+                      selectedParent &&
+                      " ✓ Parent has been auto-selected"}
                   </small>
                 </div>
               )}
@@ -743,125 +847,7 @@ const CreateModule = () => {
             </div>
           </div>
 
-          {/* Employee Assignment Section for New/Edit Work Item */}
-          <div className="form-section">
-            <h2 className="section-title">
-              <FontAwesomeIcon icon={faUserPlus} />
-              {isEditMode ? "Manage Employee Assignments" : "Assign Employees to This Work Item (Optional)"}
-            </h2>
-
-            <div className="employee-assignment-area">
-              {/* Selected Employees Summary */}
-              {selectedEmployees.length > 0 && (
-                <div className="selected-employees-summary">
-                  <h3>
-                    <FontAwesomeIcon icon={faCheckCircle} />
-                    Selected Employees ({selectedEmployees.length})
-                  </h3>
-                  <div className="selected-badges">
-                    {selectedEmployees.map((employee) => (
-                      <div key={employee.emp_code} className="selected-badge">
-                        <span>{employee.emp_fname} {employee.emp_lname}</span>
-                        <span className="employee-code-badge">{employee.emp_code}</span>
-                        {currentlyAssignedEmployees.some(emp => emp.emp_code === employee.emp_code) && (
-                          <span className="already-assigned-badge">Already Assigned</span>
-                        )}
-                        <button
-                          type="button"
-                          className="remove-badge"
-                          onClick={() => handleRemoveEmployee(employee.emp_code)}
-                        >
-                          <FontAwesomeIcon icon={faTimes} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Search and Add Employees */}
-              <div className="add-employee-section">
-                <div className="search-box-small">
-                  <FontAwesomeIcon icon={faSearch} className="search-icon-small" />
-                  <input
-                    type="text"
-                    placeholder="Search employees by name or code..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input-small"
-                  />
-                </div>
-                
-                <div className="available-employees-list">
-                  <h4>Available Employees</h4>
-                  <div className="employees-mini-grid">
-                    {filteredEmployees.slice(0, 5).map((employee) => {
-                      const isSelected = selectedEmployees.some(emp => emp.emp_code === employee.emp_code);
-                      return (
-                        <div key={employee.emp_code} className="employee-mini-card">
-                          <div className="employee-mini-info">
-                            <div className="employee-mini-avatar">
-                              {employee.emp_fname?.charAt(0) || 'U'}
-                            </div>
-                            <div>
-                              <div className="employee-mini-name">
-                                {employee.emp_fname} {employee.emp_lname}
-                              </div>
-                              <div className="employee-mini-code">{employee.emp_code}</div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            className={`assign-mini-btn ${isSelected ? 'assigned' : ''}`}
-                            onClick={() => handleEmployeeSelect(employee)}
-                            disabled={isSelected}
-                          >
-                            {isSelected ? (
-                              <FontAwesomeIcon icon={faCheckCircle} />
-                            ) : (
-                              <FontAwesomeIcon icon={faUserPlus} />
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {members.length > 5 && (
-                    <button
-                      type="button"
-                      className="view-all-btn"
-                      onClick={() => setShowEmployeeSelector(true)}
-                    >
-                      View all {members.length} employees
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation to Separate Assignment Page */}
-          <div className="form-section">
-            <div className="navigate-assignment-section">
-              <div className="navigate-info">
-                <FontAwesomeIcon icon={faUserFriends} className="navigate-icon" />
-                <div>
-                  <h4>Want to assign employees to existing work items?</h4>
-                  <p>Go to the Employee Assignment page to manage assignments for modules, submodules, tasks, and subtasks</p>
-                </div>
-              </div>
-              <button 
-                type="button" 
-                className="navigate-assign-btn"
-                onClick={handleGoToAssignmentPage}
-              >
-                <FontAwesomeIcon icon={faUserCheck} />
-                Go to Employee Assignment
-              </button>
-            </div>
-          </div>
-
-          {/* Form Actions for Create/Update */}
+          {/* Form Actions */}
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={handleBack}>
               Cancel
@@ -875,88 +861,15 @@ const CreateModule = () => {
               ) : (
                 <>
                   <FontAwesomeIcon icon={faSave} />
-                  {isEditMode ? `Update ${currentTypeInfo?.label}` : `Create ${currentTypeInfo?.label}`}
+                  {isEditMode
+                    ? `Update ${currentTypeInfo?.label}`
+                    : `Create ${currentTypeInfo?.label}`}
                 </>
               )}
             </button>
           </div>
         </form>
       </div>
-
-      {/* Full Employee Selection Modal for Main Form */}
-      {showEmployeeSelector && (
-        <div className="modal-overlay" onClick={() => setShowEmployeeSelector(false)}>
-          <div className="employee-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="employee-modal-header">
-              <h3>
-                <FontAwesomeIcon icon={faUserPlus} />
-                Select Employees to Assign
-              </h3>
-              <button onClick={() => setShowEmployeeSelector(false)}>✕</button>
-            </div>
-            <div className="employee-modal-search">
-              <FontAwesomeIcon icon={faSearch} />
-              <input
-                type="text"
-                placeholder="Search employees..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="employee-modal-list">
-              {filteredEmployees.map((employee) => {
-                const isSelected = selectedEmployees.some(emp => emp.emp_code === employee.emp_code);
-                return (
-                  <div key={employee.emp_code} className="employee-modal-item">
-                    <div className="employee-modal-info">
-                      <div className="employee-modal-avatar">
-                        {employee.emp_fname?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <div className="employee-modal-name">
-                          {employee.emp_fname} {employee.emp_lname}
-                        </div>
-                        <div className="employee-modal-code">{employee.emp_code}</div>
-                      </div>
-                    </div>
-                    <button
-                      className={`employee-modal-select ${isSelected ? 'selected' : ''}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          handleRemoveEmployee(employee.emp_code);
-                        } else {
-                          handleEmployeeSelect(employee);
-                        }
-                      }}
-                    >
-                      {isSelected ? (
-                        <>
-                          <FontAwesomeIcon icon={faCheckCircle} />
-                          Selected
-                        </>
-                      ) : (
-                        <>
-                          <FontAwesomeIcon icon={faUserPlus} />
-                          Select
-                        </>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="employee-modal-footer">
-              <button onClick={() => setShowEmployeeSelector(false)}>Close</button>
-              <button 
-                className="confirm-btn"
-                onClick={() => setShowEmployeeSelector(false)}
-              >
-                Done ({selectedEmployees.length} selected)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

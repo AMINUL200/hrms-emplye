@@ -15,6 +15,8 @@ import {
   faTrash,
   faPlus,
   faEdit,
+  faUsers,
+  faClipboardList,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -110,6 +112,11 @@ const AssignedProject = () => {
   // Navigate to create project page
   const handleCreateProject = () => {
     navigate("/organization/create-project");
+  };
+
+  // Navigate to master roll page
+  const handleMasterRoll = () => {
+    navigate("/organization/master-roll");
   };
 
   useEffect(() => {
@@ -251,10 +258,16 @@ const AssignedProject = () => {
           <div className="projects-header">
             <div className="header-left">
               <h2>My Projects</h2>
-              <button className="create-project-btn" onClick={handleCreateProject}>
-                <FontAwesomeIcon icon={faPlus} />
-                <span>Create Project</span>
-              </button>
+              <div className="header-buttons">
+                <button className="master-roll-btn" onClick={handleMasterRoll}>
+                  <FontAwesomeIcon icon={faClipboardList} />
+                  <span>Master Roll</span>
+                </button>
+                <button className="create-project-btn" onClick={handleCreateProject}>
+                  <FontAwesomeIcon icon={faPlus} />
+                  <span>Create Project</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -279,10 +292,16 @@ const AssignedProject = () => {
           )}
         </div>
         {hasAnyCreatePermission() && (
-          <button className="create-project-btn" onClick={handleCreateProject}>
-            <FontAwesomeIcon icon={faPlus} />
-            <span>Create Project</span>
-          </button>
+          <div className="header-buttons">
+            <button className="master-roll-btn" onClick={handleMasterRoll}>
+              <FontAwesomeIcon icon={faClipboardList} />
+              <span>Master Roll</span>
+            </button>
+            <button className="create-project-btn" onClick={handleCreateProject}>
+              <FontAwesomeIcon icon={faPlus} />
+              <span>Create Project</span>
+            </button>
+          </div>
         )}
       </div>
 
