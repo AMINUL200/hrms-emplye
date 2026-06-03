@@ -69,7 +69,23 @@ const CreateModule = () => {
     start_date: "",
     end_date: "",
     status: "open",
+    priority: null,
   });
+
+  const priorityOptions = [
+    {
+      value: "high",
+      label: "High 🔴",
+    },
+    {
+      value: "medium",
+      label: "Medium 🟡",
+    },
+    {
+      value: "low",
+      label: "Low 🟢",
+    },
+  ];
 
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
@@ -230,6 +246,7 @@ const CreateModule = () => {
               : "",
             end_date: workItem.end_date ? workItem.end_date.split("T")[0] : "",
             status: workItem.status || "open",
+            priority: workItem.priority || null,
           });
 
           // If parent_id exists, fetch parent details to display selected parent
@@ -353,6 +370,7 @@ const CreateModule = () => {
       setFormData((prev) => ({
         ...prev,
         parent_id: "",
+        priority: "",
       }));
     }
   }, [formData.type]);
@@ -417,6 +435,7 @@ const CreateModule = () => {
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: formData.status,
+          priority: formData.priority,
         };
 
         if (formData.type !== "module" && formData.parent_id) {
@@ -457,6 +476,10 @@ const CreateModule = () => {
         if (formData.start_date) submitData.start_date = formData.start_date;
         if (formData.end_date) submitData.end_date = formData.end_date;
         if (formData.status) submitData.status = formData.status;
+        if (formData.priority) submitData.priority = formData.priority;
+
+        // debug log before submission
+        console.log("Submitting work item data:", submitData);
 
         response = await axios.post(`${api_url}/work-items`, submitData, {
           headers: {
@@ -808,6 +831,29 @@ const CreateModule = () => {
                   onChange={handleChange}
                 >
                   {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Priority */}
+              <div className="form-group">
+                <label htmlFor="priority">
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                  Priority
+                </label>
+
+                <select
+                  id="priority"
+                  name="priority"
+                  value={formData.priority}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Priority</option>
+
+                  {priorityOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
