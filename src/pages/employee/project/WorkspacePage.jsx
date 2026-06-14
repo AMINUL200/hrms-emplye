@@ -277,8 +277,6 @@ const WorkspacePage = () => {
   const replyInputRef = useRef(null);
   const chatContainerRef = useRef(null);
 
- 
-
   // ========================================
   // HELPER FUNCTIONS
   // ========================================
@@ -311,6 +309,31 @@ const WorkspacePage = () => {
         };
       default:
         return {};
+    }
+  };
+
+  const permissions = workspaceDetails?.current_user_permissions || [];
+
+  const hasPermission = (permissionName) => {
+    return permissions.some((item) => item.permission_name === permissionName);
+  };
+
+  const canShowActionButtons = () => {
+    switch (selectedItem?.type) {
+      case "module":
+        return hasPermission("create_module");
+
+      case "submodule":
+        return hasPermission("create_submodule");
+
+      case "task":
+        return hasPermission("create_task");
+
+      case "subtask":
+        return hasPermission("create_subtask");
+
+      default:
+        return false;
     }
   };
 
@@ -440,8 +463,6 @@ const WorkspacePage = () => {
     () => sortCommentsByDate(comments),
     [comments],
   );
-
-
 
   // Group the flat list by date for date dividers
   const groupedComments = useMemo(
@@ -580,7 +601,6 @@ const WorkspacePage = () => {
     }
   };
 
-
   const handleDeleteComment = useCallback(
     async (commentId) => {
       if (!window.confirm("Are you sure you want to delete this message?"))
@@ -648,18 +668,11 @@ const WorkspacePage = () => {
   // ========================================
 
   useEffect(() => {
-  if (!selectedItem?.id) return;
+    if (!selectedItem?.id) return;
 
-  const unsubscribe = listenMessages(
-    selectedItem.id,
-    (newMessage) => {
-
+    const unsubscribe = listenMessages(selectedItem.id, (newMessage) => {
       setComments((prev) => {
-
-        const exists = prev.some(
-          (msg) =>
-            msg.id === newMessage.id
-        );
+        const exists = prev.some((msg) => msg.id === newMessage.id);
 
         if (exists) return prev;
 
@@ -669,13 +682,12 @@ const WorkspacePage = () => {
       requestAnimationFrame(() => {
         scrollToBottom();
       });
-    }
-  );
+    });
 
-  return () => {
-    if (unsubscribe) unsubscribe();
-  };
-}, [selectedItem?.id]);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [selectedItem?.id]);
 
   useEffect(() => {
     getWorkspaceDetails();
@@ -803,7 +815,7 @@ const WorkspacePage = () => {
                 </div>
               </div>
             </div>
-
+            {canShowActionButtons() && (
             <div className="workspace-action-buttons">
               <button
                 className="workspace-create-btn"
@@ -836,6 +848,7 @@ const WorkspacePage = () => {
                 {actionConfig.assignLabel}
               </button>
             </div>
+            )}
 
             {details?.description && (
               <div className="description-box">
@@ -869,7 +882,7 @@ const WorkspacePage = () => {
                     <th>Employee</th>
                     <th>Employee ID</th>
                     <th>Role</th>
-                    <th>Access Type</th>
+                    {/* <th>Access Type</th> */}
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -900,15 +913,15 @@ const WorkspacePage = () => {
                           <span
                             className={`role-badge role-${emp.role || "member"}`}
                           >
-                            {emp.role || "Member"}
+                            {emp.role_name || "Member"}
                           </span>
                         </td>
-                        <td className="access-type-cell">
+                        {/* <td className="access-type-cell">
                           <span className="access-badge">
                             <FontAwesomeIcon icon={faEye} />
                             {emp.access_type || "View"}
                           </span>
-                        </td>
+                        </td> */}
                         <td className="status-cell">
                           <span className="status-badge-table active">
                             <span className="status-dot"></span>

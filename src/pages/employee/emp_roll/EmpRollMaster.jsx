@@ -45,7 +45,7 @@ const EmpRollMaster = () => {
       if (response.data.status === 1) {
         setRoles(response.data.roles || []);
         setTotalItems(response.data.roles?.length || 0);
-        toast.success("Roles loaded successfully!");
+        // toast.success("Roles loaded successfully!");
       } else {
         toast.error(response.data.message || "Failed to fetch roles");
       }

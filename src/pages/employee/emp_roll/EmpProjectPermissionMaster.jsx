@@ -63,7 +63,7 @@ const EmpProjectPermissionMaster = () => {
 
       if (response.data.status === 1) {
         setRoles(response.data.roles || []);
-        toast.success("Roles loaded successfully");
+        // toast.success("Roles loaded successfully");
       } else {
         toast.error("Failed to fetch roles");
       }
@@ -125,7 +125,7 @@ const EmpProjectPermissionMaster = () => {
         }));
         setAllPermissions(updatedPermissions);
         
-        toast.success(`Loaded permissions for ${response.data.data.role.name}`);
+        // toast.success(`Loaded permissions for ${response.data.data.role.name}`);
       } else {
         // If no permissions found, just set empty array
         setRolePermissions([]);
