@@ -390,7 +390,7 @@ const AssignWorkItem = () => {
           },
         },
       );
-      console.log("Assignment response:", response.data);
+      console.log("Assignment response:", response);
       if (response.data.status === 1) {
         toast.success(
           `${selectedEmployees.length} ${memberType}(s) assigned successfully!`,
@@ -405,7 +405,7 @@ const AssignWorkItem = () => {
         // Refresh work items list
         fetchWorkItemsList();
       } else {
-        toast.warning(`${memberType} assignment failed`);
+        toast.warning(`${response.data.message || "Assignment failed"}`);
       }
     } catch (err) {
       console.error("Error assigning:", err);

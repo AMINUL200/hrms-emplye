@@ -369,6 +369,13 @@
   box-shadow: 0 4px 12px rgba(255, 144, 47, 0.3);
 }
 
+.workspace-tabs button.disabled-tab {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* ========================================
    TAB CONTENT
 ======================================== */
@@ -403,7 +410,8 @@
   color: #ff902f;
 }
 
-.member-count, .history-count {
+.member-count,
+.history-count {
   background: #f3f4f6;
   padding: 6px 14px;
   border-radius: 20px;
@@ -461,9 +469,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -1148,30 +1159,30 @@
   .employee-table-container {
     border-radius: 12px;
   }
-  
+
   .employee-table thead th {
     padding: 12px 16px;
     font-size: 11px;
   }
-  
+
   .employee-table tbody td {
     padding: 12px 16px;
   }
-  
+
   .employee-info-wrapper {
     gap: 8px;
   }
-  
+
   .employee-avatar-small-table {
     width: 32px;
     height: 32px;
     font-size: 12px;
   }
-  
+
   .employee-name-table {
     font-size: 13px;
   }
-  
+
   .employee-id-cell code {
     font-size: 10px;
     padding: 3px 8px;
@@ -1179,12 +1190,13 @@
 }
 
 @media (max-width: 640px) {
+
   /* Make table horizontally scrollable on small screens */
   .employee-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .employee-table {
     min-width: 600px;
   }
@@ -1224,11 +1236,9 @@
 }
 
 .workspace-create-btn {
-  background: linear-gradient(
-    135deg,
-    #2563eb,
-    #1d4ed8
-  );
+  background: linear-gradient(135deg,
+      #2563eb,
+      #1d4ed8);
 
   color: white;
 
@@ -1239,6 +1249,24 @@
   transform: translateY(-2px);
 
   box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+}
+
+
+.workspace-create-btn:disabled,
+.workspace-assign-btn:disabled,
+.submit-remark-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+  box-shadow: none;
+  transform: none;
+}
+
+.workspace-create-btn:disabled:hover,
+.workspace-assign-btn:disabled:hover,
+.submit-remark-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .workspace-assign-btn {
@@ -1350,6 +1378,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1841,15 +1870,15 @@
   .workspace-main .message-bubble-container {
     max-width: 85%;
   }
-  
+
   .workspace-main .message-wrapper.message-reply {
     margin-left: 20px;
   }
-  
+
   .workspace-main .chat-input-wrapper {
     padding: 6px 12px;
   }
-  
+
   .workspace-main .emoji-picker {
     grid-template-columns: repeat(4, 1fr);
     left: 10px;
@@ -1864,15 +1893,15 @@
     height: 28px;
     font-size: 11px;
   }
-  
+
   .workspace-main .message-bubble {
     padding: 8px 12px;
   }
-  
+
   .workspace-main .message-text {
     font-size: 13px;
   }
-  
+
   .workspace-main .chat-messages-area {
     padding: 12px;
   }

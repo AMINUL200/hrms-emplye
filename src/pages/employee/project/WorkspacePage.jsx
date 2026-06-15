@@ -286,31 +286,37 @@ const WorkspacePage = () => {
       case "module":
         return {
           createLabel: "Create Submodule",
-          assignLabel: "Assign Submodule",
+          assignLabel: "Assign Module",
           createType: "submodule",
+          assignType: "module",
         };
       case "submodule":
         return {
           createLabel: "Create Task",
-          assignLabel: "Assign Task",
+          assignLabel: "Assign Submodule",
           createType: "task",
+          assignType: "submodule",
         };
       case "task":
         return {
           createLabel: "Create Subtask",
-          assignLabel: "Assign Subtask",
+          assignLabel: "Assign Task",
           createType: "subtask",
+          assignType: "task",
         };
       case "subtask":
         return {
           createLabel: "Submit Work",
-          assignLabel: "View Discussion",
+          assignLabel: "Assign Subtask",
           createType: null,
+          assignType: "subtask",
         };
       default:
         return {};
     }
   };
+
+
 
   const permissions = workspaceDetails?.current_user_permissions || [];
 
@@ -318,24 +324,48 @@ const WorkspacePage = () => {
     return permissions.some((item) => item.permission_name === permissionName);
   };
 
-  const canShowActionButtons = () => {
+  const canCreate = () => {
     switch (selectedItem?.type) {
       case "module":
-        return hasPermission("create_module");
+        return hasPermission("create_submodule") || hasPermission("create_task") ;
 
       case "submodule":
-        return hasPermission("create_submodule");
-
-      case "task":
         return hasPermission("create_task");
 
-      case "subtask":
+      case "task":
         return hasPermission("create_subtask");
+
+      case "subtask":
+        return false;
 
       default:
         return false;
     }
   };
+
+  const canAssign = () => {
+    switch (selectedItem?.type) {
+      case "module":
+        return hasPermission("assign_module");
+
+      case "submodule":
+        return hasPermission("assign_submodule");
+
+      case "task":
+        return hasPermission("assign_task");
+
+      case "subtask":
+        return hasPermission("assign_subtask");
+
+      default:
+        return false;
+    }
+  };
+
+  const canCreateSubmission = hasPermission("create_submission");
+  const canViewSubmission = hasPermission("view_submission");
+
+  const canAccessSubmission = canCreateSubmission || canViewSubmission;
 
   const findPath = (tree, targetId, path = []) => {
     for (const item of tree) {
@@ -351,6 +381,7 @@ const WorkspacePage = () => {
 
   const getTabs = () => {
     if (!selectedItem) return [];
+
     if (selectedItem.type === "module" || selectedItem.type === "submodule") {
       return [
         { id: "overview", label: "Overview", icon: faChartSimple },
@@ -358,15 +389,30 @@ const WorkspacePage = () => {
         { id: "comments", label: "Discussion", icon: faComment },
       ];
     }
+
     if (selectedItem.type === "task" || selectedItem.type === "subtask") {
       return [
         { id: "overview", label: "Overview", icon: faChartSimple },
         { id: "assignedEmployees", label: "Team Members", icon: faUsers },
-        { id: "remarkForm", label: "Submit Work", icon: faUpload },
-        { id: "remarksHistory", label: "Work History", icon: faListCheck },
+
+        {
+          id: "remarkForm",
+          label: "Submit Work",
+          icon: faUpload,
+          disabled: !canCreateSubmission,
+        },
+
+        {
+          id: "remarksHistory",
+          label: "Work History",
+          icon: faListCheck,
+          disabled: !canViewSubmission,
+        },
+
         { id: "comments", label: "Discussion", icon: faComment },
       ];
     }
+
     return [];
   };
 
@@ -769,8 +815,16 @@ const WorkspacePage = () => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={activeTab === tab.id ? "active-tab" : ""}
-            onClick={() => setActiveTab(tab.id)}
+            disabled={tab.disabled}
+            className={`
+    ${activeTab === tab.id ? "active-tab" : ""}
+    ${tab.disabled ? "disabled-tab" : ""}
+  `}
+            onClick={() => {
+              if (!tab.disabled) {
+                setActiveTab(tab.id);
+              }
+            }}
           >
             <FontAwesomeIcon icon={tab.icon} />
             {tab.label}
@@ -815,40 +869,76 @@ const WorkspacePage = () => {
                 </div>
               </div>
             </div>
-            {canShowActionButtons() && (
+
             <div className="workspace-action-buttons">
-              <button
-                className="workspace-create-btn"
-                onClick={() => {
-                  if (selectedItem.type === "subtask") {
-                    setActiveTab("remarkForm");
-                    return;
-                  }
-                  navigate(
-                    `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createType}`,
-                  );
-                }}
-              >
-                <FontAwesomeIcon icon={faLayerGroup} />
-                {actionConfig.createLabel}
-              </button>
-              <button
-                className="workspace-assign-btn"
-                onClick={() => {
-                  if (selectedItem.type === "subtask") {
-                    setActiveTab("comments");
-                    return;
-                  }
-                  navigate(
-                    `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createType}`,
-                  );
-                }}
-              >
-                <FontAwesomeIcon icon={faUsers} />
-                {actionConfig.assignLabel}
-              </button>
+              {/* SUBTASK BUTTONS */}
+              {selectedItem.type === "subtask" ? (
+                <>
+                  <button
+                    className={`workspace-create-btn ${
+                      !canCreateSubmission ? "btn-disabled" : ""
+                    }`}
+                    disabled={!canCreateSubmission}
+                    onClick={() => setActiveTab("remarkForm")}
+                  >
+                    <FontAwesomeIcon icon={faUpload} />
+                    Submit Work Report
+                  </button>
+
+                  <button
+                    className="workspace-assign-btn"
+                    onClick={() => setActiveTab("comments")}
+                  >
+                    <FontAwesomeIcon icon={faComment} />
+                    View Discussion
+                  </button>
+
+                  {canAssign() && (
+                    <button
+                      className="workspace-assign-btn"
+                      onClick={() =>
+                        navigate(
+                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=subtask`,
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} />
+                      Assign Subtask
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {canCreate() && (
+                    <button
+                      className="workspace-create-btn"
+                      onClick={() =>
+                        navigate(
+                          `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createType}`,
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faLayerGroup} />
+                      {actionConfig.createLabel}
+                    </button>
+                  )}
+
+                  {canAssign() && (
+                    <button
+                      className="workspace-assign-btn"
+                      onClick={() =>
+                        navigate(
+                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.assignType}`,
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faUsers} />
+                      {actionConfig.assignLabel}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
-            )}
 
             {details?.description && (
               <div className="description-box">
