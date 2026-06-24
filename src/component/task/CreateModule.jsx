@@ -34,6 +34,9 @@ import {
   faUserCheck,
   faBuilding,
   faUserFriends,
+  faPaperclip,
+  faCloudUploadAlt,
+  faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -72,6 +75,12 @@ const CreateModule = () => {
     status: "open",
     priority: null,
   });
+
+  // File upload states
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [fileError, setFileError] = useState("");
+  const [existingFile, setExistingFile] = useState(null);
 
   const priorityOptions = [
     {
@@ -200,14 +209,11 @@ const CreateModule = () => {
     setSelectedParent(selectedItem);
     setFormData((prev) => ({
       ...prev,
-
       parent_id: selectedItem.id,
-
       type: itemTypeParam,
     }));
 
     setSelectedParent(selectedItem);
-
     setShowParentSelector(false);
 
     // Expand parent nodes
@@ -218,6 +224,103 @@ const CreateModule = () => {
     );
     setAutoSelectAttempted(true);
     return true;
+  };
+
+  // File validation and handling
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      setFilePreview(null);
+      setFileError("");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setFileError("File size exceeds 10MB limit");
+      setSelectedFile(null);
+      setFilePreview(null);
+      e.target.value = "";
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      // Images
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      // Documents
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // Text files
+      'text/plain',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setFileError("File type not supported. Please upload images, PDFs, Word, PowerPoint, Excel, or text files.");
+      setSelectedFile(null);
+      setFilePreview(null);
+      e.target.value = "";
+      return;
+    }
+
+    setFileError("");
+    setSelectedFile(file);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-image files, show file icon
+      setFilePreview(null);
+    }
+  };
+
+  // Remove selected file
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    setFileError("");
+    const fileInput = document.getElementById('file_upload');
+    if (fileInput) fileInput.value = '';
+  };
+
+  // Get file icon based on file type
+  const getFileIcon = (file) => {
+    if (!file) return null;
+    
+    const type = file.type;
+    if (type.startsWith('image/')) return '🖼️';
+    if (type === 'application/pdf') return '📄';
+    if (type.includes('word') || type.includes('document')) return '📝';
+    if (type.includes('presentation') || type.includes('powerpoint')) return '📊';
+    if (type.includes('sheet') || type.includes('excel')) return '📈';
+    if (type.startsWith('text/')) return '📃';
+    return '📎';
+  };
+
+  // Get file type label
+  const getFileTypeLabel = (file) => {
+    if (!file) return '';
+    
+    const type = file.type;
+    if (type.startsWith('image/')) return 'Image';
+    if (type === 'application/pdf') return 'PDF';
+    if (type.includes('word') || type.includes('document')) return 'Word Document';
+    if (type.includes('presentation') || type.includes('powerpoint')) return 'PowerPoint';
+    if (type.includes('sheet') || type.includes('excel')) return 'Excel Spreadsheet';
+    if (type.startsWith('text/')) return 'Text File';
+    return 'File';
   };
 
   // Fetch work item data for edit mode
@@ -249,6 +352,11 @@ const CreateModule = () => {
             status: workItem.status || "open",
             priority: workItem.priority || null,
           });
+
+          // If there's an existing file/image, store it
+          if (workItem.image) {
+            setExistingFile(workItem.image);
+          }
 
           // If parent_id exists, fetch parent details to display selected parent
           if (workItem.parent_id && workItem.type !== "module") {
@@ -285,13 +393,8 @@ const CreateModule = () => {
     }
   };
 
-  // Fetch project tree for parent selection - FIXED for the actual API response structure
+  // Fetch project tree for parent selection
   const fetchProjectTree = async () => {
-    // Only fetch if we need parent selection (non-module items)
-    // if (formData.type === "module") {
-    //   return;
-    // }
-
     setFetchingData(true);
     try {
       const response = await axios.get(`${api_url}/project-tree/${p_id}`, {
@@ -358,7 +461,6 @@ const CreateModule = () => {
     // AUTO URL MODE
     if (autoSelectWorkItemId && autoSelectType) {
       fetchProjectTree();
-
       return;
     }
 
@@ -367,7 +469,6 @@ const CreateModule = () => {
       fetchProjectTree();
     } else {
       setSelectedParent(null);
-
       setFormData((prev) => ({
         ...prev,
         parent_id: "",
@@ -443,19 +544,35 @@ const CreateModule = () => {
           updateData.parent_id = parseInt(formData.parent_id);
         }
 
+        // Create FormData if file is being uploaded
+        let formDataToSend = new FormData();
+        let isMultipart = false;
+
+        if (selectedFile) {
+          isMultipart = true;
+          Object.keys(updateData).forEach(key => {
+            if (updateData[key] !== null && updateData[key] !== undefined) {
+              formDataToSend.append(key, updateData[key]);
+            }
+          });
+          formDataToSend.append('image', selectedFile);
+        }
+
         response = await axios.post(
           `${api_url}/work-item-update/${updateId}`,
-          updateData,
+          isMultipart ? formDataToSend : updateData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',
             },
           },
         );
 
         if (response.data.status === 1) {
           toast.success("Work item updated successfully!");
+          navigate(`/organization/workspace/${p_id}`);
+          return;
         } else {
           throw new Error(response.data.message || "Update failed");
         }
@@ -482,20 +599,37 @@ const CreateModule = () => {
         // debug log before submission
         console.log("Submitting work item data:", submitData);
 
-        response = await axios.post(`${api_url}/work-items`, submitData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        // Create FormData if file is being uploaded
+        let formDataToSend = new FormData();
+        let isMultipart = false;
+
+        if (selectedFile) {
+          isMultipart = true;
+          Object.keys(submitData).forEach(key => {
+            if (submitData[key] !== null && submitData[key] !== undefined) {
+              formDataToSend.append(key, submitData[key]);
+            }
+          });
+          formDataToSend.append('image', selectedFile);
+        }
+
+        response = await axios.post(
+          `${api_url}/work-items`,
+          isMultipart ? formDataToSend : submitData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',
+            },
           },
-        });
+        );
 
         if (response.data.status === 1) {
           toast.success(
             `${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} created successfully!`,
           );
-          // navigate(`/organization/emp-assign-work-item/${p_id}`);
           navigate(`/organization/workspace/${p_id}`);
-          return; // Exit early to avoid navigating again
+          return;
         } else {
           throw new Error(response.data.message || "Creation failed");
         }
@@ -788,7 +922,6 @@ const CreateModule = () => {
               </div>
 
               {/* Description */}
-              {/* Description */}
               <div className="form-group full-width">
                 <label htmlFor="description">
                   <FontAwesomeIcon icon={faEdit} />
@@ -904,6 +1037,100 @@ const CreateModule = () => {
                   onChange={handleChange}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* File Upload Section */}
+          <div className="form-section">
+            <h2 className="section-title">
+              <FontAwesomeIcon icon={faPaperclip} />
+              Attach File (Optional)
+            </h2>
+
+            <div className="form-group full-width">
+              <div className="file-upload-container">
+                {/* Existing file display for edit mode */}
+                {existingFile && !selectedFile && (
+                  <div className="existing-file-info">
+                    <div className="existing-file-card">
+                      <div className="existing-file-icon">
+                        <span className="file-icon-emoji">📎</span>
+                      </div>
+                      <div className="existing-file-details">
+                        <div className="existing-file-name">Current File</div>
+                        <div className="existing-file-path">{existingFile}</div>
+                      </div>
+                    </div>
+                    <small className="form-hint">
+                      Upload a new file to replace the existing one
+                    </small>
+                  </div>
+                )}
+
+                <div className="file-drop-zone">
+                  <input
+                    type="file"
+                    id="file_upload"
+                    className="file-input"
+                    onChange={handleFileChange}
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+                  />
+                  <label htmlFor="file_upload" className="file-upload-label">
+                    <div className="file-upload-icon">
+                      <FontAwesomeIcon icon={faCloudUploadAlt} />
+                    </div>
+                    <div className="file-upload-text">
+                      <span className="file-upload-title">Click or drag to upload</span>
+                      <span className="file-upload-subtitle">
+                        Supported: Images, PDF, Word, PowerPoint, Excel, Text (Max 10MB)
+                      </span>
+                    </div>
+                  </label>
+                </div>
+
+                {fileError && (
+                  <div className="file-error">
+                    <FontAwesomeIcon icon={faExclamationCircle} />
+                    <span>{fileError}</span>
+                  </div>
+                )}
+
+                {selectedFile && (
+                  <div className="file-preview-container">
+                    <div className="file-preview-card">
+                      <div className="file-preview-icon">
+                        {filePreview ? (
+                          <img src={filePreview} alt="Preview" className="file-image-preview" />
+                        ) : (
+                          <div className="file-type-icon">
+                            <span className="file-icon-emoji">{getFileIcon(selectedFile)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="file-preview-info">
+                        <div className="file-preview-name">{selectedFile.name}</div>
+                        <div className="file-preview-details">
+                          <span className="file-preview-type">{getFileTypeLabel(selectedFile)}</span>
+                          <span className="file-preview-size">
+                            {(selectedFile.size / 1024).toFixed(1)} KB
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="file-remove-btn"
+                        onClick={handleRemoveFile}
+                        title="Remove file"
+                      >
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <small className="form-hint">
+                Attach a file to this work item (images, documents, presentations, etc.)
+              </small>
             </div>
           </div>
 

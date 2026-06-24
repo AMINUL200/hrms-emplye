@@ -323,14 +323,14 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
       <div className="header">
         <div className="header-left">
           <div className="header-log">
-            <a href="#" className="logo2">
+            <Link to={"/organization/employerdashboard"} className="logo2">
               <img
                 src={`${storage_url}/${data?.org_logo}`}
                 width="100"
                 height="80"
                 alt="Logo"
               />
-            </a>
+            </Link>
           </div>
 
           <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar}>

@@ -79,6 +79,27 @@ const getFileIcon = (filename) => {
   return faFile;
 };
 
+const getFileType = (filename) => {
+  if (!filename) return "File";
+  const ext = filename.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return "PDF";
+  if (ext === "doc" || ext === "docx") return "Word Document";
+  if (ext === "xls" || ext === "xlsx") return "Excel Spreadsheet";
+  if (ext === "ppt" || ext === "pptx") return "PowerPoint";
+  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "Image";
+  if (ext === "zip" || ext === "rar" || ext === "7z") return "Archive";
+  return "File";
+};
+
+const getFileSize = (filename, fileSize) => {
+  if (fileSize) {
+    if (fileSize < 1024) return `${fileSize} B`;
+    if (fileSize < 1048576) return `${(fileSize / 1024).toFixed(1)} KB`;
+    return `${(fileSize / 1048576).toFixed(1)} MB`;
+  }
+  return "";
+};
+
 const formatWhatsAppTime = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -316,8 +337,6 @@ const WorkspacePage = () => {
     }
   };
 
-
-
   const permissions = workspaceDetails?.current_user_permissions || [];
 
   const hasPermission = (permissionName) => {
@@ -327,7 +346,7 @@ const WorkspacePage = () => {
   const canCreate = () => {
     switch (selectedItem?.type) {
       case "module":
-        return hasPermission("create_submodule") || hasPermission("create_task") ;
+        return hasPermission("create_submodule") || hasPermission("create_task");
 
       case "submodule":
         return hasPermission("create_task");
@@ -394,21 +413,18 @@ const WorkspacePage = () => {
       return [
         { id: "overview", label: "Overview", icon: faChartSimple },
         { id: "assignedEmployees", label: "Team Members", icon: faUsers },
-
         {
           id: "remarkForm",
           label: "Submit Work",
           icon: faUpload,
           disabled: !canCreateSubmission,
         },
-
         {
           id: "remarksHistory",
           label: "Work History",
           icon: faListCheck,
           disabled: !canViewSubmission,
         },
-
         { id: "comments", label: "Discussion", icon: faComment },
       ];
     }
@@ -778,6 +794,19 @@ const WorkspacePage = () => {
   const statusConfig = getStatusConfig(workspaceDetails?.details?.status);
   const details = workspaceDetails?.details;
 
+  // Get the full image URL
+  const getFullImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    return `${STORAGE_URL}${imagePath}`;
+  };
+
+  // Check if file is an image
+  const isImageFile = (filename) => {
+    if (!filename) return false;
+    const ext = filename.split(".").pop()?.toLowerCase();
+    return ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
+  };
+
   // ========================================
   // MAIN RENDER
   // ========================================
@@ -870,6 +899,50 @@ const WorkspacePage = () => {
               </div>
             </div>
 
+            {/* ── FILE ATTACHMENT DISPLAY ── */}
+            {details?.image && (
+              <div className="file-attachment-section">
+                <div className="file-attachment-header">
+                  <FontAwesomeIcon icon={faPaperclip} />
+                  <span>Attached File</span>
+                </div>
+                <div className="file-attachment-card">
+                  <div className="file-attachment-icon">
+                    <FontAwesomeIcon icon={getFileIcon(details.image)} />
+                  </div>
+                  <div className="file-attachment-info">
+                    <div className="file-attachment-name">
+                      {details.image.split("/").pop()}
+                    </div>
+                    <div className="file-attachment-details">
+                      <span className="file-type-badge">
+                        {getFileType(details.image)}
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    href={getFullImageUrl(details.image)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="file-download-btn"
+                  >
+                    <FontAwesomeIcon icon={faDownload} />
+                    <span>Download</span>
+                  </a>
+                </div>
+                {/* Image Preview for image files */}
+                {isImageFile(details.image) && (
+                  <div className="file-image-preview-container">
+                    <img
+                      src={getFullImageUrl(details.image)}
+                      alt="Attachment preview"
+                      className="file-image-preview-full"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="workspace-action-buttons">
               {/* SUBTASK BUTTONS */}
               {selectedItem.type === "subtask" ? (
@@ -946,9 +1019,7 @@ const WorkspacePage = () => {
                   <FontAwesomeIcon icon={faFileAlt} />
                   Description
                 </h4>
-                <p dangerouslySetInnerHTML={{__html:details.description}}>
-                  
-                </p>
+                <p dangerouslySetInnerHTML={{ __html: details.description }} />
               </div>
             )}
           </div>
@@ -974,7 +1045,6 @@ const WorkspacePage = () => {
                     <th>Employee</th>
                     <th>Employee ID</th>
                     <th>Role</th>
-                    {/* <th>Access Type</th> */}
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -1008,12 +1078,6 @@ const WorkspacePage = () => {
                             {emp.role_name || "Member"}
                           </span>
                         </td>
-                        {/* <td className="access-type-cell">
-                          <span className="access-badge">
-                            <FontAwesomeIcon icon={faEye} />
-                            {emp.access_type || "View"}
-                          </span>
-                        </td> */}
                         <td className="status-cell">
                           <span className="status-badge-table active">
                             <span className="status-dot"></span>
@@ -1024,7 +1088,7 @@ const WorkspacePage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="empty-table-row">
+                      <td colSpan="5" className="empty-table-row">
                         <div className="empty-state-small">
                           <FontAwesomeIcon icon={faUserPlus} />
                           <p>No team members assigned yet</p>

@@ -404,6 +404,7 @@ const AssignWorkItem = () => {
         setSelectedRoleName("");
         // Refresh work items list
         fetchWorkItemsList();
+        navigate(`/organization/workspace/${p_id}`)
       } else {
         toast.warning(`${response.data.message || "Assignment failed"}`);
       }
