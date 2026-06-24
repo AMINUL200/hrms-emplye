@@ -38,6 +38,7 @@ import {
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContex";
+import CustomTextEditor from "../common/CustomTextEditor";
 
 const CreateModule = () => {
   const { p_id } = useParams(); // projectId
@@ -492,7 +493,8 @@ const CreateModule = () => {
           toast.success(
             `${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)} created successfully!`,
           );
-          navigate(`/organization/emp-assign-work-item/${p_id}`);
+          // navigate(`/organization/emp-assign-work-item/${p_id}`);
+          navigate(`/organization/workspace/${p_id}`);
           return; // Exit early to avoid navigating again
         } else {
           throw new Error(response.data.message || "Creation failed");
@@ -786,16 +788,28 @@ const CreateModule = () => {
               </div>
 
               {/* Description */}
+              {/* Description */}
               <div className="form-group full-width">
-                <label htmlFor="description">Description</label>
-                <textarea
-                  id="description"
-                  name="description"
+                <label htmlFor="description">
+                  <FontAwesomeIcon icon={faEdit} />
+                  Description
+                </label>
+
+                <CustomTextEditor
                   value={formData.description}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder="Enter description (optional)"
+                  placeholder="Enter description..."
+                  height={350}
+                  onChange={(newContent) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: newContent,
+                    }))
+                  }
                 />
+
+                <small className="form-hint">
+                  Add detailed information about this work item
+                </small>
               </div>
 
               {/* Order By */}

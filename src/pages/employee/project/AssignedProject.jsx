@@ -24,6 +24,33 @@ import axios from "axios";
 import { AuthContext } from "../../../context/AuthContex";
 import { toast } from "react-toastify";
 
+// Description Popup Component
+const DescriptionPopup = ({ description, onClose }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content description-popup" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>Project Description</h3>
+          <button className="modal-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="modal-body description-body">
+          <div 
+            className="full-description"
+            dangerouslySetInnerHTML={{ __html: description || "No description available" }}
+          />
+        </div>
+        <div className="modal-footer">
+          <button className="modal-btn cancel" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AssignedProject = () => {
   const { token, data: userData } = useContext(AuthContext);
   const api_url = import.meta.env.VITE_API_URL;
@@ -33,6 +60,7 @@ const AssignedProject = () => {
   const [error, setError] = useState(null);
   const [menuOpen, setMenuOpen] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [selectedDescription, setSelectedDescription] = useState(null);
   const navigate = useNavigate();
 
   // Check if user has specific permission for a project
@@ -338,8 +366,12 @@ const AssignedProject = () => {
           const isOverdue = daysRemaining === "Overdue";
           const canDelete = hasPermission(item, "delete_project");
           const canUpdate = hasPermission(item, "update_project");
-          const canCreateModule = hasPermission(item, "create_project");
+          const canCreateModule = hasPermission(item, "create_module");
 
+          // Check if description is long enough to need "See More"
+          const descriptionText = project.description || "No description available";
+          const needsSeeMore = descriptionText.length > 100 || 
+            (descriptionText.match(/<[^>]+>/g) || []).length > 3;
 
           return (
             <div className="project-card" key={project.id}>
@@ -356,50 +388,49 @@ const AssignedProject = () => {
                     <span>{project.identifier}</span>
                   </div>
                   
-                    <div className="card-menu-container">
-                      <button
-                        className="menu-trigger"
-                        onClick={(e) => toggleMenu(project.id, e)}
+                  <div className="card-menu-container">
+                    <button
+                      className="menu-trigger"
+                      onClick={(e) => toggleMenu(project.id, e)}
+                    >
+                      <FontAwesomeIcon icon={faEllipsisV} />
+                    </button>
+                    {menuOpen === project.id && (
+                      <div
+                        className="menu-dropdown"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </button>
-                      {menuOpen === project.id && (
-                        <div
-                          className="menu-dropdown"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {canUpdate && (
-                            <button
-                              className="menu-item edit"
-                              onClick={() => handleEditProject(item)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                              <span>Edit Project</span>
-                            </button>
-                          )}
-                          {canCreateModule && (
+                        {canUpdate && (
                           <button
                             className="menu-item edit"
-                            onClick={() => handleCreateModule(item)}
+                            onClick={() => handleEditProject(item)}
                           >
-                            <FontAwesomeIcon icon={faLayerGroup} />
-                            <span>Create Module</span>
+                            <FontAwesomeIcon icon={faEdit} />
+                            <span>Edit Project</span>
                           </button>
-                          )}
+                        )}
+                        {canCreateModule && (
+                        <button
+                          className="menu-item edit"
+                          onClick={() => handleCreateModule(item)}
+                        >
+                          <FontAwesomeIcon icon={faLayerGroup} />
+                          <span>Create Module</span>
+                        </button>
+                        )}
 
-                          {canDelete && (
-                            <button
-                              className="menu-item delete"
-                              onClick={() => setDeleteConfirm(item)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                              <span>Delete Project</span>
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                
+                        {canDelete && (
+                          <button
+                            className="menu-item delete"
+                            onClick={() => setDeleteConfirm(item)}
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                            <span>Delete Project</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -408,9 +439,17 @@ const AssignedProject = () => {
                   {project.title}
                 </h3>
 
-                <p className="project-description">
-                  {project.description || "No description available"}
-                </p>
+                <div className="project-description-wrapper">
+                  <p className="project-description" dangerouslySetInnerHTML={{__html: descriptionText}} />
+                  {needsSeeMore && (
+                    <button 
+                      className="see-more-btn"
+                      onClick={() => setSelectedDescription(descriptionText)}
+                    >
+                      See More
+                    </button>
+                  )}
+                </div>
 
                 <div className="project-dates">
                   <div className="date-item">
@@ -449,6 +488,14 @@ const AssignedProject = () => {
           );
         })}
       </div>
+
+      {/* Description Popup */}
+      {selectedDescription && (
+        <DescriptionPopup 
+          description={selectedDescription} 
+          onClose={() => setSelectedDescription(null)} 
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (

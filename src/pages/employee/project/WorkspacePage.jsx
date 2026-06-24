@@ -946,7 +946,9 @@ const WorkspacePage = () => {
                   <FontAwesomeIcon icon={faFileAlt} />
                   Description
                 </h4>
-                <p>{details.description}</p>
+                <p dangerouslySetInnerHTML={{__html:details.description}}>
+                  
+                </p>
               </div>
             )}
           </div>

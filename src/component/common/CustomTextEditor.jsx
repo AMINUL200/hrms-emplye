@@ -1,47 +1,95 @@
 // components/CustomTextEditor.jsx
-import React, { useRef } from 'react';
-import JoditEditor from 'jodit-react';
 
-const CustomTextEditor = ({ 
-  value, 
-  onChange, 
-  placeholder = 'Start typing...',
+import React, { useRef, useMemo } from "react";
+import JoditEditor from "jodit-react";
+
+const CustomTextEditor = ({
+  value,
+  onChange,
+  placeholder = "Start typing...",
   height = 400,
-  disabled = false 
+  disabled = false,
 }) => {
   const editor = useRef(null);
 
-  // Configuration without image insertion
-  const config = {
-    readonly: disabled,
-    placeholder: placeholder,
-    height: height,
-    toolbarButtonSize: 'medium',
-    removeButtons: [
-      'image', // Remove image button
-      'file', // Remove file upload
-      'video', // Remove video
-      'media', // Remove media
-      'source', // Remove source code editor
-      'about', // Remove about
-      'print', // Remove print
-      'symbols', // Remove symbols
-      'table', // Remove table (optional)
-      'hr', // Remove horizontal line (optional)
-    ],
-    buttons: [
-      'bold', 'italic', 'underline', 'strikethrough',
-      '|', 'ul', 'ol', 'outdent', 'indent',
-      '|', 'font', 'fontsize', 'brush', 'paragraph',
-      '|', 'align', 'undo', 'redo',
-      '|', 'link', 'unlink',
-      '|', 'fullsize', 'preview'
-    ],
-    showXPathInStatusbar: false,
-    showCharsCounter: false,
-    showWordsCounter: false,
-    toolbarAdaptive: false
-  };
+  const config = useMemo(
+    () => ({
+      readonly: disabled,
+
+      placeholder,
+
+      height,
+
+      toolbarButtonSize: "middle",
+
+      toolbarAdaptive: false,
+
+      showXPathInStatusbar: false,
+
+      showCharsCounter: false,
+
+      showWordsCounter: false,
+
+      askBeforePasteHTML: false,
+
+      askBeforePasteFromWord: false,
+
+      defaultActionOnPaste: "insert_as_html",
+
+      removeButtons: [
+        "image",
+        "file",
+        "video",
+        "media",
+        "source",
+        "about",
+        "print",
+        "symbols",
+        "table",
+        "hr",
+      ],
+
+      buttons: [
+        "cut",
+        "copy",
+        "paste",
+        "|",
+
+        "bold",
+        "italic",
+        "underline",
+        "strikethrough",
+        "|",
+
+        "ul",
+        "ol",
+        "outdent",
+        "indent",
+        "|",
+
+        "font",
+        "fontsize",
+        "brush",
+        "paragraph",
+        "|",
+
+        "align",
+        "|",
+
+        "undo",
+        "redo",
+        "|",
+
+        "link",
+        "unlink",
+        "|",
+
+        "fullsize",
+        "preview",
+      ],
+    }),
+    [disabled, placeholder, height]
+  );
 
   return (
     <div className="custom-text-editor">
@@ -50,7 +98,7 @@ const CustomTextEditor = ({
         value={value}
         config={config}
         tabIndex={1}
-        onBlur={onChange} // Better for performance
+        onChange={(newContent) => onChange(newContent)}
       />
     </div>
   );

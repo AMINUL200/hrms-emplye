@@ -178,6 +178,132 @@
   -webkit-box-orient: vertical;
 }
 
+/* Description Wrapper and See More Button */
+.assigned-projects-container .project-description-wrapper {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.assigned-projects-container .project-description {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.assigned-projects-container .see-more-btn {
+  display: inline-block;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 0;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.assigned-projects-container .see-more-btn:hover {
+  color: #2563eb;
+}
+
+/* Description Popup */
+.assigned-projects-container .description-popup {
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.assigned-projects-container .description-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.assigned-projects-container .full-description {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #1a1f36;
+  word-wrap: break-word;
+}
+
+.assigned-projects-container .full-description p {
+  margin-bottom: 12px;
+}
+
+.assigned-projects-container .full-description ul,
+.assigned-projects-container .full-description ol {
+  margin: 8px 0 12px 20px;
+  padding-left: 8px;
+}
+
+.assigned-projects-container .full-description li {
+  margin-bottom: 4px;
+}
+
+.assigned-projects-container .full-description strong {
+  color: #1a1f36;
+}
+
+.assigned-projects-container .full-description a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.assigned-projects-container .full-description img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.assigned-projects-container .full-description blockquote {
+  border-left: 4px solid #3b82f6;
+  padding: 8px 16px;
+  margin: 8px 0;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+/* Scrollbar styling for description popup */
+.assigned-projects-container .description-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.assigned-projects-container .description-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.assigned-projects-container .description-body::-webkit-scrollbar-thumb {
+  background: #c1c7cd;
+  border-radius: 3px;
+}
+
+.assigned-projects-container .description-body::-webkit-scrollbar-thumb:hover {
+  background: #a0a7ae;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .assigned-projects-container .description-popup {
+    max-width: 95%;
+    margin: 16px;
+  }
+  
+  .assigned-projects-container .full-description {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+}
+
 /* Project Dates */
 .project-dates {
   display: flex;

@@ -17,18 +17,19 @@ import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
+import CustomTextEditor from "../../../component/common/CustomTextEditor";
 
 const EmpCreateProject = () => {
   const { token, data: userData } = useContext(AuthContext);
   const api_url = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Check if we're in edit mode
   const queryParams = new URLSearchParams(location.search);
-  const projectId = queryParams.get('update');
+  const projectId = queryParams.get("update");
   const isEditMode = !!projectId;
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -87,7 +88,7 @@ const EmpCreateProject = () => {
       console.error("Error fetching project:", error);
       toast.error(
         error.response?.data?.message ||
-          "An error occurred while fetching project data"
+          "An error occurred while fetching project data",
       );
       navigate("/organization/assigned-projects");
     } finally {
@@ -140,9 +141,7 @@ const EmpCreateProject = () => {
       case "identifier":
         if (!value.trim()) {
           error = "Project identifier is required";
-        } else if (!/^[A-Z0-9]{3,10}$/.test(value.trim())) {
-          error = "Identifier must be 3-10 uppercase letters/numbers";
-        }
+        } 
         break;
 
       case "description":
@@ -221,7 +220,7 @@ const EmpCreateProject = () => {
 
     try {
       let response;
-      
+
       if (isEditMode) {
         // Update existing project
         response = await axios.post(
@@ -232,10 +231,10 @@ const EmpCreateProject = () => {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         console.log("Project update response:", response.data);
-        
+
         if (response.data.status === 1) {
           toast.success("Project updated successfully!");
           navigate("/organization/assigned-project");
@@ -251,7 +250,7 @@ const EmpCreateProject = () => {
           },
         });
         console.log("Project creation response:", response.data);
-        
+
         if (response.data.success === 1 || response.data.status === 1) {
           toast.success("Project created successfully!");
           navigate("/organization/assigned-project");
@@ -263,7 +262,7 @@ const EmpCreateProject = () => {
       console.error("Error submitting project:", error);
       toast.error(
         error.response?.data?.message ||
-          `An error occurred while ${isEditMode ? 'updating' : 'creating'} the project. Please try again.`,
+          `An error occurred while ${isEditMode ? "updating" : "creating"} the project. Please try again.`,
       );
     } finally {
       setLoading(false);
@@ -445,7 +444,7 @@ const EmpCreateProject = () => {
                     value={formData.project_start_date}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    min={getTodayDate()}
+                    // min={getTodayDate()}
                     className={`form-input ${touched.project_start_date && errors.project_start_date ? "error" : ""}`}
                     disabled={loading}
                   />
@@ -492,28 +491,39 @@ const EmpCreateProject = () => {
                 <label htmlFor="description" className="form-label">
                   <span>Project Description</span>
                 </label>
-                <textarea
-                  id="description"
-                  name="description"
+
+                <CustomTextEditor
                   value={formData.description}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Describe the project objectives, scope, and key deliverables..."
-                  className={`form-textarea ${touched.description && errors.description ? "error" : ""}`}
-                  rows="8"
+                  placeholder="Describe the project objectives, scope, key deliverables and requirements..."
+                  height={300}
                   disabled={loading}
+                  onChange={(content) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: content,
+                    }));
+
+                    if (errors.description) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        description: "",
+                      }));
+                    }
+                  }}
                 />
+
                 {touched.description && errors.description && (
                   <div className="error-message">
                     <FontAwesomeIcon icon={faExclamationTriangle} />
                     <span>{errors.description}</span>
                   </div>
                 )}
+
                 <div className="input-hint">
                   <FontAwesomeIcon icon={faInfoCircle} />
                   <span>
-                    Optional. Max 500 characters. Current:{" "}
-                    {formData.description.length}/500
+                    Add formatted project details, requirements, scope and
+                    deliverables.
                   </span>
                 </div>
               </div>
@@ -528,8 +538,8 @@ const EmpCreateProject = () => {
                   <div className="preview-identifier">
                     {formData.identifier || "IDENTIFIER"}
                   </div>
-                  <div className="preview-description">
-                    {formData.description || "No description provided"}
+                  <div className="preview-description" dangerouslySetInnerHTML={{__html:formData.description }}>
+                    {/* {formData.description || "No description provided"} */}
                   </div>
                   <div className="preview-dates">
                     <span>
@@ -584,12 +594,16 @@ const EmpCreateProject = () => {
               {loading ? (
                 <>
                   <div className="spinner"></div>
-                  <span>{isEditMode ? "Updating Project..." : "Creating Project..."}</span>
+                  <span>
+                    {isEditMode ? "Updating Project..." : "Creating Project..."}
+                  </span>
                 </>
               ) : (
                 <>
                   <FontAwesomeIcon icon={isEditMode ? faEdit : faSave} />
-                  <span>{isEditMode ? "Update Project" : "Create Project"}</span>
+                  <span>
+                    {isEditMode ? "Update Project" : "Create Project"}
+                  </span>
                 </>
               )}
             </button>
