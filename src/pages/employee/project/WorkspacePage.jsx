@@ -302,36 +302,112 @@ const WorkspacePage = () => {
   // HELPER FUNCTIONS
   // ========================================
 
+  // const getActionConfig = () => {
+  //   switch (selectedItem?.type) {
+  //     case "module":
+  //       return {
+  //         createLabel: "Create Submodule",
+  //         createType: "submodule",
+
+  //         assignLabel: "Assign Module",
+  //         assignType: "module",
+  //       };
+  //     case "submodule":
+  //       return {
+  //         createLabel: "Create Task",
+  //         assignLabel: "Assign Submodule",
+  //         createType: "task",
+  //         assignType: "submodule",
+  //       };
+  //     case "task":
+  //       return {
+  //         createLabel: "Create Subtask",
+  //         assignLabel: "Assign Task",
+  //         createType: "subtask",
+  //         assignType: "task",
+  //       };
+  //     case "subtask":
+  //       return {
+  //         createLabel: "Submit Work",
+  //         assignLabel: "Assign Subtask",
+  //         createType: null,
+  //         assignType: "subtask",
+  //       };
+  //     default:
+  //       return {};
+  //   }
+  // };
+
   const getActionConfig = () => {
     switch (selectedItem?.type) {
       case "module":
         return {
-          createLabel: "Create Submodule",
-          assignLabel: "Assign Module",
-          createType: "submodule",
-          assignType: "module",
+          createSame: {
+            label: "Create Module",
+            type: "module",
+            permission: "create_module",
+          },
+          createChild: {
+            label: "Create Submodule",
+            type: "submodule",
+            permission: "create_submodule",
+          },
+          assign: {
+            label: "Assign Module",
+            type: "module",
+            permission: "assign_module",
+          },
         };
+
       case "submodule":
         return {
-          createLabel: "Create Task",
-          assignLabel: "Assign Submodule",
-          createType: "task",
-          assignType: "submodule",
+          createSame: {
+            label: "Create Submodule",
+            type: "submodule",
+            permission: "create_submodule",
+          },
+          createChild: {
+            label: "Create Task",
+            type: "task",
+            permission: "create_task",
+          },
+          assign: {
+            label: "Assign Submodule",
+            type: "submodule",
+            permission: "assign_submodule",
+          },
         };
+
       case "task":
         return {
-          createLabel: "Create Subtask",
-          assignLabel: "Assign Task",
-          createType: "subtask",
-          assignType: "task",
+          createSame: {
+            label: "Create Task",
+            type: "task",
+            permission: "create_task",
+          },
+          createChild: {
+            label: "Create Subtask",
+            type: "subtask",
+            permission: "create_subtask",
+          },
+          assign: {
+            label: "Assign Task",
+            type: "task",
+            permission: "assign_task",
+          },
         };
+
       case "subtask":
         return {
-          createLabel: "Submit Work",
-          assignLabel: "Assign Subtask",
-          createType: null,
-          assignType: "subtask",
+          createSame: null,
+          createChild: null,
+          assign: {
+            label: "Assign Subtask",
+            type: "subtask",
+            permission: "assign_subtask",
+          },
         };
+
       default:
         return {};
     }
@@ -363,25 +439,69 @@ const WorkspacePage = () => {
         return false;
     }
   };
-
-  const canAssign = () => {
+  const canCreateSameLevel = () => {
     switch (selectedItem?.type) {
       case "module":
-        return hasPermission("assign_module");
+        return hasPermission("create_module");
 
       case "submodule":
-        return hasPermission("assign_submodule");
+        return hasPermission("create_submodule");
 
       case "task":
-        return hasPermission("assign_task");
-
-      case "subtask":
-        return hasPermission("assign_subtask");
+        return hasPermission("create_task");
 
       default:
         return false;
     }
   };
+
+  const canCreateChildLevel = () => {
+    switch (selectedItem?.type) {
+      case "module":
+        return hasPermission("create_submodule");
+
+      case "submodule":
+        return hasPermission("create_task");
+
+      case "task":
+        return hasPermission("create_subtask");
+
+      default:
+        return false;
+    }
+  };
+
+  // const canAssign = () => {
+  //   switch (selectedItem?.type) {
+  //     case "module":
+  //       return hasPermission("assign_module");
+
+  //     case "submodule":
+  //       return hasPermission("assign_submodule");
+
+  //     case "task":
+  //       return hasPermission("assign_task");
+
+  //     case "subtask":
+  //       return hasPermission("assign_subtask");
+
+  //     default:
+  //       return false;
+  //   }
+  // };
+
+  const actionConfig = getActionConfig();
+
+  const canCreateSame = () =>
+    actionConfig.createSame &&
+    hasPermission(actionConfig.createSame.permission);
+
+  const canCreateChild = () =>
+    actionConfig.createChild &&
+    hasPermission(actionConfig.createChild.permission);
+
+  const canAssign = () =>
+    actionConfig.assign && hasPermission(actionConfig.assign.permission);
 
   const canCreateSubmission = hasPermission("create_submission");
   const canViewSubmission = hasPermission("view_submission");
@@ -512,8 +632,6 @@ const WorkspacePage = () => {
   // ========================================
   // MEMOIZED VALUES
   // ========================================
-
-  const actionConfig = getActionConfig();
 
   const breadcrumb = useMemo(() => {
     if (!selectedItem) return [];
@@ -949,17 +1067,7 @@ const WorkspacePage = () => {
               {/* SUBTASK BUTTONS */}
               {selectedItem.type === "subtask" ? (
                 <>
-                  <button
-                    className={`workspace-create-btn ${
-                      !canCreateSubmission ? "btn-disabled" : ""
-                    }`}
-                    disabled={!canCreateSubmission}
-                    onClick={() => setActiveTab("remarkForm")}
-                  >
-                    <FontAwesomeIcon icon={faUpload} />
-                    Submit Work Report
-                  </button>
-
+                  
                   <button
                     className="workspace-assign-btn"
                     onClick={() => setActiveTab("comments")}
@@ -968,33 +1076,47 @@ const WorkspacePage = () => {
                     View Discussion
                   </button>
 
-                  {canAssign() && (
+                    {canAssign() && (
                     <button
                       className="workspace-assign-btn"
                       onClick={() =>
                         navigate(
-                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=subtask`,
+                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.assign.type}`,
                         )
                       }
                     >
                       <FontAwesomeIcon icon={faUsers} />
-                      Assign Subtask
+                      {actionConfig.assign.label}
                     </button>
                   )}
                 </>
               ) : (
                 <>
-                  {canCreate() && (
+                  {canCreateSame() && (
                     <button
                       className="workspace-create-btn"
                       onClick={() =>
                         navigate(
-                          `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createType}`,
+                          `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createSame.type}`,
                         )
                       }
                     >
                       <FontAwesomeIcon icon={faLayerGroup} />
-                      {actionConfig.createLabel}
+                      {actionConfig.createSame.label}
+                    </button>
+                  )}
+
+                  {canCreateChild() && (
+                    <button
+                      className="workspace-create-btn"
+                      onClick={() =>
+                        navigate(
+                          `/organization/emp-add-module/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.createChild.type}`,
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faLayerGroup} />
+                      {actionConfig.createChild.label}
                     </button>
                   )}
 
@@ -1003,12 +1125,12 @@ const WorkspacePage = () => {
                       className="workspace-assign-btn"
                       onClick={() =>
                         navigate(
-                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.assignType}`,
+                          `/organization/emp-assign-work-item/${projectId}?workitem_id=${selectedItem.id}&type=${actionConfig.assign.type}`,
                         )
                       }
                     >
                       <FontAwesomeIcon icon={faUsers} />
-                      {actionConfig.assignLabel}
+                      {actionConfig.assign.label}
                     </button>
                   )}
                 </>

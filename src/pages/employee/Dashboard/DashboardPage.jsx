@@ -172,7 +172,7 @@ const DashboardPage = () => {
   return (
     <div className="dashboard-page-container container-fluid pt-1">
       {/* Alert Row */}
-      {showAlert && (
+      {/* {showAlert && (
         <div className="row g-3 mb-3">
           <div className="col-12">
             <div className="alert-card alert-success">
@@ -189,7 +189,7 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Attendance + Bottom Cards + Calendar Row */}
       <div className="row g-3 mb-3 align-items-stretch">
