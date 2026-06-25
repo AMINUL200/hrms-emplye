@@ -346,7 +346,9 @@ const WorkspacePage = () => {
   const canCreate = () => {
     switch (selectedItem?.type) {
       case "module":
-        return hasPermission("create_submodule") || hasPermission("create_task");
+        return (
+          hasPermission("create_submodule") || hasPermission("create_task")
+        );
 
       case "submodule":
         return hasPermission("create_task");
@@ -1026,6 +1028,7 @@ const WorkspacePage = () => {
         )}
 
         {/* ── TEAM MEMBERS ── */}
+        {/* ── TEAM MEMBERS ── */}
         {activeTab === "assignedEmployees" && (
           <div className="tab-card">
             <div className="tab-header">
@@ -1045,7 +1048,9 @@ const WorkspacePage = () => {
                     <th>Employee</th>
                     <th>Employee ID</th>
                     <th>Role</th>
-                    <th>Status</th>
+                    {/* <th>Status</th> */}
+                    <th>Assigned By</th>
+                    <th>Assigned At</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1073,22 +1078,55 @@ const WorkspacePage = () => {
                         </td>
                         <td className="role-cell">
                           <span
-                            className={`role-badge role-${emp.role || "member"}`}
+                            className={`role-badge role-${emp.role_name?.toLowerCase() || "member"}`}
                           >
                             {emp.role_name || "Member"}
                           </span>
                         </td>
-                        <td className="status-cell">
-                          <span className="status-badge-table active">
-                            <span className="status-dot"></span>
-                            Active
-                          </span>
+                        {/* <td className="status-cell">
+                          {emp.status ? (
+                            <span
+                              className={`status-badge-table ${emp.status === "assigned" ? "active" : "inactive"}`}
+                            >
+                              <span className="status-dot"></span>
+                              {emp.status.charAt(0).toUpperCase() +
+                                emp.status.slice(1)}
+                            </span>
+                          ) : (
+                            <span className="status-badge-table inactive">
+                              <span className="status-dot"></span>
+                              Pending
+                            </span>
+                          )}
+                        </td> */}
+                        <td className="assigned-by-cell">
+                          {emp.assigned_by_name ? (
+                            <div className="assigned-by-info">
+                              <span className="assigned-by-name">
+                                {emp.assigned_by_name}
+                              </span>
+                              <span className="assigned-by-id">
+                                ({emp.assigned_by})
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="not-assigned-text">—</span>
+                          )}
+                        </td>
+                        <td className="assigned-at-cell">
+                          {emp.assigned_at ? (
+                            <span className="assigned-at-time">
+                              {new Date(emp.assigned_at).toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="not-assigned-text">—</span>
+                          )}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="empty-table-row">
+                      <td colSpan="7" className="empty-table-row">
                         <div className="empty-state-small">
                           <FontAwesomeIcon icon={faUserPlus} />
                           <p>No team members assigned yet</p>
@@ -1101,7 +1139,6 @@ const WorkspacePage = () => {
             </div>
           </div>
         )}
-
         {/* ── REMARK FORM ── */}
         {activeTab === "remarkForm" && (
           <div className="tab-card">
