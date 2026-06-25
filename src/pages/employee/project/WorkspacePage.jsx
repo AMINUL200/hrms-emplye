@@ -1233,7 +1233,7 @@ const WorkspacePage = () => {
                       <p className="remark-text">{item.remarks}</p>
                       {item.file && (
                         <a
-                          href={`${api_url}/${item.file}`}
+                          href={`${STORAGE_URL}/${item.file}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="remark-file"
