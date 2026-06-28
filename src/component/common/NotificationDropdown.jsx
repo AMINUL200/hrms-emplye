@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faEye, faTimes } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContex";
 
@@ -28,8 +28,9 @@ const NotificationDropdown = ({
     return `${Math.floor(diff / 86400)} days ago`;
   };
 
+  // ✅ FIXED: Use is_read instead of status
   const unreadNotificationCount = notifications.filter(
-    (n) => n.status === 0,
+    (n) => n.is_read === 0,
   ).length;
 
   const toggleNotifications = () => {
@@ -40,26 +41,27 @@ const NotificationDropdown = ({
     setSelectedNotification(notification);
     setShowNotifications(false);
 
-    // if (notification.is_read === 0) {
-    console.log("🔔 Marking as read:", notification.id); // ✅ DEBUG
-    try {
-      const res = await axios.put(
-        `${api_url}/emp-notification/read/${notification.id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+    // Mark as read if unread
+    if (notification.is_read === 0) {
+      console.log("🔔 Marking as read:", notification.id);
+      try {
+        const res = await axios.put(
+          `${api_url}/emp-notification/read/${notification.id}`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
 
-      // ✅ update local UI immediately
-      onStatusUpdate(notification.id);
+        // ✅ update local UI immediately
+        onStatusUpdate(notification.id);
 
-      // ✅ THEN refresh from backend
-      await refreshNotifications(); // update parent state
-    } catch (error) {
-      console.error("Status update failed", error);
+        // ✅ THEN refresh from backend
+        await refreshNotifications();
+      } catch (error) {
+        console.error("Status update failed", error);
+      }
     }
-    // }
   };
 
   // Close dropdown when clicking outside
@@ -82,7 +84,7 @@ const NotificationDropdown = ({
           <FontAwesomeIcon icon={faBell} />
           {unreadNotificationCount > 0 && (
             <span className="notification-badge">
-              {unreadNotificationCount}
+              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
             </span>
           )}
         </button>
@@ -92,40 +94,46 @@ const NotificationDropdown = ({
           <div className="dropdown-menu notification-menu show">
             <div className="notification-header">
               <h6>Notifications</h6>
-              <span className="notification-count">{notifications.length}</span>
+              <span className="notification-count">{unreadNotificationCount}</span>
             </div>
 
             <div className="notification-list">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`notification-item ${notification.status === 0 ? "unread" : ""}`}
-                >
-                  {/* 🔴 Unread Dot LEFT SIDE */}
-                  {notification.is_read === 0 && (
-                    <div className="unread-dot-left"></div>
-                  )}
-
-                  {/* Notification Title + Time */}
-                  <div className="notification-content">
-                    <h6>{notification.title}</h6>
-                    <small>{timeAgo(notification.created_at)}</small>
-                  </div>
-
-                  {/* View Icon */}
-                  <FontAwesomeIcon
-                    icon={faEye}
-                    className="view-icon"
-                    onClick={() => handleView(notification)}
-                  />
+              {notifications.length === 0 ? (
+                <div className="no-notifications">
+                  No notifications yet
                 </div>
-              ))}
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`notification-item ${notification.is_read === 0 ? "unread" : ""}`}
+                  >
+                    {/* 🔴 Unread Dot LEFT SIDE */}
+                    {notification.is_read === 0 && (
+                      <div className="unread-dot-left"></div>
+                    )}
+
+                    {/* Notification Title + Time */}
+                    <div className="notification-content">
+                      <h6>{notification.title}</h6>
+                      <small>{timeAgo(notification.created_at)}</small>
+                    </div>
+
+                    {/* View Icon */}
+                    <FontAwesomeIcon
+                      icon={faEye}
+                      className="view-icon"
+                      onClick={() => handleView(notification)}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Notification Detail Modal */}
+      {/* Notification Detail Modal - FIXED with scrollable content */}
       {selectedNotification && (
         <div
           className="custom-modal-overlay"
@@ -135,35 +143,62 @@ const NotificationDropdown = ({
             className="custom-modal notification-detail-modal"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Fixed Header with Close Button */}
             <div className="modal-header-gradient">
               <h2>{selectedNotification.title}</h2>
+              <button 
+                className="modal-close-btn"
+                onClick={() => setSelectedNotification(null)}
+                aria-label="Close modal"
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
 
-            <div className="modal-body-content">
-              <p>
-                <strong>Description: </strong>
-                {selectedNotification.description}
-              </p>
-              <p>
-                <strong>Start Date: </strong>
-                {selectedNotification.start_date}
-              </p>
-              <p>
-                <strong>End Date: </strong>
-                {selectedNotification.end_date}
-              </p>
-              {/* <p>
-                <strong>Created At: </strong>
-                {selectedNotification.created_at}
-              </p> */}
+            {/* Scrollable Content Area */}
+            <div className="modal-body-content scrollable-content">
+              <div className="notification-detail-section">
+                <div className="detail-item">
+                  <strong>Description: </strong>
+                  <div 
+                    className="description-content"
+                    dangerouslySetInnerHTML={{ __html: selectedNotification.description }}
+                  />
+                </div>
+                
+                <div className="detail-item">
+                  <strong>Type: </strong>
+                  <span>{selectedNotification.type}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <strong>Start Date: </strong>
+                  <span>{selectedNotification.start_date}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <strong>End Date: </strong>
+                  <span>{selectedNotification.end_date}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <strong>Status: </strong>
+                  <span className={selectedNotification.is_read === 0 ? 'status-unread' : 'status-read'}>
+                    {selectedNotification.is_read === 0 ? 'Unread' : 'Read'}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <button
-              className="close-btn-modern"
-              onClick={() => setSelectedNotification(null)}
-            >
-              Close
-            </button>
+            {/* Fixed Footer with Close Button */}
+            <div className="modal-footer-fixed">
+              <button
+                className="close-btn-modern"
+                onClick={() => setSelectedNotification(null)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

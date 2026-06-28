@@ -5,13 +5,11 @@ import axios from "axios";
 import PageLoader from "../../../component/loader/PageLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { listenProjectMessages } from "../../../service/projectChatService";
 
 // Helper function to get file type
 const getFileType = (filename) => {
   if (!filename) return "file";
-
   const ext = filename.split(".").pop().toLowerCase();
   if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "image";
   if (["pdf"].includes(ext)) return "pdf";
@@ -23,31 +21,18 @@ const getFileType = (filename) => {
 // Helper function to get file icon
 const getFileIcon = (fileType) => {
   switch (fileType) {
-    case "image":
-      return "🖼️";
-    case "pdf":
-      return "📄";
-    case "word":
-      return "📝";
-    case "excel":
-      return "📊";
-    default:
-      return "📎";
+    case "image": return "🖼️";
+    case "pdf": return "📄";
+    case "word": return "📝";
+    case "excel": return "📊";
+    default: return "📎";
   }
 };
 
-// Color palette for avatar backgrounds - Updated to match new scheme
+// Color palette for avatar backgrounds
 const avatarColors = [
-  "#0A4FA5", // Royal Blue
-  "#0D6EAF", // Header Center Blue
-  "#138A8A", // Teal
-  "#1565C0", // Primary Accent
-  "#1A73E8", // Google Blue
-  "#00897B", // Teal Green
-  "#0D47A1", // Dark Blue
-  "#00796B", // Dark Teal
-  "#1976D2", // Medium Blue
-  "#0097A7", // Cyan Teal
+  "#0A4FA5", "#0D6EAF", "#138A8A", "#1565C0", "#1A73E8",
+  "#00897B", "#0D47A1", "#00796B", "#1976D2", "#0097A7"
 ];
 
 const MessageCenter = () => {
@@ -69,6 +54,7 @@ const MessageCenter = () => {
   const [attachments, setAttachments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
+  const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -79,10 +65,8 @@ const MessageCenter = () => {
     const checkMobile = () => {
       setIsMobileView(window.innerWidth <= 768);
     };
-
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -93,38 +77,38 @@ const MessageCenter = () => {
         setLoading(true);
         const response = await axios.get(`${api_url}/message-center`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { t: Date.now() }, // Prevent caching
+          params: { t: Date.now() },
         });
 
         if (response.data.status === 200) {
+          // Set total unread messages
+          setTotalUnreadMessages(response.data.total_unread_messages || 0);
+
           const projectsData = response.data.projects.map((project, index) => {
-            // Format time for last message
-            const lastMessage =
-              project.messages?.length > 0
-                ? project.messages[project.messages.length - 1]
-                : null;
+            // Determine last message display text
+            let lastMessageText = "No messages yet";
+            if (project.last_message) {
+              const senderName = project.last_sender || "Unknown";
+              const isCurrentUser = project.last_sender === data?.employee_id;
+              const senderDisplay = isCurrentUser ? "You" : senderName.split(" ")[0];
+              lastMessageText = `${senderDisplay}: ${project.last_message}`;
+            }
 
             return {
               project_id: project.project_id,
               project_name: project.project_name,
               status: project.status,
               type: "group",
-              unread: 0,
+              unread: project.unread_messages || 0,
               isOnline: false,
-              lastMessage: lastMessage
-                ? `${
-                    lastMessage.employee_code === data?.employee_id
-                      ? "You"
-                      : lastMessage.user_name?.split(" ")[0]
-                  }: ${lastMessage.message?.substring(0, 30)}${
-                    lastMessage.message?.length > 30 ? "..." : ""
-                  }`
-                : "No messages yet",
-              timestamp: lastMessage ? getTimeAgo(lastMessage.created_at) : "",
+              lastMessage: lastMessageText,
+              timestamp: project.last_message_time ? getTimeAgo(project.last_message_time) : "",
               members: project.members || [],
               messages: project.messages || [],
               avatarColor: avatarColors[index % avatarColors.length],
               groupAvatar: getProjectInitials(project.project_name),
+              last_message_time: project.last_message_time,
+              last_sender: project.last_sender,
             };
           });
 
@@ -185,8 +169,8 @@ const MessageCenter = () => {
     (project) =>
       project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.members.some((member) =>
-        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
+        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   );
 
   // Handle project selection
@@ -198,9 +182,12 @@ const MessageCenter = () => {
 
     setProjects((prev) =>
       prev.map((p) =>
-        p.project_id === project.project_id ? { ...p, unread: 0 } : p,
-      ),
+        p.project_id === project.project_id ? { ...p, unread: 0 } : p
+      )
     );
+
+    // Update total unread count
+    setTotalUnreadMessages((prev) => Math.max(0, prev - (project.unread || 0)));
 
     if (isMobileView) {
       setShowChat(true);
@@ -227,16 +214,11 @@ const MessageCenter = () => {
       formData.append("project_id", selectedProject.project_id);
 
       if (editingMessage) {
-        // Editing existing message
         formData.append("title", messageText.trim());
         const response = await axios.put(
           `${api_url}/project-posts/${editingMessage.id}`,
-          {
-            title: messageText.trim(),
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { title: messageText.trim() },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 200) {
@@ -246,15 +228,11 @@ const MessageCenter = () => {
           setAttachments([]);
         }
       } else {
-        // Sending new message or reply
         formData.append("title", messageText.trim());
-
         if (replyingTo) {
           formData.append("parent_id", replyingTo.id);
         }
-
-        // Add file attachments if any
-        attachments.forEach((attachment, index) => {
+        attachments.forEach((attachment) => {
           if (attachment.file) {
             formData.append("file", attachment.file);
           }
@@ -268,9 +246,7 @@ const MessageCenter = () => {
         });
 
         if (response.data.status === 200) {
-          // Refresh messages
           await refreshProjectMessages(selectedProject.project_id);
-
           setMessageText("");
           setAttachments([]);
           setReplyingTo(null);
@@ -290,15 +266,13 @@ const MessageCenter = () => {
         `${api_url}/projects/members/${projectId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { t: Date.now() }, // Prevent caching
-        },
+          params: { t: Date.now() },
+        }
       );
 
       if (response.data.status === 200) {
-        const projectData = response.data.data.project;
         const messages = response.data.data.posts || [];
 
-        // Update selected project messages
         if (selectedProject?.project_id === projectId) {
           setSelectedProject((prev) => ({
             ...prev,
@@ -306,31 +280,30 @@ const MessageCenter = () => {
           }));
         }
 
-        // Update projects list
         setProjects((prev) =>
           prev.map((project) => {
             if (project.project_id === projectId) {
-              const lastMessage =
-                messages.length > 0 ? messages[messages.length - 1] : null;
+              const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+              let lastMessageText = project.lastMessage;
+              let lastMessageTime = project.timestamp;
+              
+              if (lastMessage) {
+                const isCurrentUser = lastMessage.employee_code === data?.employee_id;
+                const senderDisplay = isCurrentUser ? "You" : (lastMessage.user_name?.split(" ")[0] || "Unknown");
+                const messagePreview = lastMessage.message?.substring(0, 30) + (lastMessage.message?.length > 30 ? "..." : "");
+                lastMessageText = `${senderDisplay}: ${messagePreview}`;
+                lastMessageTime = getTimeAgo(lastMessage.created_at);
+              }
+              
               return {
                 ...project,
                 messages: messages,
-                lastMessage: lastMessage
-                  ? `${
-                      lastMessage.employee_code === data?.employee_id
-                        ? "You"
-                        : lastMessage.user_name?.split(" ")[0]
-                    }: ${lastMessage.message?.substring(0, 30)}${
-                      lastMessage.message?.length > 30 ? "..." : ""
-                    }`
-                  : project.lastMessage,
-                timestamp: lastMessage
-                  ? getTimeAgo(lastMessage.created_at)
-                  : project.timestamp,
+                lastMessage: lastMessageText,
+                timestamp: lastMessageTime,
               };
             }
             return project;
-          }),
+          })
         );
       }
     } catch (error) {
@@ -355,15 +328,12 @@ const MessageCenter = () => {
 
   // Handle delete message
   const handleDeleteMessage = async (messageId) => {
-    if (!window.confirm("Are you sure you want to delete this message?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
 
     try {
       const response = await axios.delete(
         `${api_url}/project-posts/${messageId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 200) {
@@ -461,15 +431,6 @@ const MessageCenter = () => {
     return getInitials(project.project_name);
   };
 
-  // Get current user role in project
-  const getCurrentUserRole = () => {
-    if (!selectedProject || !data?.employee_id) return "";
-    const member = selectedProject.members.find(
-      (m) => m.emp_code === data.employee_id,
-    );
-    return member?.role || "Member";
-  };
-
   // Check if message is from current user
   const isMessageFromCurrentUser = (message) => {
     return message.employee_code === data?.employee_id;
@@ -478,11 +439,11 @@ const MessageCenter = () => {
   // Get input placeholder text
   const getInputPlaceholder = () => {
     if (editingMessage) return "Edit your message...";
-    if (replyingTo)
-      return `Reply to ${replyingTo.user_name || replyingTo.employee_code}...`;
+    if (replyingTo) return `Reply to ${replyingTo.employee_name || replyingTo.employee_code}...`;
     return `Message in ${selectedProject?.project_name || "project"}...`;
   };
 
+  // Firebase listener
   useEffect(() => {
     if (!selectedProject?.project_id) return;
 
@@ -504,23 +465,35 @@ const MessageCenter = () => {
 
         setSelectedProject((prev) => {
           if (!prev) return prev;
-
-          const exists = prev.messages.some(
-            (msg) => msg.id === transformedMessage.id,
-          );
-
+          const exists = prev.messages.some((msg) => msg.id === transformedMessage.id);
           if (exists) return prev;
-
           return {
             ...prev,
             messages: [...prev.messages, transformedMessage],
           };
         });
-      },
+
+        // Update last message in sidebar
+        setProjects((prev) =>
+          prev.map((project) => {
+            if (project.project_id === firebaseMessage.project_id) {
+              const senderName = firebaseMessage.employee_name || "Unknown";
+              const isCurrentUser = firebaseMessage.employee_code === data?.employee_id;
+              const senderDisplay = isCurrentUser ? "You" : senderName.split(" ")[0];
+              return {
+                ...project,
+                lastMessage: `${senderDisplay}: ${firebaseMessage.message}`,
+                timestamp: getTimeAgo(firebaseMessage.created_at),
+              };
+            }
+            return project;
+          })
+        );
+      }
     );
 
     return () => unsubscribe();
-  }, [selectedProject?.project_id]);
+  }, [selectedProject?.project_id, data?.employee_id]);
 
   if (loading) {
     return <PageLoader />;
@@ -544,14 +517,7 @@ const MessageCenter = () => {
                 className="close-btn"
                 onClick={() => setShowProjectDetails(false)}
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
@@ -567,9 +533,7 @@ const MessageCenter = () => {
 
               <div className="group-name">{selectedProject.project_name}</div>
               <div className="group-status">
-                <span
-                  className={`status-badge status-${selectedProject.status}`}
-                >
+                <span className={`status-badge status-${selectedProject.status}`}>
                   {selectedProject.status}
                 </span>
               </div>
@@ -583,25 +547,20 @@ const MessageCenter = () => {
                   <div key={index} className="member-item">
                     <div
                       className="member-avatar"
-                      style={{
-                        backgroundColor:
-                          avatarColors[index % avatarColors.length],
-                      }}
+                      style={{ backgroundColor: avatarColors[index % avatarColors.length] }}
                     >
                       {getInitials(member.employee_name)}
                     </div>
                     <div className="member-info">
                       <div className="member-name">
                         {member.employee_name}
-                        {member.emp_code === data?.employee_id && (
+                        {member.employee_id === data?.employee_id && (
                           <span className="you-badge">You</span>
                         )}
                       </div>
-                      <div className="member-code">{member.emp_code}</div>
+                      <div className="member-code">{member.employee_id}</div>
                     </div>
-                    <div className="member-role">
-                      {member.role} {member.user_type === "guest" && "(Guest)"}
-                    </div>
+                    <div className="member-role">{member.role_name}</div>
                   </div>
                 ))}
               </div>
@@ -610,30 +569,33 @@ const MessageCenter = () => {
         </div>
       )}
 
-      {/* Left Sidebar - Hidden on mobile when chat is shown */}
-      <div
-        className={`message-sidebar ${
-          isMobileView && showChat ? "hidden" : ""
-        }`}
-      >
+      {/* Left Sidebar */}
+      <div className={`message-sidebar ${isMobileView && showChat ? "hidden" : ""}`}>
         <div className="sidebar-header">
           <h2>Project Messages</h2>
-          <button
-            className="new-chat-btn"
-            title="Refresh"
-            onClick={() => window.location.reload()}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {totalUnreadMessages > 0 && (
+              <span style={{
+                background: "rgba(255, 255, 255, 0.3)",
+                color: "white",
+                padding: "4px 10px",
+                borderRadius: "12px",
+                fontSize: "12px",
+                fontWeight: "600"
+              }}>
+                {totalUnreadMessages} unread
+              </span>
+            )}
+            <button
+              className="new-chat-btn"
+              title="Refresh"
+              onClick={() => window.location.reload()}
             >
-              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-            </svg>
-          </button>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="search-container">
@@ -650,14 +612,7 @@ const MessageCenter = () => {
           {filteredProjects.length === 0 ? (
             <div className="no-projects">
               <div className="no-projects-icon">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                >
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                 </svg>
               </div>
@@ -667,11 +622,7 @@ const MessageCenter = () => {
             filteredProjects.map((project) => (
               <div
                 key={project.project_id}
-                className={`contact-item ${
-                  selectedProject?.project_id === project.project_id
-                    ? "active"
-                    : ""
-                }`}
+                className={`contact-item ${selectedProject?.project_id === project.project_id ? "active" : ""}`}
                 onClick={() => handleProjectSelect(project)}
               >
                 <div
@@ -680,14 +631,7 @@ const MessageCenter = () => {
                 >
                   {getProjectAvatar(project)}
                   <div className="group-badge">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -716,19 +660,12 @@ const MessageCenter = () => {
         </div>
       </div>
 
-      {/* Right Chat Area - Full width on mobile when chat is shown */}
+      {/* Right Chat Area */}
       <div className={`chat-area ${isMobileView && !showChat ? "hidden" : ""}`}>
         {!selectedProject ? (
           <div className="empty-chat">
             <div className="empty-chat-icon">
-              <svg
-                width="64"
-                height="64"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-              >
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
               </svg>
             </div>
@@ -737,18 +674,11 @@ const MessageCenter = () => {
           </div>
         ) : (
           <>
-            {/* Chat Header with back button on mobile */}
+            {/* Chat Header */}
             <div className="chat-header">
               {isMobileView && (
                 <div className="back-button-chat" onClick={handleBackToProjects}>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </div>
@@ -760,14 +690,7 @@ const MessageCenter = () => {
                 >
                   {getProjectAvatar(selectedProject)}
                   <div className="group-badge">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -776,22 +699,18 @@ const MessageCenter = () => {
                   </div>
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: "16px", color: "#334155" }}>
+                  <h3 style={{ margin: 0, fontSize: "16px", color: "#ffffff" }}>
                     {selectedProject.project_name}
                     <span className="group-badge-text">Project</span>
                   </h3>
                   <div className="chat-user-status">
                     <div className="group-members-preview">
-                      {selectedProject.members
-                        .slice(0, 3)
-                        .map((member, index) => (
-                          <span key={index} className="member-preview">
-                            {member.employee_name.split(" ")[0]}
-                            {index < 2 &&
-                              index < selectedProject.members.length - 1 &&
-                              ", "}
-                          </span>
-                        ))}
+                      {selectedProject.members.slice(0, 3).map((member, index) => (
+                        <span key={index} className="member-preview">
+                          {member.employee_name.split(" ")[0]}
+                          {index < 2 && index < selectedProject.members.length - 1 && ", "}
+                        </span>
+                      ))}
                       {selectedProject.members.length > 3 && (
                         <span className="more-members">
                           +{selectedProject.members.length - 3} more
@@ -804,18 +723,9 @@ const MessageCenter = () => {
               <div className="chat-actions">
                 <div
                   className="action-icon"
-                  onClick={() =>
-                    refreshProjectMessages(selectedProject.project_id)
-                  }
+                  onClick={() => refreshProjectMessages(selectedProject.project_id)}
                 >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
                   </svg>
                 </div>
@@ -827,14 +737,7 @@ const MessageCenter = () => {
               {selectedProject.messages.length === 0 ? (
                 <div className="no-messages">
                   <div className="no-messages-icon">
-                    <svg
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                    >
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                     </svg>
                   </div>
@@ -848,14 +751,12 @@ const MessageCenter = () => {
                     return (
                       <div
                         key={message.id}
-                        className={`message ${
-                          isCurrentUser ? "sent" : "received"
-                        }`}
+                        className={`message ${isCurrentUser ? "sent" : "received"}`}
                       >
                         <div className="message-content-wrapper">
                           {!isCurrentUser && (
                             <div className="message-sender">
-                              {message.user_name || message.employee_code}
+                              {message.employee_name || message.employee_code}
                             </div>
                           )}
                           <div className="message-text">
@@ -866,10 +767,7 @@ const MessageCenter = () => {
                               <div
                                 className="attachment-preview"
                                 onClick={() =>
-                                  window.open(
-                                    `${stor_url}/${message.file}`,
-                                    "_blank",
-                                  )
+                                  window.open(`${stor_url}/${message.file}`, "_blank")
                                 }
                               >
                                 <span className="attachment-icon">
@@ -881,13 +779,12 @@ const MessageCenter = () => {
                               </div>
                             </div>
                           )}
-                          {console.log("Message replies:", message.replies)}
                           {message.replies && message.replies.length > 0 && (
                             <div className="message-replies">
                               {message.replies.map((reply) => (
                                 <div key={reply.id} className="reply-item">
                                   <div className="reply-sender">
-                                    {reply.user_name || reply.employee_code}
+                                    {reply.employee_name || reply.employee_code}
                                   </div>
                                   <div className="reply-text">
                                     {reply.message || reply.title}
@@ -908,14 +805,7 @@ const MessageCenter = () => {
                                 className="message-action-btn reply-btn"
                                 onClick={() => handleReplyToMessage(message)}
                               >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                 </svg>
                               </button>
@@ -925,32 +815,16 @@ const MessageCenter = () => {
                                     className="message-action-btn edit-btn"
                                     onClick={() => handleEditMessage(message)}
                                   >
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                   </button>
                                   <button
                                     className="message-action-btn delete-btn"
-                                    onClick={() =>
-                                      handleDeleteMessage(message.id)
-                                    }
+                                    onClick={() => handleDeleteMessage(message.id)}
                                   >
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
                                   </button>
@@ -988,8 +862,7 @@ const MessageCenter = () => {
                       <>
                         <span className="action-icon">↩️</span>
                         <span>
-                          Replying to{" "}
-                          {replyingTo.user_name || replyingTo.employee_code}
+                          Replying to {replyingTo.employee_name || replyingTo.employee_code}
                         </span>
                       </>
                     )}
@@ -998,14 +871,7 @@ const MessageCenter = () => {
                     className="cancel-action-btn"
                     onClick={handleCancelAction}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
@@ -1015,10 +881,7 @@ const MessageCenter = () => {
               {attachments.length > 0 && (
                 <div className="attachments-preview">
                   {attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className="attachment-preview-item"
-                    >
+                    <div key={attachment.id} className="attachment-preview-item">
                       <span className="attachment-icon">{attachment.icon}</span>
                       <span className="attachment-name">{attachment.name}</span>
                       <button
@@ -1044,14 +907,7 @@ const MessageCenter = () => {
                   className="input-attachment"
                   onClick={() => setShowAttachmentPopup(!showAttachmentPopup)}
                 >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
                 </div>
@@ -1068,26 +924,10 @@ const MessageCenter = () => {
                 <button
                   className="send-button"
                   onClick={handleSendMessage}
-                  disabled={
-                    (!messageText.trim() && attachments.length === 0) ||
-                    sendingMessage
-                  }
+                  disabled={(!messageText.trim() && attachments.length === 0) || sendingMessage}
                 >
                   {sendingMessage ? (
                     <div className="sending-spinner"></div>
-                  ) : editingMessage ? (
-                    <svg className="w-5 h-5 animate-spin" viewBox="0 0 50 50">
-                      <circle
-                        cx="25"
-                        cy="25"
-                        r="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeDasharray="31.4 31.4"
-                      />
-                    </svg>
                   ) : (
                     <FontAwesomeIcon icon={faCircleUp} />
                   )}

@@ -28,7 +28,10 @@ import { toast } from "react-toastify";
 const DescriptionPopup = ({ description, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content description-popup" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-content description-popup"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h3>Project Description</h3>
           <button className="modal-close" onClick={onClose}>
@@ -36,9 +39,11 @@ const DescriptionPopup = ({ description, onClose }) => {
           </button>
         </div>
         <div className="modal-body description-body">
-          <div 
+          <div
             className="full-description"
-            dangerouslySetInnerHTML={{ __html: description || "No description available" }}
+            dangerouslySetInnerHTML={{
+              __html: description || "No description available",
+            }}
           />
         </div>
         <div className="modal-footer">
@@ -144,14 +149,14 @@ const AssignedProject = () => {
     navigate(`/organization/create-project?update=${project.project.id}`, {
       state: { project: project.project },
     });
-  }; 
+  };
 
   const handleCreateModule = (project) => {
     console.log("Navigating to create module for project:", project);
     navigate(`/organization/emp-add-module/${project.project.id}?type=module`, {
       state: { project: project.project },
     });
-  }
+  };
 
   // Navigate to create project page
   const handleCreateProject = () => {
@@ -367,10 +372,13 @@ const AssignedProject = () => {
           const canDelete = hasPermission(item, "delete_project");
           const canUpdate = hasPermission(item, "update_project");
           const canCreateModule = hasPermission(item, "create_module");
+          const canView = hasPermission(item, "view_project");
 
           // Check if description is long enough to need "See More"
-          const descriptionText = project.description || "No description available";
-          const needsSeeMore = descriptionText.length > 100 || 
+          const descriptionText =
+            project.description || "No description available";
+          const needsSeeMore =
+            descriptionText.length > 100 ||
             (descriptionText.match(/<[^>]+>/g) || []).length > 3;
 
           return (
@@ -387,7 +395,7 @@ const AssignedProject = () => {
                     <FontAwesomeIcon icon={faBuilding} />
                     <span>{project.identifier}</span>
                   </div>
-                  
+
                   <div className="card-menu-container">
                     <button
                       className="menu-trigger"
@@ -410,13 +418,13 @@ const AssignedProject = () => {
                           </button>
                         )}
                         {canCreateModule && (
-                        <button
-                          className="menu-item edit"
-                          onClick={() => handleCreateModule(item)}
-                        >
-                          <FontAwesomeIcon icon={faLayerGroup} />
-                          <span>Create Module</span>
-                        </button>
+                          <button
+                            className="menu-item edit"
+                            onClick={() => handleCreateModule(item)}
+                          >
+                            <FontAwesomeIcon icon={faLayerGroup} />
+                            <span>Create Module</span>
+                          </button>
                         )}
 
                         {canDelete && (
@@ -440,9 +448,12 @@ const AssignedProject = () => {
                 </h3>
 
                 <div className="project-description-wrapper">
-                  <p className="project-description" dangerouslySetInnerHTML={{__html: descriptionText}} />
+                  <p
+                    className="project-description"
+                    dangerouslySetInnerHTML={{ __html: descriptionText }}
+                  />
                   {needsSeeMore && (
-                    <button 
+                    <button
                       className="see-more-btn"
                       onClick={() => setSelectedDescription(descriptionText)}
                     >
@@ -471,18 +482,20 @@ const AssignedProject = () => {
 
               <div className="card-footer">
                 <div className="created-info">
-                  <FontAwesomeIcon icon={faUser} />
+                  {/* <FontAwesomeIcon icon={faUser} />
                   <span>
                     Created by: <strong>ID {project.createdBy}</strong>
-                  </span>
+                  </span> */}
                 </div>
-                <div
-                  className="view-project"
-                  onClick={(e) => handleViewProject(item, e)}
-                >
-                  <span>View Project</span>
-                  <FontAwesomeIcon icon={faArrowRight} />
-                </div>
+                {canView && (
+                  <div
+                    className="view-project"
+                    onClick={(e) => handleViewProject(item, e)}
+                  >
+                    <span>View Project</span>
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -491,9 +504,9 @@ const AssignedProject = () => {
 
       {/* Description Popup */}
       {selectedDescription && (
-        <DescriptionPopup 
-          description={selectedDescription} 
-          onClose={() => setSelectedDescription(null)} 
+        <DescriptionPopup
+          description={selectedDescription}
+          onClose={() => setSelectedDescription(null)}
         />
       )}
 
