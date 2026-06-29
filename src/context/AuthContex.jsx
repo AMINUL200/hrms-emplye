@@ -1,7 +1,8 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { generateToken } from "../utils/generateToken";
+import { listenProjectSummary } from "../service/projectSummaryService";
 
 export const AuthContext = createContext();
 
@@ -13,6 +14,9 @@ const AuthContextProvider = (props) => {
     const storedData = localStorage.getItem("userData");
     return storedData ? JSON.parse(storedData) : null;
   });
+
+  const [projectSummary, setProjectSummary] = useState({});
+  const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
   const validateForm = (email, password) => {
     if (!email || !password) {
@@ -42,8 +46,8 @@ const AuthContextProvider = (props) => {
         {
           email,
           password,
-          fcm_token: fcmToken, 
-          device_type: "web", 
+          fcm_token: fcmToken,
+          device_type: "web",
         },
       );
 
@@ -145,6 +149,37 @@ const AuthContextProvider = (props) => {
     }
   };
 
+  useEffect(() => {
+    if (!token || !data?.employee_id) return;
+
+    console.log("🔥 Starting Project Summary Listener...");
+
+    const unsubscribe = listenProjectSummary((summaries) => {
+      console.log("📋 Project Summary Updated:", summaries);
+
+      if (!summaries) {
+        setProjectSummary({});
+        setTotalUnreadMessages(0);
+        return;
+      }
+
+      setProjectSummary(summaries);
+
+      let unreadTotal = 0;
+
+      Object.values(summaries).forEach((summary) => {
+        unreadTotal += Number(summary.unread || 0);
+      });
+
+      setTotalUnreadMessages(unreadTotal);
+    });
+
+    return () => {
+      console.log("🛑 Stopping Project Summary Listener");
+      unsubscribe();
+    };
+  }, [token, data?.employee_id]);
+
   const value = {
     data,
     setData,
@@ -154,6 +189,11 @@ const AuthContextProvider = (props) => {
     logoutUser,
     token,
     guestLogin,
+
+    // Firebase
+    projectSummary,
+    totalUnreadMessages,
+    setTotalUnreadMessages,
   };
 
   return (

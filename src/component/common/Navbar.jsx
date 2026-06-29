@@ -248,7 +248,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log("Message received. ", payload);
       toast.info(
-        payload.notification.title + " - " + payload.notification.body,
+        payload.notification.title + " -> " + payload.notification.body,
       );
     });
     return () => {

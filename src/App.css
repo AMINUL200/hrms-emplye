@@ -3886,3 +3886,68 @@ textarea {
 .premium-workspace{
     padding-left: 30px;
 }
+
+
+/* Sidebar Unread Badge */
+.sidebar-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #dc3545;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: 5px;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* When sidebar is collapsed (medium screen) */
+.sidebar.medium-screen.not-visible .sidebar-unread-badge {
+  display: none;
+}
+
+/* When sidebar is collapsed (small screen) */
+.sidebar.small-screen.visible .sidebar-unread-badge {
+  display: none;
+}
+
+/* Show badge on hover for collapsed states */
+.sidebar.medium-screen.not-visible.hovered .sidebar-unread-badge {
+  display: inline-flex;
+}
+
+.sidebar.small-screen.visible.hovered .sidebar-unread-badge {
+  display: inline-flex;
+}
+
+/* Style for the menu text container to handle badge positioning */
+.menu-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity var(--transition-speed) ease;
+  min-width: 0;
+}
+
+/* Ensure badge stays within the menu item */
+.menu-text .sidebar-unread-badge {
+  flex-shrink: 0;
+}

@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   const [openMenu, setOpenMenu] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
-  const { data } = useContext(AuthContext);
+  const { data, totalUnreadMessages } = useContext(AuthContext);
 
   // Enhanced menu configuration array supporting different types
   const menuItems = [
@@ -125,32 +125,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       icon: faProjectDiagram,
       type: "single",
     },
-    // {
-    //   key: "project-mangement",
-    //   title: "Project Management",
-    //   icon: faProjectDiagram,
-    //   type: "dropdown",
-    //   submenu: [
-    //     {
-    //       title: "Master Roll",
-    //       path: "/organization/master-roll",
-    //       icon: faListAlt,
-    //       type: "single",
-    //     },
-    //     {
-    //       title: "Project Permission Master",
-    //       path: "/organization/project-permission",
-    //       icon: faListAlt,
-    //       type: "single",
-    //     },
-    //     {
-    //       title: "Permission List",
-    //       path: "/organization/permission-list",
-    //       icon: faListAlt,
-    //       type: "single",
-    //     }
-    //   ]
-    // },
     {
       key: "calendar-holidays",
       title: "Calendar & Holidays",
@@ -199,8 +173,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       type: "single",
     },
   ];
-  const isGuest = data?.user_type === "guest";
 
+  const isGuest = data?.user_type === "guest";
   const GUEST_ALLOWED_MENUS = ["message-center", "profile"];
 
   // Handle menu item clicks on small screens - close sidebar after selection
@@ -241,10 +215,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       if (item.type === "single") {
         // Single link item
         return (
-          <li
-            key={itemKey}
-            // style={{ paddingLeft: `${level * 15}px` }}
-          >
+          <li key={itemKey}>
             <NavLink
               to={item.path}
               className={({ isActive }) =>
@@ -263,12 +234,10 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
           <li
             key={itemKey}
             className={`has-dropdown nested-dropdown ${hasActiveSubmenu(item.submenu) ? "active-parent" : ""}`}
-            // style={{ paddingLeft: `${(level - 1) * 15}px` }}
           >
             <a
               className="side-title nested-title"
               onClick={() => toggleSubMenu(itemKey)}
-              // style={{ paddingLeft: `${level * 15}px` }}
             >
               <span className="menu-icon">
                 <FontAwesomeIcon icon={item.icon} />
@@ -306,15 +275,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
     >
       <div className="sidebar-inner">
         <div className="sidebar-menu">
-          {/* <div className="sidebar-header">
-            <div className="logo-container">
-              <span className="logo-icon">
-                <FontAwesomeIcon icon={faCube} />
-              </span>
-              <span className="logo-text">Employ Access</span>
-            </div>
-          </div> */}
-
           <ul className="sidebar-menu-vertical">
             <li className="menu-title">
               <span>Main</span>
@@ -341,7 +301,15 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
                       <span className="menu-icon">
                         <FontAwesomeIcon icon={menuItem.icon} />
                       </span>
-                      <span className="menu-text">{menuItem.title}</span>
+                      <span className="menu-text">
+                        {menuItem.title}
+                        {/* Show unread badge for Message Center */}
+                        {menuItem.key === "message-center" && totalUnreadMessages > 0 && (
+                          <span className="sidebar-unread-badge">
+                            {totalUnreadMessages > 99 ? "99+" : totalUnreadMessages}
+                          </span>
+                        )}
+                      </span>
                     </NavLink>
                   </li>
                 );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
 import "./MessageCenter.css";
 import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
@@ -21,22 +21,42 @@ const getFileType = (filename) => {
 // Helper function to get file icon
 const getFileIcon = (fileType) => {
   switch (fileType) {
-    case "image": return "🖼️";
-    case "pdf": return "📄";
-    case "word": return "📝";
-    case "excel": return "📊";
-    default: return "📎";
+    case "image":
+      return "🖼️";
+    case "pdf":
+      return "📄";
+    case "word":
+      return "📝";
+    case "excel":
+      return "📊";
+    default:
+      return "📎";
   }
 };
 
 // Color palette for avatar backgrounds
 const avatarColors = [
-  "#0A4FA5", "#0D6EAF", "#138A8A", "#1565C0", "#1A73E8",
-  "#00897B", "#0D47A1", "#00796B", "#1976D2", "#0097A7"
+  "#0A4FA5",
+  "#0D6EAF",
+  "#138A8A",
+  "#1565C0",
+  "#1A73E8",
+  "#00897B",
+  "#0D47A1",
+  "#00796B",
+  "#1976D2",
+  "#0097A7",
 ];
 
 const MessageCenter = () => {
-  const { token, data } = useContext(AuthContext);
+  const {
+    token,
+    data,
+    projectSummary,
+    totalUnreadMessages,
+    setTotalUnreadMessages
+  } = useContext(AuthContext);
+
   const api_url = import.meta.env.VITE_API_URL;
   const stor_url = import.meta.env.VITE_STORAGE_URL;
 
@@ -54,11 +74,12 @@ const MessageCenter = () => {
   const [attachments, setAttachments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
-  const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
+  const [markingAsRead, setMarkingAsRead] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const unsubscribeChatRef = useRef(null);
 
   // Check if mobile view on mount and resize
   useEffect(() => {
@@ -70,64 +91,8 @@ const MessageCenter = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Fetch projects data
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${api_url}/message-center`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { t: Date.now() },
-        });
-
-        if (response.data.status === 200) {
-          // Set total unread messages
-          setTotalUnreadMessages(response.data.total_unread_messages || 0);
-
-          const projectsData = response.data.projects.map((project, index) => {
-            // Determine last message display text
-            let lastMessageText = "No messages yet";
-            if (project.last_message) {
-              const senderName = project.last_sender || "Unknown";
-              const isCurrentUser = project.last_sender === data?.employee_id;
-              const senderDisplay = isCurrentUser ? "You" : senderName.split(" ")[0];
-              lastMessageText = `${senderDisplay}: ${project.last_message}`;
-            }
-
-            return {
-              project_id: project.project_id,
-              project_name: project.project_name,
-              status: project.status,
-              type: "group",
-              unread: project.unread_messages || 0,
-              isOnline: false,
-              lastMessage: lastMessageText,
-              timestamp: project.last_message_time ? getTimeAgo(project.last_message_time) : "",
-              members: project.members || [],
-              messages: project.messages || [],
-              avatarColor: avatarColors[index % avatarColors.length],
-              groupAvatar: getProjectInitials(project.project_name),
-              last_message_time: project.last_message_time,
-              last_sender: project.last_sender,
-            };
-          });
-
-          setProjects(projectsData);
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token) {
-      fetchProjects();
-    }
-  }, [token, data?.employee_id]);
-
   // Helper function to get time ago
-  const getTimeAgo = (dateString) => {
+  const getTimeAgo = useCallback((dateString) => {
     try {
       const date = new Date(dateString);
       const now = new Date();
@@ -149,10 +114,10 @@ const MessageCenter = () => {
     } catch {
       return "";
     }
-  };
+  }, []);
 
   // Format time for display
-  const formatTime = (dateString) => {
+  const formatTime = useCallback((dateString) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleTimeString([], {
@@ -162,19 +127,178 @@ const MessageCenter = () => {
     } catch {
       return "";
     }
-  };
+  }, []);
+
+  // Get initials for avatar
+  const getInitials = useCallback((name) => {
+    if (!name) return "??";
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, []);
+
+  // Get project initials for group avatar
+  const getProjectInitials = useCallback((name) => {
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return words[0][0] + words[1][0];
+    }
+    return name.substring(0, 2).toUpperCase();
+  }, []);
+
+  // Get project avatar display
+  const getProjectAvatar = useCallback((project) => {
+    if (project.type === "group") {
+      if (project.groupAvatar && project.groupAvatar.length === 2) {
+        return project.groupAvatar;
+      }
+      return getInitials(project.project_name);
+    }
+    return getInitials(project.project_name);
+  }, [getInitials]);
+
+  // Fetch projects data - ONLY ONCE on mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${api_url}/message-center`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { t: Date.now() },
+        });
+
+        if (response.data.status === 200) {
+          const projectsData = response.data.projects.map((project, index) => {
+            let lastMessageText = "No messages yet";
+            if (project.last_message) {
+              const senderName = project.last_sender || "Unknown";
+              const isCurrentUser = project.last_sender === data?.employee_id;
+              const senderDisplay = isCurrentUser
+                ? "You"
+                : senderName.split(" ")[0];
+              lastMessageText = `${senderDisplay}: ${project.last_message}`;
+            }
+
+            return {
+              project_id: project.project_id,
+              project_name: project.project_name,
+              status: project.status,
+              type: "group",
+              unread: project.unread_messages || 0,
+              isOnline: false,
+              lastMessage: lastMessageText,
+              timestamp: project.last_message_time
+                ? getTimeAgo(project.last_message_time)
+                : "",
+              members: project.members || [],
+              messages: project.messages || [],
+              avatarColor: avatarColors[index % avatarColors.length],
+              groupAvatar: getProjectInitials(project.project_name),
+              last_message_time: project.last_message_time,
+              last_sender: project.last_sender,
+            };
+          });
+
+          setProjects(projectsData);
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchProjects();
+    }
+  }, [token, data?.employee_id, getTimeAgo, getProjectInitials]);
+
+  // 🔥 MERGE projectSummary from AuthContext into projects state
+  useEffect(() => {
+    if (!projectSummary || Object.keys(projectSummary).length === 0) return;
+
+    setProjects((prevProjects) => {
+      let updated = false;
+      const newProjects = prevProjects.map((project) => {
+        const summary = projectSummary[project.project_id];
+        if (!summary) return project;
+
+        updated = true;
+        const isCurrentUser = summary.last_sender_code === data?.employee_id;
+        const senderDisplay = isCurrentUser
+          ? "You"
+          : (summary.last_sender || "Unknown").split(" ")[0];
+
+        return {
+          ...project,
+          unread: summary.unread || 0,
+          lastMessage: summary.last_message
+            ? `${senderDisplay}: ${summary.last_message}`
+            : project.lastMessage,
+          timestamp: summary.last_message_time
+            ? getTimeAgo(summary.last_message_time)
+            : project.timestamp,
+          last_message_time: summary.last_message_time || project.last_message_time,
+          last_sender: summary.last_sender || project.last_sender,
+        };
+      });
+
+      return updated ? newProjects : prevProjects;
+    });
+  }, [projectSummary, data?.employee_id, getTimeAgo]);
 
   // Filter projects based on search
   const filteredProjects = projects.filter(
     (project) =>
       project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.members.some((member) =>
-        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+        member.employee_name.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
+  // Mark project messages as read
+  const markProjectMessagesAsRead = useCallback(async (projectId) => {
+    if (!projectId || !data?.employee_id) return;
+
+    try {
+      setMarkingAsRead(true);
+      const response = await axios.post(
+        `${api_url}/project/chat/read`,
+        {
+          project_id: projectId,
+          employee_id: data.employee_id,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (response.data.status === 1) {
+        setTotalUnreadMessages(0)
+        console.log(
+          `✅ Marked ${response.data.read_count} messages as read for project ${projectId}`,
+        );
+        return response.data.read_count;
+      }
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    } finally {
+      setMarkingAsRead(false);
+    }
+    return 0;
+  }, [api_url, token, data?.employee_id]);
+
   // Handle project selection
-  const handleProjectSelect = (project) => {
+  const handleProjectSelect = useCallback(async (project) => {
+    // Mark messages as read for this project - backend updates Firebase
+    if (project.unread > 0) {
+      await markProjectMessagesAsRead(project.project_id);
+      // DO NOT manually update unread counts - wait for projectSummary to update
+    }
+
     setSelectedProject({
       ...project,
       unread: 0,
@@ -182,29 +306,84 @@ const MessageCenter = () => {
 
     setProjects((prev) =>
       prev.map((p) =>
-        p.project_id === project.project_id ? { ...p, unread: 0 } : p
-      )
+        p.project_id === project.project_id ? { ...p, unread: 0 } : p,
+      ),
     );
-
-    // Update total unread count
-    setTotalUnreadMessages((prev) => Math.max(0, prev - (project.unread || 0)));
 
     if (isMobileView) {
       setShowChat(true);
     }
-  };
+  }, [markProjectMessagesAsRead, isMobileView]);
 
   // Handle back to project list on mobile
-  const handleBackToProjects = () => {
+  const handleBackToProjects = useCallback(() => {
     setShowChat(false);
     setSelectedProject(null);
     setReplyingTo(null);
     setEditingMessage(null);
     setAttachments([]);
-  };
+  }, []);
+
+  // Refresh messages for a specific project (REST API)
+  const refreshProjectMessages = useCallback(async (projectId) => {
+    try {
+      const response = await axios.get(
+        `${api_url}/projects/members/${projectId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { t: Date.now() },
+        },
+      );
+
+      if (response.data.status === 200) {
+        const messages = response.data.data.posts || [];
+
+        if (selectedProject?.project_id === projectId) {
+          setSelectedProject((prev) => ({
+            ...prev,
+            messages: messages,
+          }));
+        }
+
+        setProjects((prev) =>
+          prev.map((project) => {
+            if (project.project_id === projectId) {
+              const lastMessage =
+                messages.length > 0 ? messages[messages.length - 1] : null;
+              let lastMessageText = project.lastMessage;
+              let lastMessageTime = project.timestamp;
+
+              if (lastMessage) {
+                const isCurrentUser =
+                  lastMessage.employee_code === data?.employee_id;
+                const senderDisplay = isCurrentUser
+                  ? "You"
+                  : lastMessage.user_name?.split(" ")[0] || "Unknown";
+                const messagePreview =
+                  lastMessage.message?.substring(0, 30) +
+                  (lastMessage.message?.length > 30 ? "..." : "");
+                lastMessageText = `${senderDisplay}: ${messagePreview}`;
+                lastMessageTime = getTimeAgo(lastMessage.created_at);
+              }
+
+              return {
+                ...project,
+                messages: messages,
+                lastMessage: lastMessageText,
+                timestamp: lastMessageTime,
+              };
+            }
+            return project;
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("Error refreshing messages:", error);
+    }
+  }, [api_url, token, selectedProject?.project_id, data?.employee_id, getTimeAgo]);
 
   // Handle sending message
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if ((!messageText.trim() && attachments.length === 0) || !selectedProject)
       return;
 
@@ -218,7 +397,7 @@ const MessageCenter = () => {
         const response = await axios.put(
           `${api_url}/project-posts/${editingMessage.id}`,
           { title: messageText.trim() },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         if (response.status === 200) {
@@ -257,83 +436,32 @@ const MessageCenter = () => {
     } finally {
       setSendingMessage(false);
     }
-  };
-
-  // Refresh messages for a specific project
-  const refreshProjectMessages = async (projectId) => {
-    try {
-      const response = await axios.get(
-        `${api_url}/projects/members/${projectId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { t: Date.now() },
-        }
-      );
-
-      if (response.data.status === 200) {
-        const messages = response.data.data.posts || [];
-
-        if (selectedProject?.project_id === projectId) {
-          setSelectedProject((prev) => ({
-            ...prev,
-            messages: messages,
-          }));
-        }
-
-        setProjects((prev) =>
-          prev.map((project) => {
-            if (project.project_id === projectId) {
-              const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-              let lastMessageText = project.lastMessage;
-              let lastMessageTime = project.timestamp;
-              
-              if (lastMessage) {
-                const isCurrentUser = lastMessage.employee_code === data?.employee_id;
-                const senderDisplay = isCurrentUser ? "You" : (lastMessage.user_name?.split(" ")[0] || "Unknown");
-                const messagePreview = lastMessage.message?.substring(0, 30) + (lastMessage.message?.length > 30 ? "..." : "");
-                lastMessageText = `${senderDisplay}: ${messagePreview}`;
-                lastMessageTime = getTimeAgo(lastMessage.created_at);
-              }
-              
-              return {
-                ...project,
-                messages: messages,
-                lastMessage: lastMessageText,
-                timestamp: lastMessageTime,
-              };
-            }
-            return project;
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Error refreshing messages:", error);
-    }
-  };
+  }, [messageText, attachments, selectedProject, editingMessage, replyingTo, api_url, token, refreshProjectMessages]);
 
   // Handle edit message
-  const handleEditMessage = (message) => {
+  const handleEditMessage = useCallback((message) => {
     setEditingMessage(message);
     setReplyingTo(null);
     setMessageText(message.message || message.title || "");
     inputRef.current?.focus();
-  };
+  }, []);
 
   // Handle reply to message
-  const handleReplyToMessage = (message) => {
+  const handleReplyToMessage = useCallback((message) => {
     setReplyingTo(message);
     setEditingMessage(null);
     inputRef.current?.focus();
-  };
+  }, []);
 
   // Handle delete message
-  const handleDeleteMessage = async (messageId) => {
-    if (!window.confirm("Are you sure you want to delete this message?")) return;
+  const handleDeleteMessage = useCallback(async (messageId) => {
+    if (!window.confirm("Are you sure you want to delete this message?"))
+      return;
 
     try {
       const response = await axios.delete(
         `${api_url}/project-posts/${messageId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.status === 200) {
@@ -342,25 +470,25 @@ const MessageCenter = () => {
     } catch (error) {
       console.error("Error deleting message:", error);
     }
-  };
+  }, [api_url, token, selectedProject?.project_id, refreshProjectMessages]);
 
   // Handle key press (Enter to send)
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
 
   // Handle project avatar/name click
-  const handleProjectClick = () => {
+  const handleProjectClick = useCallback(() => {
     if (selectedProject?.type === "group") {
       setShowProjectDetails(true);
     }
-  };
+  }, [selectedProject]);
 
   // Handle file selection
-  const handleFileSelect = (e) => {
+  const handleFileSelect = useCallback((e) => {
     const files = Array.from(e.target.files);
     const newAttachments = files.map((file) => ({
       id: Date.now() + Math.random(),
@@ -374,77 +502,41 @@ const MessageCenter = () => {
 
     setAttachments((prev) => [...prev, ...newAttachments]);
     setShowAttachmentPopup(false);
-  };
+  }, []);
 
   // Remove attachment
-  const handleRemoveAttachment = (id) => {
+  const handleRemoveAttachment = useCallback((id) => {
     setAttachments((prev) => prev.filter((att) => att.id !== id));
-  };
+  }, []);
 
   // Cancel reply or edit
-  const handleCancelAction = () => {
+  const handleCancelAction = useCallback(() => {
     setReplyingTo(null);
     setEditingMessage(null);
     setMessageText("");
-  };
-
-  // Scroll to bottom of messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [selectedProject?.messages, isTyping]);
-
-  // Focus input when project is selected
-  useEffect(() => {
-    if (selectedProject) {
-      inputRef.current?.focus();
-    }
-  }, [selectedProject]);
-
-  // Get initials for avatar
-  const getInitials = (name) => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // Get project initials for group avatar
-  const getProjectInitials = (name) => {
-    const words = name.split(" ");
-    if (words.length >= 2) {
-      return words[0][0] + words[1][0];
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  // Get project avatar display
-  const getProjectAvatar = (project) => {
-    if (project.type === "group") {
-      if (project.groupAvatar && project.groupAvatar.length === 2) {
-        return project.groupAvatar;
-      }
-      return getInitials(project.project_name);
-    }
-    return getInitials(project.project_name);
-  };
+  }, []);
 
   // Check if message is from current user
-  const isMessageFromCurrentUser = (message) => {
+  const isMessageFromCurrentUser = useCallback((message) => {
     return message.employee_code === data?.employee_id;
-  };
+  }, [data?.employee_id]);
 
   // Get input placeholder text
-  const getInputPlaceholder = () => {
+  const getInputPlaceholder = useCallback(() => {
     if (editingMessage) return "Edit your message...";
-    if (replyingTo) return `Reply to ${replyingTo.employee_name || replyingTo.employee_code}...`;
+    if (replyingTo)
+      return `Reply to ${replyingTo.employee_name || replyingTo.employee_code}...`;
     return `Message in ${selectedProject?.project_name || "project"}...`;
-  };
+  }, [editingMessage, replyingTo, selectedProject]);
 
-  // Firebase listener
+  // 🔥 FIREBASE CHAT LISTENER - Only when a project is opened
   useEffect(() => {
+    // Clean up previous listener
+    if (unsubscribeChatRef.current) {
+      unsubscribeChatRef.current();
+      unsubscribeChatRef.current = null;
+    }
+
     if (!selectedProject?.project_id) return;
 
     const unsubscribe = listenProjectMessages(
@@ -463,9 +555,13 @@ const MessageCenter = () => {
           replies: firebaseMessage.replies || null,
         };
 
+        // Append message to selected project - NO duplicate checking via ID
         setSelectedProject((prev) => {
           if (!prev) return prev;
-          const exists = prev.messages.some((msg) => msg.id === transformedMessage.id);
+          // Check if message already exists
+          const exists = prev.messages.some(
+            (msg) => msg.id === transformedMessage.id,
+          );
           if (exists) return prev;
           return {
             ...prev,
@@ -473,27 +569,51 @@ const MessageCenter = () => {
           };
         });
 
-        // Update last message in sidebar
+        // 🔥 ONLY update last message in sidebar - NO unread badge update here
+        // projectSummary will handle unread updates
         setProjects((prev) =>
           prev.map((project) => {
             if (project.project_id === firebaseMessage.project_id) {
               const senderName = firebaseMessage.employee_name || "Unknown";
-              const isCurrentUser = firebaseMessage.employee_code === data?.employee_id;
-              const senderDisplay = isCurrentUser ? "You" : senderName.split(" ")[0];
+              const isCurrentUser =
+                firebaseMessage.employee_code === data?.employee_id;
+              const senderDisplay = isCurrentUser
+                ? "You"
+                : senderName.split(" ")[0];
               return {
                 ...project,
                 lastMessage: `${senderDisplay}: ${firebaseMessage.message}`,
                 timestamp: getTimeAgo(firebaseMessage.created_at),
+                // DO NOT update unread here - projectSummary handles it
               };
             }
             return project;
-          })
+          }),
         );
-      }
+      },
     );
 
-    return () => unsubscribe();
-  }, [selectedProject?.project_id, data?.employee_id]);
+    unsubscribeChatRef.current = unsubscribe;
+
+    return () => {
+      if (unsubscribeChatRef.current) {
+        unsubscribeChatRef.current();
+        unsubscribeChatRef.current = null;
+      }
+    };
+  }, [selectedProject?.project_id, data?.employee_id, getTimeAgo]);
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selectedProject?.messages, isTyping]);
+
+  // Focus input when project is selected
+  useEffect(() => {
+    if (selectedProject) {
+      inputRef.current?.focus();
+    }
+  }, [selectedProject]);
 
   if (loading) {
     return <PageLoader />;
@@ -517,7 +637,14 @@ const MessageCenter = () => {
                 className="close-btn"
                 onClick={() => setShowProjectDetails(false)}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
@@ -533,7 +660,9 @@ const MessageCenter = () => {
 
               <div className="group-name">{selectedProject.project_name}</div>
               <div className="group-status">
-                <span className={`status-badge status-${selectedProject.status}`}>
+                <span
+                  className={`status-badge status-${selectedProject.status}`}
+                >
                   {selectedProject.status}
                 </span>
               </div>
@@ -547,7 +676,10 @@ const MessageCenter = () => {
                   <div key={index} className="member-item">
                     <div
                       className="member-avatar"
-                      style={{ backgroundColor: avatarColors[index % avatarColors.length] }}
+                      style={{
+                        backgroundColor:
+                          avatarColors[index % avatarColors.length],
+                      }}
                     >
                       {getInitials(member.employee_name)}
                     </div>
@@ -570,19 +702,23 @@ const MessageCenter = () => {
       )}
 
       {/* Left Sidebar */}
-      <div className={`message-sidebar ${isMobileView && showChat ? "hidden" : ""}`}>
+      <div
+        className={`message-sidebar ${isMobileView && showChat ? "hidden" : ""}`}
+      >
         <div className="sidebar-header">
           <h2>Project Messages</h2>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {totalUnreadMessages > 0 && (
-              <span style={{
-                background: "rgba(255, 255, 255, 0.3)",
-                color: "white",
-                padding: "4px 10px",
-                borderRadius: "12px",
-                fontSize: "12px",
-                fontWeight: "600"
-              }}>
+              <span
+                style={{
+                  background: "rgba(255, 255, 255, 0.3)",
+                  color: "white",
+                  padding: "4px 10px",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}
+              >
                 {totalUnreadMessages} unread
               </span>
             )}
@@ -591,7 +727,14 @@ const MessageCenter = () => {
               title="Refresh"
               onClick={() => window.location.reload()}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
               </svg>
             </button>
@@ -612,7 +755,14 @@ const MessageCenter = () => {
           {filteredProjects.length === 0 ? (
             <div className="no-projects">
               <div className="no-projects-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                >
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                 </svg>
               </div>
@@ -631,7 +781,14 @@ const MessageCenter = () => {
                 >
                   {getProjectAvatar(project)}
                   <div className="group-badge">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -665,7 +822,14 @@ const MessageCenter = () => {
         {!selectedProject ? (
           <div className="empty-chat">
             <div className="empty-chat-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              >
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
               </svg>
             </div>
@@ -677,8 +841,18 @@ const MessageCenter = () => {
             {/* Chat Header */}
             <div className="chat-header">
               {isMobileView && (
-                <div className="back-button-chat" onClick={handleBackToProjects}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div
+                  className="back-button-chat"
+                  onClick={handleBackToProjects}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </div>
@@ -690,7 +864,14 @@ const MessageCenter = () => {
                 >
                   {getProjectAvatar(selectedProject)}
                   <div className="group-badge">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -705,12 +886,16 @@ const MessageCenter = () => {
                   </h3>
                   <div className="chat-user-status">
                     <div className="group-members-preview">
-                      {selectedProject.members.slice(0, 3).map((member, index) => (
-                        <span key={index} className="member-preview">
-                          {member.employee_name.split(" ")[0]}
-                          {index < 2 && index < selectedProject.members.length - 1 && ", "}
-                        </span>
-                      ))}
+                      {selectedProject.members
+                        .slice(0, 3)
+                        .map((member, index) => (
+                          <span key={index} className="member-preview">
+                            {member.employee_name.split(" ")[0]}
+                            {index < 2 &&
+                              index < selectedProject.members.length - 1 &&
+                              ", "}
+                          </span>
+                        ))}
                       {selectedProject.members.length > 3 && (
                         <span className="more-members">
                           +{selectedProject.members.length - 3} more
@@ -723,9 +908,18 @@ const MessageCenter = () => {
               <div className="chat-actions">
                 <div
                   className="action-icon"
-                  onClick={() => refreshProjectMessages(selectedProject.project_id)}
+                  onClick={() =>
+                    refreshProjectMessages(selectedProject.project_id)
+                  }
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
                   </svg>
                 </div>
@@ -737,7 +931,14 @@ const MessageCenter = () => {
               {selectedProject.messages.length === 0 ? (
                 <div className="no-messages">
                   <div className="no-messages-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                    <svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                    >
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                     </svg>
                   </div>
@@ -756,7 +957,7 @@ const MessageCenter = () => {
                         <div className="message-content-wrapper">
                           {!isCurrentUser && (
                             <div className="message-sender">
-                              {message.employee_name || message.employee_code}
+                              {message.user_name || message.employee_code}
                             </div>
                           )}
                           <div className="message-text">
@@ -767,7 +968,10 @@ const MessageCenter = () => {
                               <div
                                 className="attachment-preview"
                                 onClick={() =>
-                                  window.open(`${stor_url}/${message.file}`, "_blank")
+                                  window.open(
+                                    `${stor_url}/${message.file}`,
+                                    "_blank",
+                                  )
                                 }
                               >
                                 <span className="attachment-icon">
@@ -805,7 +1009,14 @@ const MessageCenter = () => {
                                 className="message-action-btn reply-btn"
                                 onClick={() => handleReplyToMessage(message)}
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
                                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                 </svg>
                               </button>
@@ -815,16 +1026,32 @@ const MessageCenter = () => {
                                     className="message-action-btn edit-btn"
                                     onClick={() => handleEditMessage(message)}
                                   >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
                                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                   </button>
                                   <button
                                     className="message-action-btn delete-btn"
-                                    onClick={() => handleDeleteMessage(message.id)}
+                                    onClick={() =>
+                                      handleDeleteMessage(message.id)
+                                    }
                                   >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
                                       <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     </svg>
                                   </button>
@@ -862,7 +1089,8 @@ const MessageCenter = () => {
                       <>
                         <span className="action-icon">↩️</span>
                         <span>
-                          Replying to {replyingTo.employee_name || replyingTo.employee_code}
+                          Replying to{" "}
+                          {replyingTo.employee_name || replyingTo.employee_code}
                         </span>
                       </>
                     )}
@@ -871,7 +1099,14 @@ const MessageCenter = () => {
                     className="cancel-action-btn"
                     onClick={handleCancelAction}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
@@ -881,7 +1116,10 @@ const MessageCenter = () => {
               {attachments.length > 0 && (
                 <div className="attachments-preview">
                   {attachments.map((attachment) => (
-                    <div key={attachment.id} className="attachment-preview-item">
+                    <div
+                      key={attachment.id}
+                      className="attachment-preview-item"
+                    >
                       <span className="attachment-icon">{attachment.icon}</span>
                       <span className="attachment-name">{attachment.name}</span>
                       <button
@@ -907,7 +1145,14 @@ const MessageCenter = () => {
                   className="input-attachment"
                   onClick={() => setShowAttachmentPopup(!showAttachmentPopup)}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
                 </div>
@@ -924,7 +1169,10 @@ const MessageCenter = () => {
                 <button
                   className="send-button"
                   onClick={handleSendMessage}
-                  disabled={(!messageText.trim() && attachments.length === 0) || sendingMessage}
+                  disabled={
+                    (!messageText.trim() && attachments.length === 0) ||
+                    sendingMessage
+                  }
                 >
                   {sendingMessage ? (
                     <div className="sending-spinner"></div>
