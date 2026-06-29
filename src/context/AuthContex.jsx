@@ -165,11 +165,11 @@ const AuthContextProvider = (props) => {
 
       setProjectSummary(summaries);
 
-      let unreadTotal = 0;
+      
 
-      Object.values(summaries).forEach((summary) => {
-        unreadTotal += Number(summary.unread || 0);
-      });
+      let unreadTotal = Object.values(summaries).reduce((total, summary) => {
+        return total + Number(summary?.unread?.[data.employee_id] || 0);
+      }, 0);
 
       setTotalUnreadMessages(unreadTotal);
     });

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  useCallback,
+} from "react";
 import "./MessageCenter.css";
 import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
@@ -54,7 +60,7 @@ const MessageCenter = () => {
     data,
     projectSummary,
     totalUnreadMessages,
-    setTotalUnreadMessages
+    setTotalUnreadMessages,
   } = useContext(AuthContext);
 
   const api_url = import.meta.env.VITE_API_URL;
@@ -150,15 +156,18 @@ const MessageCenter = () => {
   }, []);
 
   // Get project avatar display
-  const getProjectAvatar = useCallback((project) => {
-    if (project.type === "group") {
-      if (project.groupAvatar && project.groupAvatar.length === 2) {
-        return project.groupAvatar;
+  const getProjectAvatar = useCallback(
+    (project) => {
+      if (project.type === "group") {
+        if (project.groupAvatar && project.groupAvatar.length === 2) {
+          return project.groupAvatar;
+        }
+        return getInitials(project.project_name);
       }
       return getInitials(project.project_name);
-    }
-    return getInitials(project.project_name);
-  }, [getInitials]);
+    },
+    [getInitials],
+  );
 
   // Fetch projects data - ONLY ONCE on mount
   useEffect(() => {
@@ -234,14 +243,16 @@ const MessageCenter = () => {
 
         return {
           ...project,
-          unread: summary.unread || 0,
+          unread: Number(summary?.unread?.[data.employee_id] || 0),
+
           lastMessage: summary.last_message
             ? `${senderDisplay}: ${summary.last_message}`
             : project.lastMessage,
           timestamp: summary.last_message_time
             ? getTimeAgo(summary.last_message_time)
             : project.timestamp,
-          last_message_time: summary.last_message_time || project.last_message_time,
+          last_message_time:
+            summary.last_message_time || project.last_message_time,
           last_sender: summary.last_sender || project.last_sender,
         };
       });
@@ -260,60 +271,66 @@ const MessageCenter = () => {
   );
 
   // Mark project messages as read
-  const markProjectMessagesAsRead = useCallback(async (projectId) => {
-    if (!projectId || !data?.employee_id) return;
+  const markProjectMessagesAsRead = useCallback(
+    async (projectId) => {
+      if (!projectId || !data?.employee_id) return;
 
-    try {
-      setMarkingAsRead(true);
-      const response = await axios.post(
-        `${api_url}/project/chat/read`,
-        {
-          project_id: projectId,
-          employee_id: data.employee_id,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (response.data.status === 1) {
-        setTotalUnreadMessages(0)
-        console.log(
-          `✅ Marked ${response.data.read_count} messages as read for project ${projectId}`,
+      try {
+        setMarkingAsRead(true);
+        const response = await axios.post(
+          `${api_url}/project/chat/read`,
+          {
+            project_id: projectId,
+            employee_id: data.employee_id,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
         );
-        return response.data.read_count;
+        console.log("unread response:: ", response);
+        if (response.data.status === 1) {
+          // setTotalUnreadMessages(0);
+          console.log(
+            `✅ Marked ${response.data.read_count} messages as read for project ${projectId}`,
+          );
+          return response.data.read_count;
+        }
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+      } finally {
+        setMarkingAsRead(false);
       }
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-    } finally {
-      setMarkingAsRead(false);
-    }
-    return 0;
-  }, [api_url, token, data?.employee_id]);
+      return 0;
+    },
+    [api_url, token, data?.employee_id],
+  );
 
   // Handle project selection
-  const handleProjectSelect = useCallback(async (project) => {
-    // Mark messages as read for this project - backend updates Firebase
-    if (project.unread > 0) {
+  const handleProjectSelect = useCallback(
+    async (project) => {
+      // Mark messages as read for this project - backend updates Firebase
+      // if (project.unread > 0) {
       await markProjectMessagesAsRead(project.project_id);
       // DO NOT manually update unread counts - wait for projectSummary to update
-    }
+      // }
 
-    setSelectedProject({
-      ...project,
-      unread: 0,
-    });
+      setSelectedProject({
+        ...project,
+        unread: 0,
+      });
 
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.project_id === project.project_id ? { ...p, unread: 0 } : p,
-      ),
-    );
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.project_id === project.project_id ? { ...p, unread: 0 } : p,
+        ),
+      );
 
-    if (isMobileView) {
-      setShowChat(true);
-    }
-  }, [markProjectMessagesAsRead, isMobileView]);
+      if (isMobileView) {
+        setShowChat(true);
+      }
+    },
+    [markProjectMessagesAsRead, isMobileView],
+  );
 
   // Handle back to project list on mobile
   const handleBackToProjects = useCallback(() => {
@@ -325,62 +342,71 @@ const MessageCenter = () => {
   }, []);
 
   // Refresh messages for a specific project (REST API)
-  const refreshProjectMessages = useCallback(async (projectId) => {
-    try {
-      const response = await axios.get(
-        `${api_url}/projects/members/${projectId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { t: Date.now() },
-        },
-      );
-
-      if (response.data.status === 200) {
-        const messages = response.data.data.posts || [];
-
-        if (selectedProject?.project_id === projectId) {
-          setSelectedProject((prev) => ({
-            ...prev,
-            messages: messages,
-          }));
-        }
-
-        setProjects((prev) =>
-          prev.map((project) => {
-            if (project.project_id === projectId) {
-              const lastMessage =
-                messages.length > 0 ? messages[messages.length - 1] : null;
-              let lastMessageText = project.lastMessage;
-              let lastMessageTime = project.timestamp;
-
-              if (lastMessage) {
-                const isCurrentUser =
-                  lastMessage.employee_code === data?.employee_id;
-                const senderDisplay = isCurrentUser
-                  ? "You"
-                  : lastMessage.user_name?.split(" ")[0] || "Unknown";
-                const messagePreview =
-                  lastMessage.message?.substring(0, 30) +
-                  (lastMessage.message?.length > 30 ? "..." : "");
-                lastMessageText = `${senderDisplay}: ${messagePreview}`;
-                lastMessageTime = getTimeAgo(lastMessage.created_at);
-              }
-
-              return {
-                ...project,
-                messages: messages,
-                lastMessage: lastMessageText,
-                timestamp: lastMessageTime,
-              };
-            }
-            return project;
-          }),
+  const refreshProjectMessages = useCallback(
+    async (projectId) => {
+      try {
+        const response = await axios.get(
+          `${api_url}/projects/members/${projectId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { t: Date.now() },
+          },
         );
+
+        if (response.data.status === 200) {
+          const messages = response.data.data.posts || [];
+
+          if (selectedProject?.project_id === projectId) {
+            setSelectedProject((prev) => ({
+              ...prev,
+              messages: messages,
+            }));
+          }
+
+          setProjects((prev) =>
+            prev.map((project) => {
+              if (project.project_id === projectId) {
+                const lastMessage =
+                  messages.length > 0 ? messages[messages.length - 1] : null;
+                let lastMessageText = project.lastMessage;
+                let lastMessageTime = project.timestamp;
+
+                if (lastMessage) {
+                  const isCurrentUser =
+                    lastMessage.employee_code === data?.employee_id;
+                  const senderDisplay = isCurrentUser
+                    ? "You"
+                    : lastMessage.user_name?.split(" ")[0] || "Unknown";
+                  const messagePreview =
+                    lastMessage.message?.substring(0, 30) +
+                    (lastMessage.message?.length > 30 ? "..." : "");
+                  lastMessageText = `${senderDisplay}: ${messagePreview}`;
+                  lastMessageTime = getTimeAgo(lastMessage.created_at);
+                }
+
+                return {
+                  ...project,
+                  messages: messages,
+                  lastMessage: lastMessageText,
+                  timestamp: lastMessageTime,
+                };
+              }
+              return project;
+            }),
+          );
+        }
+      } catch (error) {
+        console.error("Error refreshing messages:", error);
       }
-    } catch (error) {
-      console.error("Error refreshing messages:", error);
-    }
-  }, [api_url, token, selectedProject?.project_id, data?.employee_id, getTimeAgo]);
+    },
+    [
+      api_url,
+      token,
+      selectedProject?.project_id,
+      data?.employee_id,
+      getTimeAgo,
+    ],
+  );
 
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
@@ -436,7 +462,16 @@ const MessageCenter = () => {
     } finally {
       setSendingMessage(false);
     }
-  }, [messageText, attachments, selectedProject, editingMessage, replyingTo, api_url, token, refreshProjectMessages]);
+  }, [
+    messageText,
+    attachments,
+    selectedProject,
+    editingMessage,
+    replyingTo,
+    api_url,
+    token,
+    refreshProjectMessages,
+  ]);
 
   // Handle edit message
   const handleEditMessage = useCallback((message) => {
@@ -454,31 +489,37 @@ const MessageCenter = () => {
   }, []);
 
   // Handle delete message
-  const handleDeleteMessage = useCallback(async (messageId) => {
-    if (!window.confirm("Are you sure you want to delete this message?"))
-      return;
+  const handleDeleteMessage = useCallback(
+    async (messageId) => {
+      if (!window.confirm("Are you sure you want to delete this message?"))
+        return;
 
-    try {
-      const response = await axios.delete(
-        `${api_url}/project-posts/${messageId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      try {
+        const response = await axios.delete(
+          `${api_url}/project-posts/${messageId}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
 
-      if (response.status === 200) {
-        await refreshProjectMessages(selectedProject.project_id);
+        if (response.status === 200) {
+          await refreshProjectMessages(selectedProject.project_id);
+        }
+      } catch (error) {
+        console.error("Error deleting message:", error);
       }
-    } catch (error) {
-      console.error("Error deleting message:", error);
-    }
-  }, [api_url, token, selectedProject?.project_id, refreshProjectMessages]);
+    },
+    [api_url, token, selectedProject?.project_id, refreshProjectMessages],
+  );
 
   // Handle key press (Enter to send)
-  const handleKeyPress = useCallback((e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage],
+  );
 
   // Handle project avatar/name click
   const handleProjectClick = useCallback(() => {
@@ -517,9 +558,12 @@ const MessageCenter = () => {
   }, []);
 
   // Check if message is from current user
-  const isMessageFromCurrentUser = useCallback((message) => {
-    return message.employee_code === data?.employee_id;
-  }, [data?.employee_id]);
+  const isMessageFromCurrentUser = useCallback(
+    (message) => {
+      return message.employee_code === data?.employee_id;
+    },
+    [data?.employee_id],
+  );
 
   // Get input placeholder text
   const getInputPlaceholder = useCallback(() => {
