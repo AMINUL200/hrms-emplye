@@ -28,6 +28,7 @@ import RingtoneSelector from "./RingtoneSelector";
 import { onMessage } from "firebase/messaging";
 import { messaging } from "../../firebase";
 import NotificationSettings from "./NotificationSettings";
+import parse from "html-react-parser";
 
 // Add this CSS import for modal styles
 import "./NavbarModal.css";
@@ -244,13 +245,15 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     );
   };
 
-  useEffect(() => {
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received. ", payload);
-      toast.info(
-        payload.notification.title + " -> " + payload.notification.body,
-      );
-    });
+ useEffect(() => {
+  const unsubscribe = onMessage(messaging, (payload) => {
+    toast.info(
+      <div>
+        <strong>{payload.notification.title}</strong>
+        <div>{parse(payload.notification.body)}</div>
+      </div>
+    );
+  });
     return () => {
       unsubscribe();
     };

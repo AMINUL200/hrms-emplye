@@ -880,6 +880,15 @@ const WorkspacePage = () => {
       fetchComments();
     }
   }, [activeTab, selectedItem, projectId]);
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   // ========================================
   // CONDITIONAL RETURNS
@@ -993,8 +1002,13 @@ const WorkspacePage = () => {
               </h3>
             </div>
             <div className="overview-grid">
+              {/* Status */}
               <div className="overview-item">
-                <span className="overview-label">Status</span>
+                <span className="overview-label">
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                  Status
+                </span>
+
                 <div className="overview-value">
                   <div
                     className="status-indicator"
@@ -1003,18 +1017,42 @@ const WorkspacePage = () => {
                   {statusConfig.label}
                 </div>
               </div>
+
+              {/* Priority */}
               <div className="overview-item">
-                <span className="overview-label">Type</span>
-                <div className="overview-value">{selectedItem.type}</div>
+                <span className="overview-label">
+                  <FontAwesomeIcon icon={faTag} />
+                  Priority
+                </span>
+
+                <div
+                  className={`priority-badge priority-${details?.priority?.toLowerCase()}`}
+                >
+                  {details?.priority || "N/A"}
+                </div>
               </div>
+
+              {/* Start Date */}
               <div className="overview-item">
-                <span className="overview-label">Employee Code</span>
-                <div className="overview-value">{details?.emid || "N/A"}</div>
-              </div>
-              <div className="overview-item">
-                <span className="overview-label">Total Submissions</span>
+                <span className="overview-label">
+                  <FontAwesomeIcon icon={faCalendarDay} />
+                  Start Date
+                </span>
+
                 <div className="overview-value">
-                  {workspaceDetails?.submissions?.length || 0}
+                  {formatDate(details?.start_date)}
+                </div>
+              </div>
+
+              {/* End Date */}
+              <div className="overview-item">
+                <span className="overview-label">
+                  <FontAwesomeIcon icon={faCalendarAlt} />
+                  End Date
+                </span>
+
+                <div className="overview-value">
+                  {formatDate(details?.end_date)}
                 </div>
               </div>
             </div>
@@ -1031,9 +1069,9 @@ const WorkspacePage = () => {
                     <FontAwesomeIcon icon={getFileIcon(details.image)} />
                   </div>
                   <div className="file-attachment-info">
-                    <div className="file-attachment-name">
+                    {/* <div className="file-attachment-name">
                       {details.image.split("/").pop()}
-                    </div>
+                    </div> */}
                     <div className="file-attachment-details">
                       <span className="file-type-badge">
                         {getFileType(details.image)}
@@ -1067,7 +1105,6 @@ const WorkspacePage = () => {
               {/* SUBTASK BUTTONS */}
               {selectedItem.type === "subtask" ? (
                 <>
-                  
                   <button
                     className="workspace-assign-btn"
                     onClick={() => setActiveTab("comments")}
@@ -1076,7 +1113,7 @@ const WorkspacePage = () => {
                     View Discussion
                   </button>
 
-                    {canAssign() && (
+                  {canAssign() && (
                     <button
                       className="workspace-assign-btn"
                       onClick={() =>

@@ -2167,3 +2167,28 @@
     font-size: 11px;
   }
 }
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.priority-high {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.priority-medium {
+  color: #d97706;
+  background: #fef3c7;
+}
+
+.priority-low {
+  color: #059669;
+  background: #dcfce7;
+}
