@@ -33,10 +33,10 @@ export const listenProjectSummary = (callback) => {
 
     const summaries = snapshot.val();
 
-    console.log(
-      "📋 Project Summary Updated",
-      summaries
-    );
+    // console.log(
+    //   "📋 Project Summary Updated",
+    //   summaries
+    // );
 
     callback(summaries);
   });

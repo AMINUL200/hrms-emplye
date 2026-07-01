@@ -16,7 +16,7 @@ import "./WorkspacePage.css";
 
 import { WorkspaceContext } from "../../../context/WorkspaceContext";
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "../../../context/AuthContex";
 
@@ -274,6 +274,12 @@ const WorkspacePage = () => {
   const { selectedItem, treeData, setSelectedItem } =
     useContext(WorkspaceContext);
 
+  const [searchParams] = useSearchParams();
+
+  const notificationItemId = searchParams.get("item");
+  const notificationType = searchParams.get("type");
+  const notificationCommentId = searchParams.get("comment");
+
   // ========================================
   // STATES
   // ========================================
@@ -301,42 +307,6 @@ const WorkspacePage = () => {
   // ========================================
   // HELPER FUNCTIONS
   // ========================================
-
-  // const getActionConfig = () => {
-  //   switch (selectedItem?.type) {
-  //     case "module":
-  //       return {
-  //         createLabel: "Create Submodule",
-  //         createType: "submodule",
-
-  //         assignLabel: "Assign Module",
-  //         assignType: "module",
-  //       };
-  //     case "submodule":
-  //       return {
-  //         createLabel: "Create Task",
-  //         assignLabel: "Assign Submodule",
-  //         createType: "task",
-  //         assignType: "submodule",
-  //       };
-  //     case "task":
-  //       return {
-  //         createLabel: "Create Subtask",
-  //         assignLabel: "Assign Task",
-  //         createType: "subtask",
-  //         assignType: "task",
-  //       };
-  //     case "subtask":
-  //       return {
-  //         createLabel: "Submit Work",
-  //         assignLabel: "Assign Subtask",
-  //         createType: null,
-  //         assignType: "subtask",
-  //       };
-  //     default:
-  //       return {};
-  //   }
-  // };
 
   const getActionConfig = () => {
     switch (selectedItem?.type) {
@@ -470,25 +440,6 @@ const WorkspacePage = () => {
         return false;
     }
   };
-
-  // const canAssign = () => {
-  //   switch (selectedItem?.type) {
-  //     case "module":
-  //       return hasPermission("assign_module");
-
-  //     case "submodule":
-  //       return hasPermission("assign_submodule");
-
-  //     case "task":
-  //       return hasPermission("assign_task");
-
-  //     case "subtask":
-  //       return hasPermission("assign_subtask");
-
-  //     default:
-  //       return false;
-  //   }
-  // };
 
   const actionConfig = getActionConfig();
 
@@ -845,6 +796,22 @@ const WorkspacePage = () => {
     "💯",
   ];
 
+  const findWorkItem = (items, id) => {
+    for (const item of items) {
+      if (String(item.id) === String(id)) {
+        return item;
+      }
+
+      if (item.children?.length) {
+        const found = findWorkItem(item.children, id);
+
+        if (found) return found;
+      }
+    }
+
+    return null;
+  };
+
   // ========================================
   // EFFECTS
   // ========================================
@@ -889,7 +856,21 @@ const WorkspacePage = () => {
       year: "numeric",
     });
   };
+  useEffect(() => {
+    if (!notificationItemId) return;
 
+    if (!treeData.length) return;
+
+    const item = findWorkItem(treeData, notificationItemId);
+
+    if (!item) return;
+
+    console.log("📌 Auto Selected:", item.title);
+
+    setSelectedItem(item);
+
+    setActiveTab("comments");
+  }, [notificationItemId, treeData]);
   // ========================================
   // CONDITIONAL RETURNS
   // ========================================

@@ -36,7 +36,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   const location = useLocation();
   const { data, totalUnreadMessages } = useContext(AuthContext);
 
-  console.log("total unread message:: ",totalUnreadMessages)
+  // console.log("total unread message:: ",totalUnreadMessages)
 
   // Enhanced menu configuration array supporting different types
   const menuItems = [

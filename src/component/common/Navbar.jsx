@@ -199,7 +199,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
         },
       });
 
-      console.log("Fetched notifications:", res.data);
+      // console.log("Fetched notifications:", res.data);
 
       if (res?.data) {
         setNotifications(res.data);
@@ -245,19 +245,49 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     );
   };
 
- useEffect(() => {
-  const unsubscribe = onMessage(messaging, (payload) => {
-    toast.info(
-      <div>
-        <strong>{payload.notification.title}</strong>
-        <div>{parse(payload.notification.body)}</div>
-      </div>
-    );
-  });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("🚀 Received foreground message:", payload);
+       const data = payload.data;
+      toast.info(
+        <div
+          style={{ cursor: "pointer" }}
+          onClick={() => {
+            toast.dismiss();
+
+            // Project chat
+            if (data.type === "project_chat") {
+              navigate(
+                `/organization/message-center?project=${data.project_id}`,
+              );
+              return;
+            }
+            // Workspace comment
+            if (data.work_item_id) {
+              console.log("Navigating to work item:", data.work_item_id);
+              navigate(
+                `/organization/workspace/${data.project_id}?item=${data.work_item_id}&type=${data.work_item_type}&comment=${data.comment_id}`,
+              );
+              return;
+            }
+            // Default
+            navigate("/organization/dashboard");
+          }}
+        >
+          <strong>{payload.notification.title}</strong>
+
+          <div>{payload.notification.body}</div>
+
+          <small style={{ color: "#2563eb" }}>Click to open conversation</small>
+        </div>,
+        {
+          autoClose: 7000,
+        },
+      );
+    });
+
+    return unsubscribe;
+  }, [navigate]);
 
   const [birthdays] = useState([
     {

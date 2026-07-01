@@ -152,10 +152,10 @@ const AuthContextProvider = (props) => {
   useEffect(() => {
     if (!token || !data?.employee_id) return;
 
-    console.log("🔥 Starting Project Summary Listener...");
+    // console.log("🔥 Starting Project Summary Listener...");
 
     const unsubscribe = listenProjectSummary((summaries) => {
-      console.log("📋 Project Summary Updated:", summaries);
+      // console.log("📋 Project Summary Updated:", summaries);
 
       if (!summaries) {
         setProjectSummary({});

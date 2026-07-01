@@ -12,6 +12,7 @@ import PageLoader from "../../../component/loader/PageLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import { listenProjectMessages } from "../../../service/projectChatService";
+import { useSearchParams } from "react-router-dom";
 
 // Helper function to get file type
 const getFileType = (filename) => {
@@ -65,6 +66,10 @@ const MessageCenter = () => {
 
   const api_url = import.meta.env.VITE_API_URL;
   const stor_url = import.meta.env.VITE_STORAGE_URL;
+
+  const [searchParams] = useSearchParams();
+
+  const projectId = searchParams.get("project");
 
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -658,6 +663,30 @@ const MessageCenter = () => {
       inputRef.current?.focus();
     }
   }, [selectedProject]);
+
+  // Set selected project based on URL parameter
+  useEffect(() => {
+    // Wait until projects are loaded
+    if (!projectId || projects.length === 0) return;
+
+    // Don't select again if already selected
+    if (
+      selectedProject &&
+      String(selectedProject.project_id) === String(projectId)
+    ) {
+      return;
+    }
+
+    const project = projects.find(
+      (p) => String(p.project_id) === String(projectId),
+    );
+
+    if (project) {
+      console.log("📩 Auto opening project:", project.project_name);
+
+      handleProjectSelect(project);
+    }
+  }, [projectId, projects, selectedProject, handleProjectSelect]);
 
   if (loading) {
     return <PageLoader />;

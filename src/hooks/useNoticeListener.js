@@ -17,7 +17,7 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
   useEffect(() => {
     if (!emid || !employeeId) return;
 
-    console.log("🚀 Listener start:", emid, employeeId); // ✅ ADD HERE
+    // console.log("🚀 Listener start:", emid, employeeId); // ✅ ADD HERE
 
     audioRef.current = new Audio("/sounds/notification.mp3");
 
@@ -35,8 +35,8 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       // ✅ ADD THESE LOGS HERE
-      console.log("📦 Snapshot size:", snapshot.size);
-      console.log("🔄 Changes:", snapshot.docChanges());
+      // console.log("📦 Snapshot size:", snapshot.size);
+      // console.log("🔄 Changes:", snapshot.docChanges());
 
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
@@ -45,7 +45,7 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
             ...change.doc.data(),
           };
 
-          console.log("👉 Incoming data:", data); // ✅ DEBUG
+          // console.log("👉 Incoming data:", data); // ✅ DEBUG
 
           if (processedIds.current.has(data.id)) return;
 
@@ -54,7 +54,7 @@ export default function useNoticeListener(emid, employeeId, onMessage) {
             return;
           }
 
-          console.log("✅ NEW NOTIFICATION:", data);
+          // console.log("✅ NEW NOTIFICATION:", data);
 
           if (data.target === "all" || data.employeeId === employeeId) {
             playSound();

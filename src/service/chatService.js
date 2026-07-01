@@ -18,24 +18,24 @@ export const listenMessages = (
     `work_item_chat/${workItemId}`
   );
 
-  console.log(
-    "🎯 Listening Path:",
-    `work_item_chat/${workItemId}`
-  );
+  // console.log(
+  //   "🎯 Listening Path:",
+  //   `work_item_chat/${workItemId}`
+  // );
 
   onChildAdded(
     chatRef,
     (snapshot) => {
 
-      console.log(
-        "🔥 Firebase Key:",
-        snapshot.key
-      );
+      // console.log(
+      //   "🔥 Firebase Key:",
+      //   snapshot.key
+      // );
 
-      console.log(
-        "🔥 Firebase Raw Data:",
-        snapshot.val()
-      );
+      // console.log(
+      //   "🔥 Firebase Raw Data:",
+      //   snapshot.val()
+      // );
 
       if (!snapshot.exists()) return;
 
@@ -44,10 +44,10 @@ export const listenMessages = (
         ...snapshot.val(),
       };
 
-      console.log(
-        "🔥 Firebase Final Message:",
-        message
-      );
+      // console.log(
+      //   "🔥 Firebase Final Message:",
+      //   message
+      // );
 
       callback(message);
     }
