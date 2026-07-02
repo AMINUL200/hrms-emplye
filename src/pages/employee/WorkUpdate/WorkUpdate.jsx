@@ -60,7 +60,7 @@ const WorkUpdate = () => {
     } catch (error) {
       console.error("Error fetching work updates:", error);
       toast.error(
-        error?.response?.data?.message || "Failed to fetch work updates"
+        error?.response?.data?.message || "Failed to fetch work updates",
       );
     } finally {
       setLoading(false);
@@ -91,7 +91,7 @@ const WorkUpdate = () => {
   // Sort by date (descending)
   const sortedWorkUpdate = useMemo(() => {
     return [...transformedData].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => new Date(b.date) - new Date(a.date),
     );
   }, [transformedData]);
 
@@ -99,7 +99,7 @@ const WorkUpdate = () => {
     return sortedWorkUpdate.filter(
       (item) =>
         item.remarks.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.comment.toLowerCase().includes(searchTerm.toLowerCase())
+        item.comment.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [sortedWorkUpdate, searchTerm]);
 
@@ -135,6 +135,26 @@ const WorkUpdate = () => {
     XLSX.writeFile(workbook, `Work_Updates_${dateString}.xlsx`);
   };
 
+  const stripHtml = (html = "") => {
+    if (!html) return "";
+
+    let text = html;
+
+    // Decode twice in case remarks are double-encoded (&amp;lt;p&amp;gt; etc.)
+    for (let i = 0; i < 2; i++) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = text;
+      text = tempDiv.textContent || tempDiv.innerText || "";
+    }
+
+    // Fallback: strip any leftover tag-looking characters
+    text = text.replace(/<\/?[^>]+(>|$)/g, "");
+
+    // Collapse whitespace
+    text = text.replace(/\s+/g, " ").trim();
+
+    return text;
+  };
   // Export to PDF function
   const exportToPDF = () => {
     try {
@@ -149,7 +169,7 @@ const WorkUpdate = () => {
         item.from,
         item.to,
         item.time,
-        item.remarks,
+        stripHtml(item.remarks),
         item.comment,
       ]);
 
