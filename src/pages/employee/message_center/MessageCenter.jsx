@@ -91,6 +91,7 @@ const MessageCenter = () => {
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const unsubscribeChatRef = useRef(null);
+  const autoSelectedRef = useRef(false);
 
   // Check if mobile view on mount and resize
   useEffect(() => {
@@ -666,27 +667,22 @@ const MessageCenter = () => {
 
   // Set selected project based on URL parameter
   useEffect(() => {
-    // Wait until projects are loaded
-    if (!projectId || projects.length === 0) return;
+    if (autoSelectedRef.current) return;
 
-    // Don't select again if already selected
-    if (
-      selectedProject &&
-      String(selectedProject.project_id) === String(projectId)
-    ) {
-      return;
-    }
+    if (!projectId) return;
+
+    if (projects.length === 0) return;
 
     const project = projects.find(
       (p) => String(p.project_id) === String(projectId),
     );
 
-    if (project) {
-      console.log("📩 Auto opening project:", project.project_name);
+    if (!project) return;
 
-      handleProjectSelect(project);
-    }
-  }, [projectId, projects, selectedProject, handleProjectSelect]);
+    autoSelectedRef.current = true;
+
+    handleProjectSelect(project);
+  }, [projectId, projects]);
 
   if (loading) {
     return <PageLoader />;
