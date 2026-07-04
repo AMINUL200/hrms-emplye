@@ -114,6 +114,21 @@ const WorkUpdate = () => {
     setShowRemarksModal(true);
   };
 
+  const stripHtml = (html = "") => {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+
+    const decoded = txt.value;
+
+    const div = document.createElement("div");
+    div.innerHTML = decoded;
+
+    return (div.textContent || div.innerText || "")
+      .replace(/\u00A0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
   // Export to Excel function
   const exportToExcel = () => {
     const exportData = currentWorkUpdate.map((item, index) => ({
@@ -122,8 +137,7 @@ const WorkUpdate = () => {
       "From Time": item.from,
       "To Time": item.to,
       Time: item.time,
-      Remarks: item.remarks,
-      Comment: item.comment,
+      Remarks: stripHtml(item.remarks),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -135,26 +149,6 @@ const WorkUpdate = () => {
     XLSX.writeFile(workbook, `Work_Updates_${dateString}.xlsx`);
   };
 
-  const stripHtml = (html = "") => {
-    if (!html) return "";
-
-    let text = html;
-
-    // Decode twice in case remarks are double-encoded (&amp;lt;p&amp;gt; etc.)
-    for (let i = 0; i < 2; i++) {
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = text;
-      text = tempDiv.textContent || tempDiv.innerText || "";
-    }
-
-    // Fallback: strip any leftover tag-looking characters
-    text = text.replace(/<\/?[^>]+(>|$)/g, "");
-
-    // Collapse whitespace
-    text = text.replace(/\s+/g, " ").trim();
-
-    return text;
-  };
   // Export to PDF function
   const exportToPDF = () => {
     try {
@@ -170,7 +164,6 @@ const WorkUpdate = () => {
         item.to,
         item.time,
         stripHtml(item.remarks),
-        item.comment,
       ]);
 
       autoTable(doc, {
@@ -182,7 +175,6 @@ const WorkUpdate = () => {
             "To Time",
             "Time",
             "Remarks",
-            "Comment",
           ],
         ],
         body: exportData,
@@ -365,7 +357,7 @@ const WorkUpdate = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Search remarks or comments..."
+                      placeholder="Search remarks..."
                       value={searchTerm}
                       onChange={handleSearch}
                     />
@@ -395,9 +387,6 @@ const WorkUpdate = () => {
                       </th>
                       <th className="text-center text-gray border py-3">
                         Work Report
-                      </th>
-                      <th className="text-center text-gray border py-3">
-                        Comment
                       </th>
                       <th className="text-center text-gray border py-3">
                         Actions
@@ -436,7 +425,6 @@ const WorkUpdate = () => {
                               </span>
                             )}
                           </td>
-                          <td className="border text-gray">{item.comment}</td>
                           <td className="border ">
                             <div className="dropdown dropstart">
                               <button
@@ -481,7 +469,7 @@ const WorkUpdate = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="8" className="text-center py-4">
+                        <td colSpan="7" className="text-center py-4">
                           <div className="d-flex flex-column align-items-center text-muted">
                             <FontAwesomeIcon
                               icon={faFile}
@@ -536,7 +524,7 @@ const WorkUpdate = () => {
                             </div>
                           </div>
 
-                          <div className="row mb-2">
+                          <div className="row mb-3">
                             <div className="col-12">
                               <p className="mb-1 small text-muted">
                                 Work Report
@@ -556,13 +544,6 @@ const WorkUpdate = () => {
                                   {item.remarks || "No remarks"}
                                 </p>
                               )}
-                            </div>
-                          </div>
-
-                          <div className="row mb-3">
-                            <div className="col-12">
-                              <p className="mb-1 small text-muted">Comment</p>
-                              <p className="mb-0 text-gray">{item.comment}</p>
                             </div>
                           </div>
 
