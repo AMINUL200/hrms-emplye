@@ -1,0 +1,31 @@
+.gh-wrap {
+  margin-bottom: 20px;
+}
+
+.gh-greeting {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.gh-wave {
+  display: inline-block;
+}
+
+.gh-name {
+  margin: 2px 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.gh-datetime {
+  margin: 0;
+  font-size: 13px;
+  color: #9aa0b4;
+}
+
+.gh-dot {
+  margin: 0 4px;
+}

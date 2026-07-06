@@ -62,7 +62,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       submenu: [
         {
           title: "Add Attendance",
-          path: "/organization/employee-attendance",
+          path: "/organization/attendance",
           icon: faCalendarCheck,
           type: "single",
         },

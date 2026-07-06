@@ -1,0 +1,66 @@
+.emp-leave-dashboard {
+  background: #f4f5fb;
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.emp-leave-dashboard * {
+  box-sizing: border-box;
+}
+
+/* ---------- Page header ---------- */
+.eld-page-header {
+  margin-bottom: 20px;
+}
+
+.eld-page-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.eld-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+}
+
+.eld-breadcrumb a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.eld-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.eld-breadcrumb span {
+  color: #9aa0b4;
+}
+
+.eld-breadcrumb-current {
+  color: #6b7280 !important;
+}
+
+/* ---------- Main two-column row ---------- */
+.eld-main-row {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.eld-col {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .eld-main-row {
+    grid-template-columns: 1fr;
+  }
+}

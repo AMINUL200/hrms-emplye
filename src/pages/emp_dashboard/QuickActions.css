@@ -1,0 +1,97 @@
+.qa-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px 22px 22px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.qa-title {
+  margin: 0 0 16px;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.qa-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+}
+
+.qa-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.qa-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: transform 0.15s ease;
+}
+
+.qa-item:hover .qa-icon {
+  transform: translateY(-2px);
+}
+
+.qa-icon--purple {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+.qa-icon--blue {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+}
+
+.qa-icon--green {
+  background: linear-gradient(135deg, #34d399, #16a34a);
+}
+
+.qa-icon--violet {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.qa-icon--orange {
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+}
+
+.qa-icon--skyblue {
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+}
+
+.qa-icon--pink {
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+}
+
+.qa-icon--gradient {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+}
+
+.qa-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b4f5e;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .qa-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .qa-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

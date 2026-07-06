@@ -1,0 +1,66 @@
+.emp-dashboard {
+  background: #f4f5fb;
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.emp-dashboard * {
+  box-sizing: border-box;
+}
+
+/* ---------- Main grid ----------
+   Row 1: left column | right column
+   Row 2: full-width actions row
+   "gap" handles spacing both between columns and between the two rows. */
+.ed-main-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: auto;
+  gap: 20px;
+  align-items: start;
+}
+
+.ed-col {
+  min-width: 0;
+}
+
+/* Stack children inside each column with even spacing */
+.ed-col--left > *:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+.ed-col--right > *:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+/* Calendar (left) + Tasks (right) side by side inside the right column */
+.ed-right-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Quick Actions spans the full width beneath both columns */
+.ed-actions-row {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  .ed-main-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ed-actions-row {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .ed-right-split {
+    grid-template-columns: 1fr;
+  }
+}

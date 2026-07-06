@@ -54,6 +54,9 @@ import WorkspacePage from "./pages/employee/project/WorkspacePage";
 import WorkspaceLayout from "./layout/WorkspaceLayout";
 import EmpCreateProject from "./pages/employee/project/EmpCreateProject";
 import AssignWorkItem from "./component/task/AssignWorkItem";
+import EMPAttendanceDashboard from "./pages/employee/Attendance/EMPAttendanceDashboard";
+import EmpLeaveDashboard from "./pages/employee/Leaves/EmpLeaveDashboard";
+import EmpDashboard from "./pages/emp_dashboard/EmpDashboard";
 
 const App = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -130,6 +133,14 @@ const App = () => {
               }
             />
             <Route
+              path="employee-dashboard"
+              element={
+                <ProtectedRoute>
+                  <EmpDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="notification"
               element={
                 <ProtectedRoute>
@@ -172,6 +183,15 @@ const App = () => {
             />
 
             <Route
+              path="attendance"
+              element={
+                <ProtectedRoute>
+                  <EMPAttendanceDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="leaves"
               element={
                 <ProtectedRoute>
@@ -195,6 +215,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="leaves-dashboard" element={<ProtectedRoute><EmpLeaveDashboard /></ProtectedRoute>} />
 
             <Route
               path="holiday"
@@ -254,8 +275,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="create-project" element={<ProtectedRoute><EmpCreateProject /></ProtectedRoute>} />
-
+            <Route
+              path="create-project"
+              element={
+                <ProtectedRoute>
+                  <EmpCreateProject />
+                </ProtectedRoute>
+              }
+            />
 
             {/* <Route
               path="assigned-project/:projectId"
@@ -276,7 +303,7 @@ const App = () => {
             />
             {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><EmpAdminViewTask /></ProtectedRoute>} /> */}
             {/* <Route path="assigned-view-task/:projectId" element={<ProtectedRoute><WorkspacePage /></ProtectedRoute>} /> */}
-             {/* <Route
+            {/* <Route
               path="emp-assigned-task/:id"
               element={
                 <ProtectedRoute>
@@ -310,7 +337,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-           
+
             <Route
               path="emp-add-module/:p_id"
               element={
@@ -320,7 +347,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="emp-assign-work-item/:p_id" element={<ProtectedRoute><AssignWorkItem /></ProtectedRoute>} />
+            <Route
+              path="emp-assign-work-item/:p_id"
+              element={
+                <ProtectedRoute>
+                  <AssignWorkItem />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="emp-assigned-module/:p_id/:m_id"
               element={
@@ -356,7 +390,7 @@ const App = () => {
             />
           </Route>
 
-              {/* Workspace Route */}
+          {/* Workspace Route */}
           <Route path="/organization" element={<WorkspaceLayout />}>
             <Route
               path="workspace/:projectId"

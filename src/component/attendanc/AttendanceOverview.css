@@ -1,0 +1,343 @@
+.att-overview-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 24px 26px;
+    box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- Heading ---------- */
+.att-overview-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.att-overview-heading .att-heading-icon {
+    color: #6d28d9;
+}
+
+.att-overview-heading h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2333;
+}
+
+/* ---------- Top tiles ---------- */
+.att-tiles-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.att-tiles-row.dashboard-tiles {
+    margin-bottom: 22px;
+}
+
+.att-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 96px;
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.dashboard-tiles .att-tile{
+    min-height:140px;
+}
+
+
+.att-tile--checkin {
+    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 55%, #a855f7 100%);
+}
+
+.att-tile--checkout {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 55%, #60a5fa 100%);
+}
+
+.att-tile--break {
+    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 55%, #22d3ee 100%);
+}
+
+.att-tile-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.att-tile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.att-tile-label {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.92;
+}
+
+.att-tile-value {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.att-tile-badge {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.24);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.att-tile-badge--muted {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* =========================================================================
+   ATTENDANCE VARIANT (variant="attendance")
+   Unchanged from the original design: buttons + info chips share one row,
+   followed by the Record Break/Check In/Check Out CTA button underneath.
+   ========================================================================= */
+
+.att-actions-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) repeat(3, 1fr);
+    gap: 14px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.att-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.att-btn:active {
+    transform: translateY(1px);
+}
+
+.att-btn--start-break {
+    background: linear-gradient(135deg, #7c3aed, #9333ea);
+    color: #ffffff;
+}
+
+.att-btn--start-break:hover {
+    filter: brightness(1.05);
+}
+
+.att-btn--end-break {
+    background: #ffffff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.att-btn--end-break:hover {
+    background: #eff6ff;
+}
+
+.att-btn--checkout {
+    background: #ffffff;
+    color: #ef4444;
+    border-color: #fecaca;
+}
+
+.att-btn--checkout:hover {
+    background: #fef2f2;
+}
+
+.att-info-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: #f7f8fc;
+    border: 1px solid #eef0f7;
+}
+
+.att-info-chip-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.att-info-chip-icon--date {
+    background: #e6e9fb;
+    color: #4f46e5;
+}
+
+.att-info-chip-icon--time {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.att-info-chip-icon--location {
+    background: #ffe4de;
+    color: #f0603b;
+}
+
+.att-info-chip-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    overflow: hidden;
+}
+
+.att-info-chip-label {
+    font-size: 11px;
+    color: #8b8fa3;
+}
+
+.att-info-chip-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.att-info-chip-value--success {
+    color: #16a34a;
+}
+
+/* ---------- Record break button (attendance variant only) ---------- */
+.att-record-break-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.att-record-break-btn {
+    min-width: 180px;
+    height: 42px;
+    padding: 0 28px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    cursor: pointer;
+
+    transition: all .25s ease;
+
+    box-shadow: 0 8px 20px rgba(37, 99, 235, .18);
+}
+
+.att-record-break-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(37, 99, 235, .25);
+}
+
+@media (max-width: 1024px) {
+    .att-actions-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .att-actions-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================================
+   DASHBOARD VARIANT (variant="dashboard")
+   Buttons and info cards split into two separate rows, no Record button.
+   Reuses .att-btn / .att-info-chip styling above, just re-arranges them.
+   ========================================================================= */
+
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* Row 1: action buttons only */
+.dashboard-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+}
+
+.dashboard-buttons .att-btn {
+    min-width: 0;
+}
+
+/* Row 2: info cards only */
+.dashboard-info-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-info-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-info-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Shared responsive: tiles ---------- */
+@media (max-width: 1024px) {
+    .att-tiles-row {
+        grid-template-columns: 1fr;
+    }
+}

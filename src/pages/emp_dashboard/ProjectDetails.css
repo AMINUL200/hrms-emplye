@@ -1,0 +1,143 @@
+.pd-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px 22px 0px 22px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  margin-bottom: 20px;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.pd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pd-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pd-title-icon {
+  color: #7c3aed;
+}
+
+.pd-title h3 {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.pd-view-all {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.pd-view-all:hover {
+  text-decoration: underline;
+}
+
+.pd-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.pd-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+}
+
+.pd-table thead th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9aa0b4;
+  letter-spacing: 0.3px;
+  padding: 6px 10px 12px;
+  white-space: nowrap;
+}
+
+.pd-table thead th:not(:first-child) {
+  text-align: center;
+}
+
+.pd-table tbody td {
+  padding: 12px 10px;
+  border-top: 1px solid #f2f3f8;
+  vertical-align: middle;
+}
+
+.pd-table tbody td:not(:first-child) {
+  text-align: center;
+}
+
+.pd-project-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.pd-project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.pd-project-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.pd-progress-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  background: #eef0f7;
+  overflow: hidden;
+}
+
+.pd-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.pd-progress-pct {
+  font-size: 11px;
+  color: #9aa0b4;
+}
+
+.pd-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.pd-metric--completed {
+  color: #16a34a;
+}
+
+.pd-metric--pending {
+  color: #d97706;
+}
+
+.pd-metric--total {
+  color: #4f46e5;
+}

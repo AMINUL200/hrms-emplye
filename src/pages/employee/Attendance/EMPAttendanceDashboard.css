@@ -1,0 +1,10 @@
+.emp-attendance-dashboard {
+  background: #f4f5fb;
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.emp-attendance-dashboard * {
+  box-sizing: border-box;
+}

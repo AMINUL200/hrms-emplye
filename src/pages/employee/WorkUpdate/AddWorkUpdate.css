@@ -1,0 +1,237 @@
+.add-work-update {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- Card shell ---------- */
+.add-work-update .aw-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  overflow: hidden;
+}
+
+.add-work-update .aw-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef0f7;
+}
+
+.add-work-update .aw-header-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.add-work-update .aw-card-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.add-work-update .aw-card-body {
+  padding: 24px;
+}
+
+.add-work-update .aw-row {
+  margin-bottom: 4px;
+  row-gap: 18px;
+}
+
+/* ---------- Fields ---------- */
+.add-work-update .aw-field {
+  margin-bottom: 18px;
+}
+
+.add-work-update .aw-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1f2333;
+  margin-bottom: 8px;
+}
+
+.add-work-update .aw-required {
+  color: #ef4444;
+}
+
+.add-work-update .aw-optional {
+  color: #9aa0b4;
+  font-weight: 500;
+}
+
+.add-work-update .aw-input-wrap {
+  position: relative;
+}
+
+.add-work-update .aw-input.form-control {
+  height: 48px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #e3e5ee;
+  background: #f7f8fc;
+  color: #1f2333;
+  font-size: 14px;
+  padding: 0 40px 0 14px;
+  box-shadow: none;
+}
+
+.add-work-update .aw-input.form-control:focus {
+  border-color: #8b5cf6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  outline: none;
+}
+
+.add-work-update .aw-input--readonly {
+  background: #f0f1f7;
+  color: #1f2333;
+  font-weight: 600;
+  cursor: default;
+}
+
+.add-work-update .aw-input-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9aa0b4;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* Native date/time picker indicator - keep clickable, hide default icon spacing issues */
+.add-work-update input[type="date"].aw-input::-webkit-calendar-picker-indicator,
+.add-work-update input[type="time"].aw-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ---------- File upload box ---------- */
+.add-work-update .aw-file-box {
+  border: 1px solid #e3e5ee;
+  border-radius: 10px;
+  background: #f7f8fc;
+  padding: 4px;
+}
+
+.add-work-update .aw-file-input {
+  width: 100%;
+  height: 40px;
+  font-size: 13.5px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.add-work-update .aw-file-input::file-selector-button {
+  height: 32px;
+  margin-right: 14px;
+  padding: 0 16px;
+  border: 1px solid #e3e5ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #4b4f5e;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-work-update .aw-file-input::file-selector-button:hover {
+  background: #f0f1f7;
+}
+
+.add-work-update .aw-existing-file {
+  display: block;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #8b8fa3;
+}
+
+.add-work-update .aw-existing-file-link {
+  color: #6d28d9;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.add-work-update .aw-existing-file-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Rich text editor wrap ---------- */
+.add-work-update .aw-editor-wrap {
+  border: 1px solid #e3e5ee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.add-work-update .aw-char-count {
+  text-align: right;
+  font-size: 12px;
+  color: #9aa0b4;
+  margin-top: 6px;
+}
+
+/* ---------- Buttons ---------- */
+.add-work-update .aw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 46px;
+  padding: 0 24px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.add-work-update .aw-btn:active {
+  transform: translateY(1px);
+}
+
+.add-work-update .aw-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.add-work-update .aw-btn--submit {
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  color: #ffffff;
+  margin-right: 12px;
+}
+
+.add-work-update .aw-btn--submit:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.add-work-update .aw-btn--cancel {
+  background: #7c828f;
+  color: #ffffff;
+}
+
+.add-work-update .aw-btn--cancel:hover:not(:disabled) {
+  background: #6b7280;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991px) {
+  .add-work-update .aw-card-body {
+    padding: 18px;
+  }
+}
