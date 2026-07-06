@@ -132,7 +132,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+            <Route 
               path="employee-dashboard"
               element={
                 <ProtectedRoute>
