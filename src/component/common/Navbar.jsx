@@ -355,7 +355,7 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
     <>
       <div className="header">
         <div className="header-left">
-          <div className="header-log">
+          {/* <div className="header-log">
             <Link to={"/organization/employerdashboard"} className="logo2">
               <img
                 src={`${storage_url}/${data?.org_logo}`}
@@ -364,9 +364,9 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
                 alt="Logo"
               />
             </Link>
-          </div>
+          </div> */}
 
-          <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar}>
+          <div className={`toggle_btn sidebar-closed`} onClick={toggleSidebar} style={{ marginLeft: "10px" }}>
             <span className="bar-icon">
               <span></span>
               <span></span>

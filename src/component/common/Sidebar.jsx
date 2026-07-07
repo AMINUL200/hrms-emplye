@@ -25,10 +25,12 @@ import {
   faListAlt,
   faProjectDiagram,
   faEnvelope,
+  faShieldAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { logo, logo2 } from "../../assets";
 import { AuthContext } from "../../context/AuthContex";
 import { t } from "i18next";
+import "./Sidebar.css";
 
 const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   const [openMenu, setOpenMenu] = useState({});
@@ -43,7 +45,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
     {
       key: "dashboard",
       title: "Dashboard",
-      path: "/organization/employerdashboard",
+      path: "/organization/employee-dashboard",
       icon: faCube,
       type: "single",
     },
@@ -276,6 +278,21 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="sidebar-inner">
+        {/* Brand / Logo */}
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-logo">
+            <img src={logo} alt="PONIC HR" />
+          </div>
+          <div className="sidebar-brand-text">
+            <span className="sidebar-brand-title">
+              PONIC<sup>HR</sup>
+            </span>
+            <span className="sidebar-brand-tagline">
+              Sponsor Compliances made Easy
+            </span>
+          </div>
+        </div>
+
         <div className="sidebar-menu">
           <ul className="sidebar-menu-vertical">
             <li className="menu-title">
@@ -306,11 +323,17 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
                       <span className="menu-text">
                         {menuItem.title}
                         {/* Show unread badge for Message Center */}
-                        {menuItem.key === "message-center" && totalUnreadMessages > 0 && (
-                          <span className="sidebar-unread-badge">
-                            {totalUnreadMessages > 99 ? "99+" : totalUnreadMessages}
-                          </span>
-                        )}
+                        {menuItem.key === "message-center" &&
+                          totalUnreadMessages > 0 && (
+                            <span className="sidebar-unread-badge">
+                              {totalUnreadMessages > 99
+                                ? "99+"
+                                : totalUnreadMessages}
+                            </span>
+                          )}
+                      </span>
+                      <span className="menu-active-arrow">
+                        <FontAwesomeIcon icon={faAngleRight} />
                       </span>
                     </NavLink>
                   </li>
@@ -360,8 +383,17 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
 
         {/* Sidebar Footer */}
         <div className="sidebar-footer">
-          <hr className="sidebar-divider" />
-
+          {/* Promo card */}
+          <div className="sidebar-promo-card">
+            <div className="sidebar-promo-glow" />
+            <span className="sidebar-promo-title">SponicHR</span>
+            <span className="sidebar-promo-subtitle">
+              Smart HR. Stronger Compliance.
+            </span>
+            <button type="button" className="sidebar-promo-btn">
+              Explore More
+            </button>
+          </div>
           {/* Footer logo and version info */}
           <div
             className="sidebar-footer-bottom"
@@ -380,6 +412,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
               &copy; 2025 SponicHR. All rights reserved.
             </div>
           </div>
+
+          {/* Copyright */}
+          {/* <div className="sidebar-copyright">
+            <FontAwesomeIcon icon={faShieldAlt} className="sidebar-copyright-icon" />
+            <span>&copy; 2025 SponicHR.<br />All rights reserved.</span>
+          </div> */}
         </div>
       </div>
     </div>

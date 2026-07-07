@@ -26,7 +26,7 @@ const GreetingHeader = () => {
   });
 
   return (
-    <div className="gh-wrap">
+    <div className="gh-card">
       <p className="gh-greeting">
         {greeting}, <span className="gh-wave">👋</span>
       </p>

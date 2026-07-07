@@ -12,9 +12,9 @@ const MainLayout = () => {
     useEffect(() => {
         const checkScreenSize = () => {
             const width = window.innerWidth;
-            setIsMediumScreen(width >= 768 );
+            setIsMediumScreen(width >= 768 && width < 1024);
             setIsSmallScreen(width < 768);
-            
+
             // Auto behavior based on screen size
             if (width < 768) {
                 setSidebarOpen(false); // Closed by default on small screens
@@ -27,42 +27,40 @@ const MainLayout = () => {
 
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
-        
+
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
     const toggleSidebar = () => {
-        // Special behavior for medium screens: toggle between icons-only and full sidebar
-        if (isMediumScreen) {
-            setSidebarOpen(!sidebarOpen);
-        } 
-        // For small screens: toggle between closed and icons-only
-        else if (isSmallScreen) {
-            setSidebarOpen(!sidebarOpen);
-        }
-        // For large screens: normal toggle
-        else {
-            setSidebarOpen(!sidebarOpen);
-        }
+        setSidebarOpen(!sidebarOpen);
     };
 
     return (
-        <div className="app">
-            <Navbar 
-                toggleSidebar={toggleSidebar} 
-                isOpen={sidebarOpen} 
+        <div className="app-shell">
+            {/* Sidebar: fixed, full height, far left */}
+            <Sidebar
+                isOpen={sidebarOpen}
+                toggleSidebar={toggleSidebar}
                 isMediumScreen={isMediumScreen}
                 isSmallScreen={isSmallScreen}
             />
-            <Sidebar 
-                isOpen={sidebarOpen} 
-                toggleSidebar={toggleSidebar} 
-                isMediumScreen={isMediumScreen}
-                isSmallScreen={isSmallScreen}
-            />
-            <div className={`main-content ${sidebarOpen && !isSmallScreen ? 'sidebar-open' : 'sidebar-collapsed'} ${isMediumScreen && !sidebarOpen ? 'sidebar-icons-only' : ''}`}>
-                <Outlet />
+
+            {/* Right column: Navbar on top, content below — both shifted by sidebar width */}
+            <div
+                className={`app-main ${sidebarOpen && !isSmallScreen ? 'sidebar-open' : 'sidebar-collapsed'} ${isMediumScreen && !sidebarOpen ? 'sidebar-icons-only' : ''}`}
+            >
+                <Navbar
+                    toggleSidebar={toggleSidebar}
+                    isOpen={sidebarOpen}
+                    isMediumScreen={isMediumScreen}
+                    isSmallScreen={isSmallScreen}
+                />
+
+                <div className="app-body custom-scrollbar">
+                    <Outlet />
+                </div>
             </div>
+
             {/* Overlay for mobile when sidebar is open */}
             {isSmallScreen && sidebarOpen && (
                 <div className="sidebar-overlay" onClick={toggleSidebar}></div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import "./AttendanceRecordTable.css";
 import {
   FileSpreadsheet,
@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ArrowUpDown,
   CalendarClock,
+  Calendar,
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -46,14 +47,29 @@ const AttendanceRecordTable = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalEntries, setTotalEntries] = useState(0);
+  
+  // Date filter states
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  
+  // Ref to track if this is the initial load
+  const isInitialLoad = useRef(true);
 
   // Fetch attendance data
   const fetchAttendanceReport = async () => {
     try {
       setLoading(true);
+      const requestData = {};
+      
+      // Add date filters if provided
+      if (fromDate && toDate) {
+        requestData.from_date = fromDate;
+        requestData.to_date = toDate;
+      }
+      
       const res = await axios.post(
         `${api_url}/attendance-report`,
-        {},
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,9 +91,38 @@ const AttendanceRecordTable = () => {
     }
   };
 
+  // Initial load and auto-fetch when both dates are selected
   useEffect(() => {
+    if (isInitialLoad.current) {
+      // Initial load without date filters
+      fetchAttendanceReport();
+      isInitialLoad.current = false;
+    } else if (fromDate && toDate) {
+      // Auto-fetch when both dates are selected
+      fetchAttendanceReport();
+    }
+  }, [fromDate, toDate]);
+
+  // Handle from date change
+  const handleFromDateChange = (e) => {
+    setFromDate(e.target.value);
+    setActivePage(1);
+  };
+
+  // Handle to date change
+  const handleToDateChange = (e) => {
+    setToDate(e.target.value);
+    setActivePage(1);
+  };
+
+  // Clear date filters
+  const clearDateFilters = () => {
+    setFromDate("");
+    setToDate("");
+    setActivePage(1);
+    // Fetch without date filters
     fetchAttendanceReport();
-  }, []);
+  };
 
   // Get status based on late minutes
   const getStatus = (late) => {
@@ -190,6 +235,7 @@ const AttendanceRecordTable = () => {
     const doc = new jsPDF("l", "mm", "a4");
 
     doc.setFontSize(16);
+    doc.setTextColor(110, 40, 180); // Violet color for title
     doc.text("Attendance Report", 14, 15);
 
     doc.setFontSize(10);
@@ -236,7 +282,7 @@ const AttendanceRecordTable = () => {
         halign: "center",
       },
       headStyles: {
-        fillColor: [68, 66, 66],
+        fillColor: [110, 40, 180], // Violet color for header
         textColor: 255,
         fontStyle: "bold",
       },
@@ -320,6 +366,48 @@ const AttendanceRecordTable = () => {
         </div>
       </div>
 
+      {/* Date Filter */}
+      <div className="att-date-filter">
+        <div className="att-date-filter-group">
+          <label>From Date</label>
+          <div className="att-date-input-wrapper">
+            <Calendar size={16} className="att-date-icon" />
+            <input
+              type="date"
+              value={fromDate}
+              onChange={handleFromDateChange}
+              className="att-date-input"
+            />
+          </div>
+        </div>
+        <div className="att-date-filter-group">
+          <label>To Date</label>
+          <div className="att-date-input-wrapper">
+            <Calendar size={16} className="att-date-icon" />
+            <input
+              type="date"
+              value={toDate}
+              onChange={handleToDateChange}
+              className="att-date-input"
+            />
+          </div>
+        </div>
+        <div className="att-date-filter-actions">
+          <button
+            type="button"
+            className="att-filter-btn att-filter-btn--clear"
+            onClick={clearDateFilters}
+          >
+            Clear Filters
+          </button>
+          {(fromDate || toDate) && (
+            <span className="att-filter-active">
+              Filter Active
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="att-table-controls">
         <div className="att-entries-select">
@@ -374,9 +462,6 @@ const AttendanceRecordTable = () => {
                   <td>{row.sl}</td>
                   <td>
                     <span className="att-date-main">{row.date}</span>
-                    {/* {row.dateTag && (
-                      <span className="att-date-tag">{row.dateTag}</span>
-                    )} */}
                   </td>
                   <td className="att-cell-in">{row.officeIn}</td>
                   <td>{row.officeOut}</td>

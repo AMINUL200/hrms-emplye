@@ -8,6 +8,20 @@ import {
   faTrashCan,
   faCamera,
   faSpinner,
+  faCircleCheck,
+  faUser,
+  faTriangleExclamation,
+  faBuildingColumns,
+  faBriefcase,
+  faPassport,
+  faCertificate,
+  faUserGroup,
+  faPhone,
+  faEnvelope,
+  faLock,
+  faLocationDot,
+  faVenusMars,
+  faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import Breadcrumb from "../../../component/common/Breadcrumb";
 import "./ProfilePage.css";
@@ -34,7 +48,7 @@ const ProfilePage = () => {
           Authorization: `Bearer ${token}`,
         },
         params: {
-          t: Date.now(), // prevent caching
+          t: Date.now(),
         },
       });
 
@@ -47,7 +61,6 @@ const ProfilePage = () => {
       } else {
         setProfileData(response.data.data[0]);
         console.log(response.data.data[0]);
-        
       }
     } catch (error) {
       console.error("Error fetching profile data:", error);
@@ -62,7 +75,6 @@ const ProfilePage = () => {
   const handleImageSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type
       const allowedTypes = [
         "image/jpeg",
         "image/jpg",
@@ -74,8 +86,7 @@ const ProfilePage = () => {
         return;
       }
 
-      // Validate file size (max 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         toast.error("Please select an image smaller than 5MB");
         return;
@@ -104,7 +115,6 @@ const ProfilePage = () => {
         toast.success(
           response.data.message || "Profile image updated successfully"
         );
-        // Refresh profile data to get the new image
         await fetchProfileData();
       } else {
         toast.error(response.data.message || "Failed to update profile image");
@@ -116,7 +126,6 @@ const ProfilePage = () => {
       );
     } finally {
       setImageUploading(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -146,7 +155,6 @@ const ProfilePage = () => {
         toast.success(
           response.data.message || "Profile image removed successfully"
         );
-        // Refresh profile data
         await fetchProfileData();
       } else {
         toast.error(response.data.message || "Failed to remove profile image");
@@ -169,7 +177,6 @@ const ProfilePage = () => {
     fetchProfileData();
   }, []);
 
-  // Helper function to format date
   const formatDate = (dateString) => {
     if (!dateString || dateString === "1970-01-01") return "Not provided";
     const date = new Date(dateString);
@@ -180,14 +187,12 @@ const ProfilePage = () => {
     });
   };
 
-  // Helper function to format employee name
   const getFullName = () => {
     if (!profileData) return "Loading...";
     const { emp_fname, emp_mname, emp_lname } = profileData;
     return [emp_fname, emp_mname, emp_lname].filter(Boolean).join(" ");
   };
 
-  // Helper function to get profile image
   const getProfileImage = () => {
     if (profileData?.emp_image) {
       return `${storage_url}/${profileData.emp_image}`;
@@ -243,20 +248,19 @@ const ProfilePage = () => {
                           )}
                         </button>
 
-                        {/* {profileData?.emp_image && (
-													<button
-														className="btn btn-sm btn-danger"
-														onClick={removeProfileImage}
-														disabled={imageUploading}
-														title="Remove Profile Image"
-													>
-														<FontAwesomeIcon icon={faTrashCan} />
-													</button>
-												)} */}
+                        {profileData?.emp_image && (
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={removeProfileImage}
+                            disabled={imageUploading}
+                            title="Remove Profile Image"
+                          >
+                            <FontAwesomeIcon icon={faTrashCan} />
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    {/* Hidden file input */}
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -286,8 +290,13 @@ const ProfilePage = () => {
                       <div className="profile-info-left">
                         <h3 className="user-name m-t-0 mb-0">
                           {getFullName()}
+                          <FontAwesomeIcon
+                            icon={faCircleCheck}
+                            className="verified-badge"
+                            title="Verified"
+                          />
                         </h3>
-                        <h6 className="text-muted">
+                        <h6 className="text-muted dept-link">
                           {profileData.emp_department ||
                             "Department not specified"}
                         </h6>
@@ -297,7 +306,9 @@ const ProfilePage = () => {
                         </small>
                         <div className="staff-id">
                           Employee ID :{" "}
-                          {profileData.emp_code || profileData.emid}
+                          <span className="staff-id-value">
+                            {profileData.emp_code || profileData.emid}
+                          </span>
                         </div>
                         <div className="small doj text-muted">
                           Date of Join : {formatDate(profileData.emp_doj)}
@@ -309,7 +320,7 @@ const ProfilePage = () => {
                               className="btn btn-custom"
                               onClick={() => setIsEdit(true)}
                             >
-                              Edit Profile
+                              <FontAwesomeIcon icon={faPencil} /> Edit Profile
                             </button>
                           ) : (
                             <>
@@ -317,10 +328,10 @@ const ProfilePage = () => {
                                 className="btn cancel-btn"
                                 onClick={() => setIsEdit(false)}
                               >
-                                Cancel{" "}
+                                Cancel
                               </button>
                               <button className="btn btn-custom">
-                                Update{" "}
+                                Update
                               </button>
                             </>
                           )}
@@ -328,9 +339,14 @@ const ProfilePage = () => {
                       </div>
                     </div>
                     <div className="col-md-7">
-                      <ul className="personal-info">
+                      <ul className="personal-info personal-info--contact">
                         <li>
-                          <div className="title">Phone:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faPhone} />
+                            </span>
+                            Phone:
+                          </div>
                           <div className="text">
                             <a href={`tel:${profileData.em_contact}`}>
                               {profileData.em_contact || "Not provided"}
@@ -338,7 +354,12 @@ const ProfilePage = () => {
                           </div>
                         </li>
                         <li>
-                          <div className="title">Email:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faEnvelope} />
+                            </span>
+                            Email:
+                          </div>
                           <div className="text">
                             <a href={`mailto:${profileData.emp_ps_email}`}>
                               {profileData.emp_ps_email || "Not provided"}
@@ -346,13 +367,23 @@ const ProfilePage = () => {
                           </div>
                         </li>
                         <li>
-                          <div className="title">Birthday:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faLock} />
+                            </span>
+                            Birthday:
+                          </div>
                           <div className="text">
                             {formatDate(profileData.emp_dob)}
                           </div>
                         </li>
                         <li>
-                          <div className="title">Address:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faLocationDot} />
+                            </span>
+                            Address:
+                          </div>
                           <div className="text">
                             {[
                               profileData.emp_pr_street_no,
@@ -367,13 +398,23 @@ const ProfilePage = () => {
                           </div>
                         </li>
                         <li>
-                          <div className="title">Gender:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faVenusMars} />
+                            </span>
+                            Gender:
+                          </div>
                           <div className="text">
                             {profileData.emp_gender || "Not specified"}
                           </div>
                         </li>
                         <li>
-                          <div className="title">Reports to:</div>
+                          <div className="title">
+                            <span className="field-icon">
+                              <FontAwesomeIcon icon={faUserTie} />
+                            </span>
+                            Reports to:
+                          </div>
                           <div className="text">
                             <a href="profile.html">
                               {profileData.emp_reporting_auth || "Not assigned"}
@@ -410,7 +451,44 @@ const ProfilePage = () => {
                   data-bs-toggle="tab"
                   className="nav-link active"
                 >
-                  Profile
+                  <FontAwesomeIcon icon={faUser} /> Profile
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="#emp_profile"
+                  data-bs-toggle="tab"
+                  className="nav-link"
+                >
+                  <FontAwesomeIcon icon={faUserGroup} /> Personal Information
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="#emp_profile"
+                  data-bs-toggle="tab"
+                  className="nav-link"
+                >
+                  <FontAwesomeIcon icon={faBriefcase} /> Work Information
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="#emp_profile"
+                  data-bs-toggle="tab"
+                  className="nav-link"
+                >
+                  <FontAwesomeIcon icon={faPassport} /> Documents
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="#emp_profile"
+                  data-bs-toggle="tab"
+                  className="nav-link"
+                >
+                  <FontAwesomeIcon icon={faCertificate} /> Additional
+                  Information
                 </a>
               </li>
             </ul>
@@ -425,10 +503,15 @@ const ProfilePage = () => {
         >
           <div className="row">
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box personal-card flex-fill">
                 <div className="card-body">
                   <h3 className="card-title">
-                    Personal Informations{" "}
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--purple">
+                        <FontAwesomeIcon icon={faUser} />
+                      </span>
+                      Personal Informations
+                    </span>
                     <a
                       href="#"
                       className="edit-icon"
@@ -438,64 +521,73 @@ const ProfilePage = () => {
                       <i className="fa-solid fa-pencil"></i>
                     </a>
                   </h3>
-                  <ul className="personal-info">
-                    <li>
-                      <div className="title">Passport No.</div>
-                      <div className="text">
-                        {profileData.pass_doc_no || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Passport Exp Date.</div>
-                      <div className="text">
-                        {formatDate(profileData.pass_exp_date)}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Tel</div>
-                      <div className="text">
-                        {profileData.emp_ps_phone || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Nationality</div>
-                      <div className="text">
-                        {profileData.nationality || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Religion</div>
-                      <div className="text">
-                        {profileData.emp_religion || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Marital status</div>
-                      <div className="text">
-                        {profileData.marital_status || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Employment of spouse</div>
-                      <div className="text">
-                        {profileData.emp_spouse_working_status || "N/A"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Spouse Name</div>
-                      <div className="text">
-                        {profileData.spouse_name || "N/A"}
-                      </div>
-                    </li>
-                  </ul>
+                  <div className="info-grid">
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">Passport No.</div>
+                        <div className="text">
+                          {profileData.pass_doc_no || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Passport Exp Date.</div>
+                        <div className="text">
+                          {formatDate(profileData.pass_exp_date)}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Tel</div>
+                        <div className="text">
+                          {profileData.emp_ps_phone || "Not provided"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">Nationality</div>
+                        <div className="text">
+                          {profileData.nationality || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Religion</div>
+                        <div className="text">
+                          {profileData.emp_religion || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Marital status</div>
+                        <div className="text">
+                          {profileData.marital_status || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Employment of spouse</div>
+                        <div className="text">
+                          {profileData.emp_spouse_working_status || "N/A"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Spouse Name</div>
+                        <div className="text">
+                          {profileData.spouse_name || "N/A"}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box  emergency-card flex-fill">
                 <div className="card-body">
                   <h3 className="card-title">
-                    Emergency Contact{" "}
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--red">
+                        <FontAwesomeIcon icon={faTriangleExclamation} />
+                      </span>
+                      Emergency Contact
+                    </span>
                     <a
                       href="#"
                       className="edit-icon"
@@ -544,40 +636,47 @@ const ProfilePage = () => {
           </div>
           <div className="row">
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box  bank-card flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">Bank & Document Information</h3>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--green">
+                        <FontAwesomeIcon icon={faBuildingColumns} />
+                      </span>
+                      Bank &amp; Document Information
+                    </span>
+                  </h3>
+                  <div className="info-grid">
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">Bank name</div>
+                        <div className="text">
+                          {profileData.emp_bank_name || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Bank account No.</div>
+                        <div className="text">
+                          {profileData.emp_account_no || "Not provided"}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">Aadhar No</div>
+                        <div className="text">
+                          {profileData.emp_aadhar_no || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">National Insurance</div>
+                        <div className="text">
+                          {profileData.ni_no || "Not provided"}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                   <ul className="personal-info">
-                    <li>
-                      <div className="title">Bank name</div>
-                      <div className="text">
-                        {profileData.emp_bank_name || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Bank account No.</div>
-                      <div className="text">
-                        {profileData.emp_account_no || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">PAN No</div>
-                      <div className="text">
-                        {profileData.emp_pan_no || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Aadhar No</div>
-                      <div className="text">
-                        {profileData.emp_aadhar_no || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">National Insurance</div>
-                      <div className="text">
-                        {profileData.ni_no || "Not provided"}
-                      </div>
-                    </li>
                     <li>
                       <div className="title">Status</div>
                       <div className="text">
@@ -597,47 +696,58 @@ const ProfilePage = () => {
               </div>
             </div>
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box work-card flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">Work Information</h3>
-                  <ul className="personal-info">
-                    <li>
-                      <div className="title">Employee Status</div>
-                      <div className="text">
-                        {profileData.emp_status || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Job Location</div>
-                      <div className="text">
-                        {profileData.job_loc || "Not provided"}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Start Date</div>
-                      <div className="text">
-                        {formatDate(profileData.start_date)}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">End Date</div>
-                      <div className="text">
-                        {formatDate(profileData.end_date)}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Confirmation Date</div>
-                      <div className="text">
-                        {formatDate(profileData.date_confirm)}
-                      </div>
-                    </li>
-                    <li>
-                      <div className="title">Retirement Date</div>
-                      <div className="text">
-                        {formatDate(profileData.emp_retirement_date)}
-                      </div>
-                    </li>
-                  </ul>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--orange">
+                        <FontAwesomeIcon icon={faBriefcase} />
+                      </span>
+                      Work Information
+                    </span>
+                  </h3>
+                  <div className="info-grid">
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">Employee Status</div>
+                        <div className="text">
+                          {profileData.emp_status || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Job Location</div>
+                        <div className="text">
+                          {profileData.job_loc || "Not provided"}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Start Date</div>
+                        <div className="text">
+                          {formatDate(profileData.start_date)}
+                        </div>
+                      </li>
+                    </ul>
+                    <ul className="personal-info">
+                      <li>
+                        <div className="title">End Date</div>
+                        <div className="text">
+                          {formatDate(profileData.end_date)}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Confirmation Date</div>
+                        <div className="text">
+                          {formatDate(profileData.date_confirm)}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="title">Retirement Date</div>
+                        <div className="text">
+                          {formatDate(profileData.emp_retirement_date)}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -646,9 +756,16 @@ const ProfilePage = () => {
           {/* Document Information */}
           <div className="row">
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box visa-card  flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">Visa Information</h3>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--blue">
+                        <FontAwesomeIcon icon={faPassport} />
+                      </span>
+                      Visa Information
+                    </span>
+                  </h3>
                   <ul className="personal-info">
                     <li>
                       <div className="title">Visa Document No.</div>
@@ -693,9 +810,16 @@ const ProfilePage = () => {
               </div>
             </div>
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box license-card flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">Professional License</h3>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--violet">
+                        <FontAwesomeIcon icon={faCertificate} />
+                      </span>
+                      Professional License
+                    </span>
+                  </h3>
                   <ul className="personal-info">
                     <li>
                       <div className="title">License Title</div>
@@ -744,9 +868,16 @@ const ProfilePage = () => {
           {/* Additional Document Cards */}
           <div className="row">
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box dbs-card flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">DBS Information</h3>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--green">
+                        <FontAwesomeIcon icon={faPassport} />
+                      </span>
+                      DBS Information
+                    </span>
+                  </h3>
                   <ul className="personal-info">
                     <li>
                       <div className="title">DBS Reference No.</div>
@@ -791,9 +922,16 @@ const ProfilePage = () => {
               </div>
             </div>
             <div className="col-md-6 d-flex">
-              <div className="card profile-box flex-fill">
+              <div className="card profile-box euss-card flex-fill">
                 <div className="card-body">
-                  <h3 className="card-title">EUSS Information</h3>
+                  <h3 className="card-title">
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--orange">
+                        <FontAwesomeIcon icon={faCertificate} />
+                      </span>
+                      EUSS Information
+                    </span>
+                  </h3>
                   <ul className="personal-info">
                     <li>
                       <div className="title">EUSS Reference No.</div>
@@ -839,13 +977,18 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Family Information - Updated to handle nominees */}
+          {/* Family Information */}
           <div className="row">
             <div className="col-md-12 d-flex">
               <div className="card profile-box flex-fill">
                 <div className="card-body">
                   <h3 className="card-title">
-                    Nominee Informations{" "}
+                    <span className="card-title-left">
+                      <span className="title-icon title-icon--violet">
+                        <FontAwesomeIcon icon={faUserGroup} />
+                      </span>
+                      Nominee Informations
+                    </span>
                     <a
                       href="#"
                       className="edit-icon"

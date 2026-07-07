@@ -1,290 +1,899 @@
-/* profile */
+/* profile.css - Purple/Violet theme matching the SponicHR dashboard screenshot */
+
+/* ============================================
+   COLOR TOKENS (for reference)
+   Primary purple:   #7C3AED
+   Primary dark:     #6D28D9
+   Primary light bg: #F3EEFF
+   Icon purple:      #7C3AED
+   Icon red:         #F43F5E
+   Icon green:       #10B981
+   Icon orange:      #F59E0B
+   Icon blue:        #3B82F6
+   Icon violet:      #A855F7
+   ============================================ */
 
 @media (max-width: 768px) {
-    .profile {
-        margin-left: 0;
-    }
+  .profile {
+    margin-left: 0;
+  }
 }
 
+/* ============================================
+   PROFILE VIEW - HEADER SECTION
+   ============================================ */
 .profile-view {
-    position: relative;
+  position: relative;
+  padding: 20px 0;
 }
 
+/* Profile Image */
 .profile-view .profile-img-wrap {
-    height: 120px;
-    width: 120px;
-    position: absolute;
+  height: 120px;
+  width: 120px;
+  position: absolute;
 }
 
 @media (max-width: 575px) {
-    .profile-view .profile-img-wrap {
-        position: relative;
-        margin: 0 auto;
-    }
+  .profile-view .profile-img-wrap {
+    position: relative;
+    margin: 0 auto;
+  }
 }
 
 .profile-view .profile-img-wrap img {
-    border-radius: 50%;
-    height: 120px;
-    width: 120px;
+  border-radius: 50%;
+  height: 120px;
+  width: 120px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
 }
 
 .profile-view .profile-img {
-    width: 120px;
-    height: 120px;
+  width: 120px;
+  height: 120px;
+  position: relative;
 }
 
+/* Profile Image Overlay - for hover effects */
+.profile-img-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(30, 20, 60, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-img:hover .profile-img-overlay {
+  opacity: 1;
+}
+
+.profile-img-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-img-actions .btn-primary {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.profile-img-actions .btn-primary:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.profile-img-actions .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-img-actions .btn-danger {
+  background: #EF4444;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.profile-img-actions .btn-danger:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Camera badge (small circular icon sitting on the avatar, like the screenshot) */
+.profile-img::after {
+  content: "";
+}
+
+.image-upload-status {
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Profile Basic Info */
 .profile-view .profile-basic {
-    margin-left: 140px;
-    padding-right: 50px;
+  margin-left: 140px;
+  padding-right: 50px;
 }
 
 @media (max-width: 575px) {
-    .profile-view .profile-basic {
-        margin-left: 0;
-        padding-right: 0;
-    }
+  .profile-view .profile-basic {
+    margin-left: 0;
+    padding-right: 0;
+  }
 }
 
 .profile-view .profile-basic .profile-info-left {
-    border-right: 2px dashed #D3D3D4;
+  border-right: 1px solid #EDE9FE;
+  padding-right: 30px;
 }
 
 @media (max-width: 575px) {
-    .profile-view .profile-basic .profile-info-left {
-        text-align: center;
-        padding: 15px 0;
-    }
+  .profile-view .profile-basic .profile-info-left {
+    text-align: center;
+    padding: 15px 0;
+    border-right: none;
+  }
 }
 
 @media (max-width: 768px) {
-    .profile-view .profile-basic .profile-info-left {
-        border-right: none;
-        border-bottom: 2px dashed #D3D3D4;
-        margin: 0 0 20px;
-        padding: 0 0 20px;
-    }
+  .profile-view .profile-basic .profile-info-left {
+    border-right: none;
+    border-bottom: 1px solid #EDE9FE;
+    margin: 0 0 20px;
+    padding: 0 0 20px;
+  }
 }
 
+/* User Name */
 .profile-view .profile-basic .profile-info-left .user-name {
-    color: #373B3E;
+  color: #1A1A2E;
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.verified-badge {
+  color: #3B82F6;
+  font-size: 16px;
+}
+
+/* Department shown as a purple "link" label, like the screenshot */
+.profile-view .profile-basic .profile-info-left h6.text-muted.dept-link {
+  color: #7C3AED !important;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.profile-view .profile-basic .profile-info-left small.text-muted {
+  color: #9CA3AF !important;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Employee ID & Join Date */
 .profile-view .profile-basic .profile-info-left .staff-id {
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 5px;
+  color: #4B5563;
 }
 
+.staff-id-value {
+  color: #7C3AED;
+  font-weight: 700;
+}
+
+.profile-view .profile-basic .profile-info-left .doj {
+  font-size: 13px;
+  color: #6B7280 !important;
+  margin-top: 4px;
+}
+
+/* Edit Profile Button */
 .profile-view .profile-basic .profile-info-left .staff-msg {
-    margin-top: 30px;
-    display: flex;
-    gap: 10px;
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .profile-view .profile-basic .profile-info-left .staff-msg .btn-custom {
-    background: #FF902F;
-    background: linear-gradient(to right, #FF902F 0%, #FC6075 100%);
-    color: #FFF;
-}
-
-.cancel-btn {
-    background: gray !important;
-    color: #FFF !important;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  color: #FFF;
+  border: none;
+  padding: 9px 26px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
 .profile-view .profile-basic .profile-info-left .staff-msg .btn-custom:hover {
-    border-color: #FF902F;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(124, 58, 237, 0.4);
 }
 
-.profile-view .pro-edit {
-    position: absolute;
-    top: 0;
-    right: 0;
+.cancel-btn {
+  background: #F3F4F6 !important;
+  color: #4B5563 !important;
+  border: none;
+  padding: 9px 26px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
+.cancel-btn:hover {
+  background: #E5E7EB !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   PERSONAL INFO LISTS (used everywhere: header
+   contact block + all the info cards)
+   ============================================ */
 .personal-info {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .personal-info li {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 4px 0;
 }
 
 @media (max-width: 991px) {
-    .personal-info li {
-        width: 100%;
-    }
+  .personal-info li {
+    width: 100%;
+  }
 }
 
 .personal-info li .title {
-    color: #373B3E;
-    float: left;
-    font-weight: 500;
-    width: 30%;
+  color: #4B5563;
+  font-weight: 600;
+  width: 42%;
+  font-size: 13.5px;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 575px) {
-    .personal-info li .title {
-        width: 50%;
-        margin: 0;
-    }
+  .personal-info li .title {
+    width: 45%;
+    min-width: 80px;
+  }
 }
 
+/* Dot separator + value, like "Passport No.  •  Not provided" in the screenshot */
 .personal-info li .text {
-    color: #7A7C7F;
-    display: block;
-    overflow: hidden;
-    width: 70%;
-    float: left;
+  color: #1A1A2E;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.personal-info li .text::before {
+  content: "•";
+  color: #C4B5FD;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.personal-info li .text a {
+  color: #7C3AED;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.personal-info li .text a:hover {
+  color: #6D28D9;
+  text-decoration: underline;
 }
 
 .personal-info li .text .avatar-box {
-    float: left;
-    position: relative;
+  float: left;
+  position: relative;
 }
 
 .personal-info li .text .avatar-box .avatar-xs {
-    line-height: normal;
+  line-height: normal;
 }
 
-.delete-icon {
-    color: #FC133D;
-    float: right;
-    font-size: 18px;
+/* Small colored icon badges before each field label (Phone, Email, etc.) */
+.field-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #F3EEFF;
+  color: #7C3AED;
+  font-size: 11px;
+  flex-shrink: 0;
 }
 
+/* The top contact block (Phone/Email/Birthday/...) doesn't need the dot,
+   the icon badge already does that job visually */
+.personal-info--contact li .text::before {
+  content: none;
+}
 
-/* user - tabs */
+.personal-info--contact li .title {
+  width: auto;
+  min-width: 150px;
+}
 
+/* Two-column layout used inside a few of the info cards */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+@media (max-width: 575px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   EDIT ICON (Top Right of header card)
+   ============================================ */
+.profile-view .pro-edit {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.profile-view .pro-edit .edit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #F3EEFF;
+  color: #7C3AED;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.profile-view .pro-edit .edit-icon:hover {
+  background: #7C3AED;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.nav-tabs-bottom {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 0 15px;
+}
 
 .nav-tabs-bottom .nav-link {
-    position: relative;
-    color: #333;
-    padding: 10px 20px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    border-radius: 6px 6px 0 0;
-    font-weight: 500;
+  position: relative;
+  color: #6B7280;
+  padding: 14px 20px;
+  transition: all 0.3s ease;
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-tabs-bottom .nav-link:hover {
-    background-color: #f0f4f7;
-    color: #FF902F;
+  color: #7C3AED;
+  background: transparent;
 }
 
-/* Bottom border animation on hover */
+/* Bottom border animation */
 .nav-tabs-bottom .nav-link::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 0;
-    height: 3px;
-    background-color: #FF902F;
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-    border-radius: 2px;
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+  border-radius: 2px;
 }
 
 .nav-tabs-bottom .nav-link.active {
-    border: none;
+  color: #7C3AED;
+  background: transparent;
+  border: none;
 }
 
-.nav-tabs-bottom .nav-link:hover::after,
 .nav-tabs-bottom .nav-link.active::after {
-    width: 60%;
+  width: 60%;
 }
 
-.profile .card:nth-of-type(2) {
-    border: none !important;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+.nav-tabs-bottom .nav-link:hover::after {
+  width: 40%;
 }
 
-/* Hide the action icon by default */
+.profile .card.tab-box {
+  border: none !important;
+  box-shadow: none !important;
+  margin-bottom: 20px;
+}
+
+/* ============================================
+   INFORMATION CARDS
+   ============================================ */
+.profile-box {
+  transition: all 0.3s ease;
+  border: 1px solid #F3F4F6;
+  border-radius: 14px;
+  background: #FFFFFF;
+  margin-bottom: 20px;
+}
+
+.profile-box:hover {
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.08);
+}
+
+.profile-box .card-body {
+  padding: 20px 25px;
+}
+
+/* Card Titles */
+.profile-box .card-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #1A1A2E;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Circular colored icon badge shown before each card title */
+.title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* .title-icon--purple { background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%); } */
+/* .title-icon--red    { background: linear-gradient(135deg, #FB7185 0%, #E11D48 100%); } */
+/* .title-icon--green  { background: linear-gradient(135deg, #34D399 0%, #059669 100%); }
+.title-icon--orange { background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%); }
+.title-icon--blue   { background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%); }
+.title-icon--violet { background: linear-gradient(135deg, #C084FC 0%, #9333EA 100%); } */
+
+.profile-box .card-title .edit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #F3EEFF;
+  color: #7C3AED;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  font-size: 11px;
+}
+
+.profile-box .card-title .edit-icon:hover {
+  background: #7C3AED;
+  color: #fff;
+}
+
+/* Section Title (like "Primary" under Emergency Contact) */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7C3AED;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 3px solid #7C3AED;
+}
+
+/* ============================================
+   BADGE STYLES
+   ============================================ */
+.badge {
+  padding: 3px 12px;
+  font-weight: 600;
+  font-size: 11px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.badge.bg-success {
+  background: #DCFCE7 !important;
+  color: #16A34A !important;
+}
+
+.badge.bg-warning {
+  background: #FEF3C7 !important;
+  color: #D97706 !important;
+}
+
+.badge.bg-secondary {
+  background: #F3F4F6 !important;
+  color: #6B7280 !important;
+}
+
+.badge.bg-danger {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+}
+
+.badge.bg-info {
+  background: #DBEAFE !important;
+  color: #2563EB !important;
+}
+
+/* ============================================
+   DROPDOWN ACTION
+   ============================================ */
 .profile-box .dropdown-action .action-icon {
-    font-size: 1rem;
-    /* Increase font size */
-    color: black;
-    /* Make it black */
-    /* opacity: 0; */
-    /* Hide initially */
-    transition: opacity 0.3s ease;
+  font-size: 1rem;
+  color: #9CA3AF;
+  transition: all 0.3s ease;
+}
+
+.profile-box .dropdown-action .action-icon:hover {
+  color: #7C3AED;
 }
 
 .faEllipsisV-icon {
-    font-size: 1.5rem;
+  font-size: 1.2rem;
+  color: #9CA3AF;
+  transition: all 0.3s ease;
+}
 
-    color: #000;
-
-    transition: all 0.3s ease;
+.faEllipsisV-icon:hover {
+  color: #7C3AED;
 }
 
 .profile .dropdown-toggle::after {
-    display: none !important;
+  display: none !important;
 }
 
-/* Optional: prevent layout shift */
 .profile-box .dropdown-action {
-    min-width: 24px;
+  min-width: 24px;
 }
 
-.profile-box .experience-box {
-    padding-left: 20px;
-    position: relative;
+/* ============================================
+   TABLE STYLES
+   ============================================ */
+.profile-box .table {
+  margin-bottom: 0;
 }
 
-.experience-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    border-left: 2px solid #e0e0e0;
+.profile-box .table thead th {
+  border-top: none;
+  border-bottom: 1px solid #F3F4F6;
+  color: #6B7280;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  background: #FAFAFF;
 }
 
-.experience-list li {
-    position: relative;
-    padding: 0 0 20px 20px;
+.profile-box .table tbody td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 14px;
+  color: #1A1A2E;
 }
 
-.experience-user {
-    position: absolute;
-    left: -10px;
-    top: 5px;
+.profile-box .table tbody tr:hover {
+  background-color: #F8F5FF;
 }
 
-.before-circle {
-    width: 10px;
-    height: 10px;
-    background: #d3d3d3;
-    border-radius: 50%;
-    position: absolute;
-    left: 4px;
-    top: 5px;
+.profile-box .table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.timeline-content {
-    padding-left: 15px;
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 991px) {
+  .profile-view .profile-basic .profile-info-left {
+    border-right: none;
+  }
+
+  .personal-info li .title {
+    width: 45%;
+  }
 }
 
-.timeline-content .name {
-    font-weight: 600;
-    color: #000;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 4px;
-}
+@media (max-width: 767px) {
+  .profile-box .card-title {
+    font-size: 14.5px;
+  }
 
-.timeline-content div {
-    font-size: 14px;
-    color: #555;
-}
-
-.timeline-content .time {
+  .personal-info li .title {
+    width: 48%;
     font-size: 13px;
-    color: #999;
+    min-width: 70px;
+  }
+
+  .personal-info li .text {
+    font-size: 13px;
+  }
+
+  .profile-view .profile-basic .profile-info-left .staff-msg {
+    justify-content: center;
+  }
+
+  .profile-view .profile-basic .profile-info-left .user-name {
+    font-size: 20px;
+    justify-content: center;
+  }
+
+  .nav-tabs-bottom .nav-link {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 575px) {
+  .profile-box .card-body {
+    padding: 15px;
+  }
+
+  .profile-view .profile-img-wrap {
+    margin: 0 auto 15px;
+  }
+
+  .profile-view .profile-basic {
+    margin-left: 0;
+    padding-right: 0;
+  }
+
+  .personal-info li {
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 0;
+  }
+
+  .personal-info li .title {
+    width: 100%;
+    margin-bottom: 2px;
+    font-size: 13px;
+    min-width: auto;
+  }
+
+  .personal-info li .text {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .personal-info li .text::before {
+    display: none;
+  }
+
+  .profile-view .profile-basic .profile-info-left {
+    text-align: center;
+    padding: 0 0 15px;
+    border-bottom: 1px solid #EDE9FE;
+    margin-bottom: 15px;
+  }
+
+  .nav-tabs-bottom {
+    padding: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+
+  .nav-tabs-bottom .nav-link {
+    padding: 8px 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .profile-box .card-title {
+    font-size: 14px;
+  }
+
+  .title-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .profile-box .card-title .edit-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.text-muted {
+  color: #6B7280 !important;
+}
+
+.card {
+  border: 1px solid #F3F4F6;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.04);
+}
+
+.card.mb-0 {
+  margin-bottom: 20px !important;
+}
+
+/* ============================================
+   DELETE ICON
+   ============================================ */
+.delete-icon {
+  color: #EF4444;
+  float: right;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.delete-icon:hover {
+  color: #DC2626;
+}
+
+/* Profile Cards */
+.profile-box {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .05);
+}
+
+/* Gradient Left Border */
+.profile-box::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 5px;
+  border-radius: 20px;
+}
+
+.profile-box:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px rgba(124, 58, 237, .08),
+    0 6px 16px rgba(0, 0, 0, .06);
+  transition: .35s;
+}
+
+.personal-card::before {
+  background: linear-gradient(to bottom,
+      #C084FC,
+      #8B5CF6,
+      #6D28D9);
+}
+
+.emergency-card::before {
+  background: linear-gradient(to bottom,
+      #FF8AA5,
+      #FF4D73,
+      #E11D48);
+}
+
+.bank-card::before {
+  background: linear-gradient(to bottom,
+      #6EE7B7,
+      #22C55E,
+      #059669);
+}
+
+.work-card::before {
+  background: linear-gradient(to bottom,
+      #FDBA74,
+      #F59E0B,
+      #D97706);
+}
+
+.visa-card::before {
+  background: linear-gradient(to bottom,
+      #93C5FD,
+      #3B82F6,
+      #2563EB);
+}
+
+.license-card::before {
+  background: linear-gradient(to bottom,
+      #D8B4FE,
+      #A855F7,
+      #7E22CE);
+}
+
+.dbs-card::before{
+    background: linear-gradient(
+        to bottom,
+        #5EEAD4 0%,
+        #14B8A6 50%,
+        #0F766E 100%
+    );
+}
+.euss-card::before{
+    background: linear-gradient(
+        to bottom,
+        #A5B4FC 0%,
+        #6366F1 50%,
+        #4338CA 100%
+    );
 }
