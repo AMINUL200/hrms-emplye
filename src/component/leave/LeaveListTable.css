@@ -39,34 +39,62 @@
   gap: 10px;
 }
 
-.llt-export-btn {
+/* Export Excel Button - Violet Border */
+.llt-export-btn--excel {
   display: flex;
   align-items: center;
   gap: 6px;
   height: 34px;
-  padding: 0 14px;
+  padding: 0 16px;
   border-radius: 8px;
-  border: none;
+  border: 2px solid #6C3BFF;
+  background: transparent;
+  color: #6C3BFF;
   font-size: 12.5px;
   font-weight: 600;
-  color: #ffffff;
   cursor: pointer;
-}
-
-.llt-export-btn--excel {
-  background: #16a34a;
+  transition: all 0.3s ease;
 }
 
 .llt-export-btn--excel:hover {
-  background: #15803d;
+  background: #6C3BFF;
+  color: #ffffff;
+  border-color: #6C3BFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(108, 59, 255, 0.3);
 }
 
+.llt-export-btn--excel:active {
+  transform: translateY(0);
+}
+
+/* Export PDF Button - Light Violet Background */
 .llt-export-btn--pdf {
-  background: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 2px solid #EDE9FE;
+  background: #EDE9FE;
+  color: #6C3BFF;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .llt-export-btn--pdf:hover {
-  background: #dc2626;
+  background: #7B2FF7;
+  border-color: #7B2FF7;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(108, 59, 255, 0.3);
+}
+
+.llt-export-btn--pdf:active {
+  transform: translateY(0);
 }
 
 /* ---------- Body ---------- */
@@ -335,5 +363,54 @@
   }
   .llt-search-box input {
     width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .llt-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+  
+  .llt-export {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .llt-export-btn--excel,
+  .llt-export-btn--pdf {
+    flex: 1;
+    justify-content: center;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+  
+  .llt-body {
+    padding: 14px 16px 16px;
+  }
+  
+  .llt-filters {
+    gap: 8px;
+  }
+  
+  .llt-filter-field {
+    width: 100%;
+  }
+  
+  .llt-input-wrap input {
+    width: 100%;
+  }
+  
+  .llt-apply-btn,
+  .llt-reset-btn {
+    flex: 1;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  
+  .llt-footer {
+    flex-direction: column;
+    align-items: center;
   }
 }

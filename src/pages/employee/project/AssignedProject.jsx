@@ -240,7 +240,8 @@ const AssignedProject = () => {
   // Handle view project click
   const handleViewProject = (project, e) => {
     e.stopPropagation();
-    window.open(`/organization/workspace/${project.project.id}`, "_blank");
+    // window.open(`/organization/workspace/${project.project.id}`, "_blank");
+    navigate(`/organization/assigned-project/${project.project.id}` )
   };
 
   // Toggle menu for a specific project

@@ -31,10 +31,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .mc-nav-btn:hover {
   background: #f4f5fa;
+  border-color: #c4c8d8;
 }
 
 .mc-weekdays {
@@ -54,6 +56,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   row-gap: 6px;
+  position: relative;
 }
 
 .mc-cell {
@@ -65,6 +68,8 @@
   color: #2c2f3d;
   border-radius: 8px;
   cursor: default;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
 .mc-cell--muted {
@@ -75,6 +80,35 @@
   background: #6d28d9;
   color: #ffffff;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+}
+
+.mc-cell--weekoff {
+  background: #f3f0ff;
+  color: #6d28d9;
+  font-weight: 500;
+}
+
+.mc-cell--holiday {
+  background: #fef3c7;
+  color: #d97706;
+  font-weight: 500;
+  position: relative;
+}
+
+.mc-holiday-dot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #d97706;
+  border-radius: 50%;
+}
+
+.mc-cell--today.mc-holiday-dot {
+  background: #ffffff;
 }
 
 .mc-note {
@@ -85,6 +119,7 @@
   padding: 12px 14px;
   border-radius: 10px;
   background: #eef2ff;
+  min-height: 56px;
 }
 
 .mc-note-icon {
@@ -97,14 +132,67 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
 }
 
 .mc-note-text strong {
   font-size: 12.5px;
   color: #1f2333;
+  font-weight: 600;
 }
 
 .mc-note-text span {
   font-size: 11.5px;
   color: #6b7280;
+}
+
+/* Hover effects */
+.mc-cell:not(.mc-cell--muted):not(.mc-cell--today):hover {
+  background: #f4f5fa;
+  transform: scale(1.05);
+}
+
+.mc-cell--weekoff:not(.mc-cell--today):hover {
+  background: #e8e0ff;
+}
+
+.mc-cell--holiday:not(.mc-cell--today):hover {
+  background: #fde68a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .mc-card {
+    padding: 14px 12px 16px;
+  }
+  
+  .mc-cell {
+    height: 26px;
+    font-size: 11px;
+  }
+  
+  .mc-month-label {
+    font-size: 12px;
+  }
+  
+  .mc-nav-btn {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .mc-weekdays span {
+    font-size: 10px;
+  }
+  
+  .mc-note {
+    padding: 10px 12px;
+  }
+  
+  .mc-note-text strong {
+    font-size: 11px;
+  }
+  
+  .mc-note-text span {
+    font-size: 10px;
+  }
 }

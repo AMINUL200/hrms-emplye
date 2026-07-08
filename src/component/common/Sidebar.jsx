@@ -115,8 +115,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
           type: "single",
         },
         {
-          title: "Leave List",
-          path: "/organization/leaves-list",
+          title: "Leave History",
+          path: "/organization/leaves-dashboard",
           icon: faListAlt,
           type: "single",
         },
