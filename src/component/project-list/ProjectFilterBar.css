@@ -1,0 +1,111 @@
+.pfb-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  margin-bottom: 20px;
+}
+
+.pfb-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1px solid #e3e5ee;
+  background: #f7f8fc;
+  color: #9aa0b4;
+  flex: 1;
+  min-width: 220px;
+}
+
+.pfb-search-box input {
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  flex: 1;
+  color: #1f2333;
+  background: transparent;
+}
+
+.pfb-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pfb-select-prefix-icon {
+  position: absolute;
+  left: 12px;
+  color: #9aa0b4;
+  pointer-events: none;
+}
+
+.pfb-select-wrap select {
+  height: 42px;
+  border-radius: 9px;
+  border: 1px solid #e3e5ee;
+  background: #ffffff;
+  padding: 0 30px 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b4f5e;
+  appearance: none;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.pfb-select-wrap:first-of-type select {
+  padding-left: 32px;
+}
+
+.pfb-select-caret {
+  position: absolute;
+  right: 10px;
+  color: #9aa0b4;
+  pointer-events: none;
+}
+
+.pfb-view-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e3e5ee;
+  border-radius: 9px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pfb-view-toggle button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: #ffffff;
+  color: #9aa0b4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pfb-view-toggle button.pfb-view-btn--active {
+  background: #fff3e8;
+  color: #ea580c;
+}
+
+@media (max-width: 900px) {
+  .pfb-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pfb-select-wrap select {
+    width: 100%;
+  }
+}

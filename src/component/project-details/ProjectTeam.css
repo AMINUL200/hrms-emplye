@@ -1,0 +1,208 @@
+.ptm-card {
+  background: #FFFFFF; /* Cards */
+  border-radius: 14px;
+  padding: 20px 22px 22px;
+  border: 1px solid #E2E8F0; /* Border */
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.ptm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.ptm-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A; /* Heading */
+}
+
+.ptm-count-badge {
+  background: #F8FAFC; /* Page Background */
+  color: #64748B; /* Sub Text */
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ---------- Table View ---------- */
+.ptm-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Custom Scrollbar - Violet Theme */
+.ptm-table-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.ptm-table-scroll::-webkit-scrollbar-track {
+  background: #F8FAFC; /* Page Background */
+  border-radius: 10px;
+}
+
+.ptm-table-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6); /* Primary to Violet gradient */
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.ptm-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED); /* Darker violet on hover */
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Firefox Scrollbar */
+.ptm-table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #6366F1 #F8FAFC;
+}
+
+.ptm-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.ptm-table thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B; /* Sub Text */
+  letter-spacing: 0.3px;
+  padding: 12px 14px;
+  border-bottom: 2px solid #E2E8F0; /* Border */
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.ptm-table tbody td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #0F172A; /* Heading */
+  border-bottom: 1px solid #E2E8F0; /* Border */
+  vertical-align: middle;
+}
+
+.ptm-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ptm-table tbody tr:hover {
+  background: #F8FAFC; /* Page Background */
+}
+
+/* ---------- Table Cell Styles ---------- */
+.ptm-cell-employee {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ptm-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ptm-employee-name {
+  font-weight: 600;
+  color: #0F172A; /* Heading */
+}
+
+.ptm-employee-id {
+  font-size: 12px;
+  color: #64748B; /* Sub Text */
+  font-weight: 500;
+}
+
+.ptm-cell-role {
+  color: #64748B; /* Sub Text */
+  font-weight: 500;
+}
+
+.ptm-cell-assigned-by {
+  color: #64748B; /* Sub Text */
+  font-weight: 500;
+}
+
+.ptm-cell-assigned-at {
+  color: #64748B; /* Sub Text */
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- Status Badge ---------- */
+.ptm-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ptm-status-badge--active {
+  background: #DCFCE7;
+  color: #10B981; /* Success */
+}
+
+.ptm-status-badge--inactive {
+  background: #FEE2E2;
+  color: #EF4444; /* Danger */
+}
+
+.ptm-status-badge--pending {
+  background: #FEF3C7;
+  color: #F59E0B; /* Warning */
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .ptm-card {
+    padding: 16px;
+  }
+
+  .ptm-table thead th {
+    padding: 10px 10px;
+    font-size: 10px;
+  }
+
+  .ptm-table tbody td {
+    padding: 10px 10px;
+    font-size: 12px;
+  }
+
+  .ptm-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .ptm-employee-id {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ptm-table-scroll {
+    margin: 0 -16px;
+    padding: 0 16px;
+    width: calc(100% + 32px);
+  }
+}

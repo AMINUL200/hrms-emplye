@@ -1,0 +1,132 @@
+.pjh-wrap {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  margin-bottom: 4px;
+}
+
+.pjh-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pjh-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748B; /* Sub Text */
+  margin-bottom: 6px;
+}
+
+.pjh-breadcrumb a {
+  color: #8B5CF6; /* Violet - matching Active Gradient */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pjh-breadcrumb a:hover {
+  color: #6366F1; /* Primary color on hover */
+  text-decoration: underline;
+}
+
+.pjh-breadcrumb-current {
+  color: #64748B; /* Sub Text */
+}
+
+.pjh-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pjh-title-row h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A; /* Heading */
+}
+
+.pjh-status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10B981; /* Success */
+  background: #dcfce7;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.pjh-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pjh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+/* Add Module Button - Primary Gradient with Darker Hover */
+.pjh-btn--primary {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6); /* Active Gradient */
+  border: none;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.pjh-btn--primary:hover {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED); /* Darker gradient on hover */
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Edit Project Button - Violet Outline with Violet Background on Hover */
+.pjh-btn--outline {
+  background: transparent;
+  border: 2px solid #8B5CF6; /* Violet border */
+  color: #8B5CF6; /* Violet text */
+}
+
+.pjh-btn--outline:hover {
+  background: #8B5CF6; /* Violet background on hover */
+  color: #FFFFFF; /* White text on hover */
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.pjh-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  border: 1px solid #E2E8F0; /* Border */
+  background: #FFFFFF; /* Cards */
+  color: #64748B; /* Sub Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.pjh-icon-btn:hover {
+  background: #F8FAFC; /* Page Background */
+}
+
+@media (max-width: 720px) {
+  .pjh-actions {
+    flex-wrap: wrap;
+  }
+}

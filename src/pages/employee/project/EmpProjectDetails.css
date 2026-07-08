@@ -1,0 +1,53 @@
+.epd-page {
+  position: relative;
+  background: #f4f5fb;
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.epd-page * {
+  box-sizing: border-box;
+}
+
+.epd-main-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.epd-col {
+  min-width: 0;
+}
+
+/* ---------- Floating action button ---------- */
+.epd-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35);
+  z-index: 50;
+}
+
+.epd-fab:hover {
+  filter: brightness(1.05);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  .epd-main-row {
+    grid-template-columns: 1fr;
+  }
+}

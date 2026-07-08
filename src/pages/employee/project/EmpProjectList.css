@@ -1,0 +1,25 @@
+.epl-page {
+  background: #f4f5fb;
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.epl-page * {
+  box-sizing: border-box;
+}
+
+.epl-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 991px) {
+  .epl-charts-row {
+    grid-template-columns: 1fr;
+  }
+}

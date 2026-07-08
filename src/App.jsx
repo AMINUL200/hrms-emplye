@@ -86,6 +86,7 @@ import { generateToken } from "./utils/generateToken";
 import "./App.css";
 import EmpProjectDetails from "./pages/employee/project/EmpProjectDetails";
 import EmpProfilePage from "./pages/employee/ProfilePage/EmpProfilePage";
+import EmpProjectList from "./pages/employee/project/EmpProjectList";
 
 const App = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -243,6 +244,7 @@ const App = () => {
             {/* -------- PROJECT ROUTES -------- */}
             {/* Assigned Projects */}
             <Route path="assigned-project" element={<AssignedProject />} />
+            <Route path="view-project" element={<EmpProjectList />} />
             <Route path="assigned-project/:projectId" element={<EmpProjectDetails />} />
             
             {/* Create Project */}

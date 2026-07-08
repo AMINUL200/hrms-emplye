@@ -1,0 +1,343 @@
+.pml-card {
+  background: #FFFFFF; /* Cards */
+  border-radius: 14px;
+  padding: 20px 22px 10px;
+  border: 1px solid #E2E8F0; /* Border */
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- Header ---------- */
+.pml-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.pml-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pml-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A; /* Heading */
+}
+
+.pml-count-badge {
+  background: #F8FAFC; /* Page Background */
+  color: #64748B; /* Sub Text */
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.pml-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pml-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0; /* Border */
+  background: #FFFFFF; /* Cards */
+  color: #64748B; /* Sub Text */
+  width: 210px;
+}
+
+.pml-search-box input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  flex: 1;
+  color: #0F172A; /* Heading */
+  background: transparent;
+}
+
+.pml-search-box input::placeholder {
+  color: #64748B; /* Sub Text */
+}
+
+.pml-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pml-select-wrap select {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0; /* Border */
+  background: #FFFFFF; /* Cards */
+  padding: 0 30px 0 12px;
+  font-size: 13px;
+  color: #0F172A; /* Heading */
+  appearance: none;
+  cursor: pointer;
+}
+
+.pml-select-wrap select:focus {
+  border-color: #6366F1; /* Primary color */
+  outline: none;
+}
+
+.pml-select-caret {
+  position: absolute;
+  right: 10px;
+  color: #64748B; /* Sub Text */
+  pointer-events: none;
+}
+
+.pml-view-toggle {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #6366F1; /* Primary color */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pml-view-toggle button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: #FFFFFF; /* Cards */
+  color: #64748B; /* Sub Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pml-view-toggle button:hover {
+  background: #F8FAFC; /* Page Background */
+}
+
+.pml-view-toggle button.pml-view-btn--active {
+  background: #EEF2FF; /* Light violet background */
+  color: #6366F1; /* Primary color */
+}
+
+/* ---------- List ---------- */
+.pml-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pml-module-group {
+  border-top: 1px solid #E2E8F0; /* Border */
+}
+
+.pml-module-group:first-child {
+  border-top: none;
+}
+
+.pml-row {
+  display: grid;
+  grid-template-columns: 26px 18px 1fr 110px 180px 70px 110px 26px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 4px;
+}
+
+.pml-row--child {
+  grid-template-columns: 16px 16px 1fr 110px 180px 70px 110px 26px;
+  padding-left: 30px;
+}
+
+.pml-expand-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #64748B; /* Sub Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pml-expand-btn:hover {
+  background: #F8FAFC; /* Page Background */
+  color: #6366F1; /* Primary color */
+}
+
+.pml-expand-btn--disabled {
+  opacity: 0.35;
+}
+
+.pml-folder-icon {
+  color: #F59E0B; /* Warning color */
+  fill: #FEF3C7;
+  flex-shrink: 0;
+}
+
+.pml-folder-icon--sm {
+  width: 14px;
+  height: 14px;
+}
+
+.pml-child-dash {
+  color: #94A3B8; /* Lighter sub text */
+  font-weight: 700;
+  text-align: center;
+}
+
+.pml-row-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A; /* Heading */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pml-row-title--sm {
+  font-weight: 600;
+  color: #64748B; /* Sub Text */
+}
+
+.pml-status-pill {
+  justify-self: start;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pml-status--completed {
+  background: #DCFCE7;
+  color: #10B981; /* Success */
+}
+
+.pml-status--progress {
+  background: #DBEAFE;
+  color: #6366F1; /* Primary color */
+}
+
+.pml-status--pending {
+  background: #FEF3C7;
+  color: #F59E0B; /* Warning */
+}
+
+.pml-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pml-progress-track {
+  width: 110px;
+  height: 6px;
+  border-radius: 4px;
+  background: #E2E8F0; /* Border */
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pml-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.pml-progress-fill--green {
+  background: #10B981; /* Success */
+}
+
+.pml-progress-fill--blue {
+  background: #6366F1; /* Primary color */
+}
+
+.pml-progress-fill--orange {
+  background: #F59E0B; /* Warning */
+}
+
+.pml-progress-pct {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #64748B; /* Sub Text */
+  width: 34px;
+}
+
+.pml-tasks-count {
+  font-size: 12.5px;
+  color: #64748B; /* Sub Text */
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pml-sub-label {
+  font-size: 12.5px;
+  color: #64748B; /* Sub Text */
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pml-more-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: #64748B; /* Sub Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pml-more-btn:hover {
+  background: #F8FAFC; /* Page Background */
+  color: #6366F1; /* Primary color */
+}
+
+.pml-more-btn-spacer {
+  width: 26px;
+  height: 26px;
+}
+
+.pml-children {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1400px) {
+  .pml-row,
+  .pml-row--child {
+    grid-template-columns: 26px 18px 1fr 110px 140px 70px 100px 26px;
+  }
+
+  .pml-progress-track {
+    width: 70px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .pml-card {
+    overflow-x: auto;
+  }
+
+  .pml-row,
+  .pml-row--child {
+    min-width: 780px;
+  }
+}
