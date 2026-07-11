@@ -122,9 +122,9 @@
   position: relative;
 }
 
-.laf-input-wrap .laf-input {
+/* .laf-input-wrap .laf-input {
   padding-right: 38px;
-}
+} */
 
 .laf-input-wrap--half {
   max-width: 100%;
@@ -303,4 +303,96 @@
     flex-wrap: wrap;
     gap: 10px;
   }
+}
+
+
+/* Remaining Leave Balances */
+.laf-remaining-leaves {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f6fc;
+  border-radius: 10px;
+  border: 1px solid #eef0f7;
+}
+
+.laf-remaining-leaves h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2333;
+}
+
+.laf-remaining-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.laf-remaining-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e3e5ee;
+}
+
+.laf-remaining-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.laf-remaining-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #6e28b4;
+  margin-top: 2px;
+}
+
+/* Loading state for buttons */
+.laf-btn--submit:disabled,
+.laf-apply-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive updates */
+@media (max-width: 640px) {
+  .laf-remaining-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .laf-remaining-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Error state for input */
+.laf-input--error {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.laf-error-message {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+/* Disabled submit button */
+.laf-btn--submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.laf-btn--submit:disabled:hover {
+  filter: none;
 }

@@ -1,34 +1,82 @@
 .plg-wrap--grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 20px;
 }
 
 .plg-wrap--list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+}
+
+.plg-wrap--list .pc-card {
+  padding: 16px 20px;
+}
+
+.plg-wrap--list .pc-card-top {
+  margin-bottom: 8px;
+}
+
+.plg-wrap--list .pc-description {
+  display: none;
+}
+
+.plg-wrap--list .pc-badges {
+  margin-bottom: 8px;
+}
+
+.plg-wrap--list .pc-progress-wrap {
+  margin-bottom: 8px;
+}
+
+.plg-wrap--list .pc-footer {
+  padding-top: 10px;
 }
 
 .plg-empty {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 40px 20px;
-  color: #9aa0b4;
-  font-size: 13.5px;
-  background: #ffffff;
-  border-radius: 14px;
+  padding: 60px 20px;
+  color: #64748B;
+  font-size: 14px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 2px dashed #E2E8F0;
   box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
 }
 
-@media (max-width: 1200px) {
+.plg-empty::before {
+  content: '📋';
+  display: block;
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* List view card hover */
+.plg-wrap--list .pc-card:hover {
+  transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
   .plg-wrap--grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .plg-wrap--grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .plg-wrap--grid {
+    gap: 14px;
+  }
+  
+  .plg-wrap--list {
+    gap: 10px;
   }
 }

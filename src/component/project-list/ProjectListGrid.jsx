@@ -11,11 +11,13 @@ export const PROJECTS = [
     priority: "High",
     progress: 43,
     dueDate: "21 Feb 2027",
+    startDate: "2026-01-15",
+    description: "Complete redesign and development of the corporate website with modern UI/UX principles, responsive design, and CMS integration. The project includes custom animations, performance optimization, and SEO best practices.",
     team: [
-      { initials: "JD", color: "#7c3aed" },
-      { initials: "JS", color: "#2563eb" },
-      { initials: "MJ", color: "#0f172a" },
-      { initials: "SW", color: "#16a34a" },
+      { initials: "JD", color: "#8B5CF6" },
+      { initials: "JS", color: "#6366F1" },
+      { initials: "MJ", color: "#0F172A" },
+      { initials: "SW", color: "#10B981" },
     ],
   },
   {
@@ -26,9 +28,11 @@ export const PROJECTS = [
     priority: "Medium",
     progress: 65,
     dueDate: "10 Sep 2026",
+    startDate: "2026-03-01",
+    description: "Mobile app redesign focusing on user experience improvements, faster navigation, and modern design language. Includes new features for client communication.",
     team: [
-      { initials: "AT", color: "#ea580c" },
-      { initials: "PN", color: "#db2777" },
+      { initials: "AT", color: "#F59E0B" },
+      { initials: "PN", color: "#EF4444" },
     ],
   },
   {
@@ -39,9 +43,11 @@ export const PROJECTS = [
     priority: "Low",
     progress: 100,
     dueDate: "30 Apr 2026",
+    startDate: "2026-01-10",
+    description: "Complete brand overhaul including logo redesign, color palette updates, typography guidelines, and brand collateral creation. Successful rebrand across all platforms.",
     team: [
-      { initials: "JS", color: "#2563eb" },
-      { initials: "SW", color: "#16a34a" },
+      { initials: "JS", color: "#6366F1" },
+      { initials: "SW", color: "#10B981" },
     ],
   },
   {
@@ -52,10 +58,12 @@ export const PROJECTS = [
     priority: "High",
     progress: 28,
     dueDate: "15 Nov 2026",
+    startDate: "2026-04-01",
+    description: "Building a comprehensive HR portal for employee management, attendance tracking, leave requests, payroll integration, and performance reviews with advanced analytics.",
     team: [
-      { initials: "JD", color: "#7c3aed" },
-      { initials: "MJ", color: "#0f172a" },
-      { initials: "AT", color: "#ea580c" },
+      { initials: "JD", color: "#8B5CF6" },
+      { initials: "MJ", color: "#0F172A" },
+      { initials: "AT", color: "#F59E0B" },
     ],
   },
   {
@@ -66,7 +74,9 @@ export const PROJECTS = [
     priority: "Medium",
     progress: 15,
     dueDate: "02 Dec 2026",
-    team: [{ initials: "PN", color: "#db2777" }],
+    startDate: "2026-05-15",
+    description: "Landing page for the upcoming marketing campaign with interactive elements, lead capture forms, and analytics tracking. Currently on hold pending marketing strategy finalization.",
+    team: [{ initials: "PN", color: "#EF4444" }],
   },
   {
     id: 6,
@@ -76,9 +86,11 @@ export const PROJECTS = [
     priority: "High",
     progress: 52,
     dueDate: "25 Jun 2026",
+    startDate: "2026-02-15",
+    description: "Integration of multiple payment gateways including Stripe, PayPal, and Razorpay with secure transaction processing, webhook handling, and real-time payment status updates.",
     team: [
-      { initials: "MJ", color: "#0f172a" },
-      { initials: "JD", color: "#7c3aed" },
+      { initials: "MJ", color: "#0F172A" },
+      { initials: "JD", color: "#8B5CF6" },
     ],
   },
 ];

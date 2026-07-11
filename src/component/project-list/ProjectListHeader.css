@@ -13,34 +13,37 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #9aa0b4;
+  color: #64748B; /* Sub Text */
   margin-bottom: 8px;
 }
 
 .plh-breadcrumb a {
-  color: #9aa0b4;
+  color: #8B5CF6; /* Violet - matching Active Gradient */
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .plh-breadcrumb a:hover {
+  color: #6366F1; /* Primary color on hover */
   text-decoration: underline;
 }
 
 .plh-breadcrumb-current {
-  color: #6b7280;
+  color: #64748B; /* Sub Text */
 }
 
 .plh-title {
   margin: 0 0 4px;
   font-size: 24px;
   font-weight: 700;
-  color: #1f2333;
+  color: #0F172A; /* Heading */
 }
 
 .plh-subtitle {
   margin: 0;
   font-size: 13px;
-  color: #9aa0b4;
+  color: #64748B; /* Sub Text */
 }
 
 .plh-actions {
@@ -61,24 +64,73 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.25s ease;
 }
 
+/* Export Button - Violet Outline (matching Edit Project) */
 .plh-btn--outline {
-  background: #ffffff;
-  border: 1px solid #e3e5ee;
-  color: #1f2333;
+  background: transparent;
+  border: 2px solid #8B5CF6; /* Violet border */
+  color: #8B5CF6; /* Violet text */
 }
 
 .plh-btn--outline:hover {
-  background: #f4f5fa;
+  background: #8B5CF6; /* Violet background on hover */
+  color: #FFFFFF; /* White text on hover */
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
 }
 
+/* New Project Button - Primary Gradient with Darker Hover */
 .plh-btn--primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #6366F1, #8B5CF6); /* Active Gradient */
   border: none;
-  color: #ffffff;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .plh-btn--primary:hover {
-  filter: brightness(1.05);
+  background: linear-gradient(135deg, #4F46E5, #7C3AED); /* Darker gradient on hover */
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Optional: Active state for buttons */
+.plh-btn:active {
+  transform: translateY(0);
+}
+
+/* Optional: Responsive styles */
+@media (max-width: 768px) {
+  .plh-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .plh-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .plh-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .plh-title {
+    font-size: 20px;
+  }
+
+  .plh-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .plh-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
