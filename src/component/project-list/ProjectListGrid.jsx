@@ -1,127 +1,117 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ProjectListGrid.css";
 import ProjectCard from "./ProjectCard.jsx";
+import ProjectFilterBar from "./ProjectFilterBar.jsx";
 
-export const PROJECTS = [
-  {
-    id: 1,
-    name: "Website Development",
-    client: "SWC Global",
-    status: "Active",
-    priority: "High",
-    progress: 43,
-    dueDate: "21 Feb 2027",
-    startDate: "2026-01-15",
-    description: "Complete redesign and development of the corporate website with modern UI/UX principles, responsive design, and CMS integration. The project includes custom animations, performance optimization, and SEO best practices.",
-    team: [
-      { initials: "JD", color: "#8B5CF6" },
-      { initials: "JS", color: "#6366F1" },
-      { initials: "MJ", color: "#0F172A" },
-      { initials: "SW", color: "#10B981" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Mobile App Redesign",
-    client: "Hubers Law",
-    status: "Active",
-    priority: "Medium",
-    progress: 65,
-    dueDate: "10 Sep 2026",
-    startDate: "2026-03-01",
-    description: "Mobile app redesign focusing on user experience improvements, faster navigation, and modern design language. Includes new features for client communication.",
-    team: [
-      { initials: "AT", color: "#F59E0B" },
-      { initials: "PN", color: "#EF4444" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Brand Identity Refresh",
-    client: "Hubers Law",
-    status: "Completed",
-    priority: "Low",
-    progress: 100,
-    dueDate: "30 Apr 2026",
-    startDate: "2026-01-10",
-    description: "Complete brand overhaul including logo redesign, color palette updates, typography guidelines, and brand collateral creation. Successful rebrand across all platforms.",
-    team: [
-      { initials: "JS", color: "#6366F1" },
-      { initials: "SW", color: "#10B981" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Internal HR Portal",
-    client: "SponicHR",
-    status: "Active",
-    priority: "High",
-    progress: 28,
-    dueDate: "15 Nov 2026",
-    startDate: "2026-04-01",
-    description: "Building a comprehensive HR portal for employee management, attendance tracking, leave requests, payroll integration, and performance reviews with advanced analytics.",
-    team: [
-      { initials: "JD", color: "#8B5CF6" },
-      { initials: "MJ", color: "#0F172A" },
-      { initials: "AT", color: "#F59E0B" },
-    ],
-  },
-  {
-    id: 5,
-    name: "Marketing Campaign Site",
-    client: "SWC Global",
-    status: "On Hold",
-    priority: "Medium",
-    progress: 15,
-    dueDate: "02 Dec 2026",
-    startDate: "2026-05-15",
-    description: "Landing page for the upcoming marketing campaign with interactive elements, lead capture forms, and analytics tracking. Currently on hold pending marketing strategy finalization.",
-    team: [{ initials: "PN", color: "#EF4444" }],
-  },
-  {
-    id: 6,
-    name: "Payment Gateway Integration",
-    client: "SWC Global",
-    status: "Overdue",
-    priority: "High",
-    progress: 52,
-    dueDate: "25 Jun 2026",
-    startDate: "2026-02-15",
-    description: "Integration of multiple payment gateways including Stripe, PayPal, and Razorpay with secure transaction processing, webhook handling, and real-time payment status updates.",
-    team: [
-      { initials: "MJ", color: "#0F172A" },
-      { initials: "JD", color: "#8B5CF6" },
-    ],
-  },
-];
+const ProjectListGrid = ({ projects = [] }) => {
+  const [viewMode, setViewMode] = useState("grid");
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "All Status",
+    priority: "All Priority",
+    sortBy: "Newest First",
+  });
 
-const ProjectListGrid = ({ filters = {}, viewMode = "grid" }) => {
-  const { search = "", status = "All Status", priority = "All Priority", sortBy = "Newest First" } = filters;
+  const { search, status, priority, sortBy } = filters;
 
-  let list = PROJECTS.filter((p) => {
+  // Transform API data to match ProjectCard expected format
+  const transformProjects = (projects) => {
+    return projects.map((item) => {
+      const project = item.project || item;
+      return {
+        id: project.id,
+        name: project.title || project.name || "Untitled Project",
+        client: project.client || "N/A",
+        status: project.status || "open",
+        priority: project.priority || "Medium",
+        progress: parseInt(project.progress) || 0,
+        dueDate: project.dueDate || project.project_end_date || "N/A",
+        startDate: project.startDate || project.project_start_date || "N/A",
+        description: project.description || "",
+        team: project.team || [],
+        roles: item.roles || [],
+        completed_tasks: project.completed_tasks || 0,
+        pending_tasks: project.pending_tasks || 0,
+        total_tasks: project.total_tasks || 0,
+      };
+    });
+  };
+
+  const transformedProjects = transformProjects(projects);
+
+  // Filter projects
+  let list = transformedProjects.filter((p) => {
+    // Search filter
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.client.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = status === "All Status" || p.status === status;
-    const matchesPriority = priority === "All Priority" || p.priority === priority;
+      p.client.toLowerCase().includes(search.toLowerCase()) ||
+      p.description.toLowerCase().includes(search.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = status === "All Status" || p.status.toLowerCase() === status.toLowerCase();
+    
+    // Priority filter
+    const matchesPriority = priority === "All Priority" || p.priority.toLowerCase() === priority.toLowerCase();
+    
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
+  // Sort projects
   if (sortBy === "Progress: High to Low") {
     list = [...list].sort((a, b) => b.progress - a.progress);
+  } else if (sortBy === "Progress: Low to High") {
+    list = [...list].sort((a, b) => a.progress - b.progress);
   } else if (sortBy === "Oldest First") {
-    list = [...list].reverse();
+    list = [...list].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  } else if (sortBy === "Newest First") {
+    list = [...list].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  } else if (sortBy === "A-Z") {
+    list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === "Z-A") {
+    list = [...list].sort((a, b) => b.name.localeCompare(a.name));
+  } else if (sortBy === "Due Date: Soonest") {
+    list = [...list].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+  } else if (sortBy === "Due Date: Latest") {
+    list = [...list].sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
   }
 
+  // Get unique statuses from projects for filter dropdown
+  const getStatusOptions = () => {
+    const statuses = transformedProjects.map(p => p.status);
+    return ["All Status", ...new Set(statuses)];
+  };
+
+  // Get unique priorities from projects for filter dropdown
+  const getPriorityOptions = () => {
+    const priorities = transformedProjects.map(p => p.priority);
+    return ["All Priority", ...new Set(priorities)];
+  };
+
   return (
-    <div className={`plg-wrap ${viewMode === "list" ? "plg-wrap--list" : "plg-wrap--grid"}`}>
-      {list.map((project) => (
-        <ProjectCard key={project.id} project={project} />
-      ))}
-      {list.length === 0 && (
-        <div className="plg-empty">No projects match your filters.</div>
-      )}
-    </div>
+    <>
+      <ProjectFilterBar
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFilterChange={setFilters}
+        statusOptions={getStatusOptions()}
+        priorityOptions={getPriorityOptions()}
+      />
+
+      <div
+        className={`plg-wrap ${viewMode === "list" ? "plg-wrap--list" : "plg-wrap--grid"}`}
+      >
+        {list.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+        {list.length === 0 && (
+          <div className="plg-empty">
+            <div className="plg-empty-icon">📋</div>
+            <h3>No Projects Found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

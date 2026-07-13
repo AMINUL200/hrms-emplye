@@ -19,13 +19,7 @@ const EmpProjectList = () => {
   const [projects, setProjects] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({});
 
-  const [viewMode, setViewMode] = useState("grid");
-  const [filters, setFilters] = useState({
-    search: "",
-    status: "All Status",
-    priority: "All Priority",
-    sortBy: "Newest First",
-  });
+ 
 
   const fetchProjects = async () => {
     const res = await axios.get(`${api_url}/permission-wise-project`, {
@@ -108,13 +102,13 @@ const EmpProjectList = () => {
         <ProjectProgressChart />
       </div>
 
-      <ProjectFilterBar
+      {/* <ProjectFilterBar
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onFilterChange={setFilters}
-      />
+      /> */}
 
-      <ProjectListGrid filters={filters} viewMode={viewMode} />
+     <ProjectListGrid projects={projects} />
     </div>
   );
 };
