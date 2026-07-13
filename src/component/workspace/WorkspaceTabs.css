@@ -1,0 +1,39 @@
+.wtab-wrap {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 2px 10px rgba(20, 20, 43, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.wtab-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 12px 18px;
+  border: none;
+  background: transparent;
+  border-bottom: 2.5px solid transparent;
+  color: #6b7280;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.wtab-tab:hover {
+  color: #6d28d9;
+  background: #f8f7ff;
+}
+
+.wtab-tab--active {
+  color: #6d28d9;
+  border-bottom-color: #6d28d9;
+  background: #f5f3ff;
+}

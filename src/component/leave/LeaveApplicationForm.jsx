@@ -20,8 +20,7 @@ const LeaveApplicationForm = ({ onSuccess }) => {
     remainingLeave,
   } = useContext(EmployeeContext);
 
-  console.log("Leave Type Data:", leaveTypeData);
-  console.log("Remaining Leave Data:", remainingLeave);
+
 
   const [leaveInHand, setLeaveInHand] = useState("");
   const [selectedLeaveTypeName, setSelectedLeaveTypeName] = useState("");
@@ -56,7 +55,8 @@ const LeaveApplicationForm = ({ onSuccess }) => {
     const selectedLeave = remainingLeave.find(
       (leave) => leave.leave_type_id === parseInt(formData.leave_type_id),
     );
-
+    console.log("Selected Leave:", selectedLeave);
+    console.log("Leave Type ID:", formData.leave_type_id);
     if (!selectedLeave) {
       toast.error("Selected leave type not found in your balance");
       return false;

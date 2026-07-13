@@ -1,0 +1,38 @@
+.wtb-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.wtb-back-btn,
+.wtb-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 9px;
+  border: 1px solid #e3e5ee;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wtb-back-btn {
+  color: #6d28d9;
+}
+
+.wtb-back-btn:hover {
+  background: #f5f3ff;
+}
+
+.wtb-edit-btn {
+  color: #1f2333;
+}
+
+.wtb-edit-btn:hover {
+  background: #f4f5fa;
+}

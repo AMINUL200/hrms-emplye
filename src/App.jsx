@@ -87,6 +87,7 @@ import "./App.css";
 import EmpProjectDetails from "./pages/employee/project/EmpProjectDetails";
 import EmpProfilePage from "./pages/employee/ProfilePage/EmpProfilePage";
 import EmpProjectList from "./pages/employee/project/EmpProjectList";
+import EmpProjectWorkspace from "./pages/employee/project/EmpProjectWorkspace";
 
 const App = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -104,7 +105,9 @@ const App = () => {
             element={
               <Navigate
                 to={
-                  isAuthenticated ? "/organization/employee-dashboard" : "/login"
+                  isAuthenticated
+                    ? "/organization/employee-dashboard"
+                    : "/login"
                 }
                 replace
               />
@@ -177,10 +180,10 @@ const App = () => {
             {/* -------- DASHBOARD ROUTES -------- */}
             {/* Employer Dashboard */}
             <Route path="employerdashboard" element={<DashboardPage />} />
-            
+
             {/* Employee Dashboard */}
             <Route path="employee-dashboard" element={<EmpDashboard />} />
-            
+
             {/* Old Dashboard (Commented) */}
             {/* <Route path="employerdashboard" element={<Dashboard />} /> */}
 
@@ -188,7 +191,7 @@ const App = () => {
             {/* Employer Profile */}
             <Route path="employerprofile" element={<ProfileRouter />} />
             <Route path="employee-profile" element={<EmpProfilePage />} />
-            
+
             {/* Employee Profile (Commented) */}
             {/* <Route path="profile" element={<ProfilePage />} /> */}
 
@@ -197,44 +200,47 @@ const App = () => {
 
             {/* -------- ATTENDANCE ROUTES -------- */}
             {/* Employee Attendance */}
-            <Route path="employee-attendance" element={<EmployeeAttendance />} />
-            
+            <Route
+              path="employee-attendance"
+              element={<EmployeeAttendance />}
+            />
+
             {/* Attendance Status */}
             <Route path="attendance-status" element={<AttendanceStatus />} />
-            
+
             {/* Attendance Report */}
             <Route path="attendance-report" element={<AttendanceReport />} />
-            
+
             {/* Attendance Dashboard */}
             <Route path="attendance" element={<EMPAttendanceDashboard />} />
 
             {/* -------- LEAVES ROUTES -------- */}
             {/* Leaves Main */}
             <Route path="leaves" element={<Leaves />} />
-            
+
             {/* Apply Leave */}
             <Route path="apply-leaves" element={<LeaveApplication />} />
-            
+
             {/* Leave List */}
             <Route path="leaves-list" element={<LeaveList />} />
-            
+
             {/* Leave Dashboard */}
             <Route path="leaves-dashboard" element={<EmpLeaveDashboard />} />
 
             {/* -------- HOLIDAY ROUTES -------- */}
             {/* Holiday Main */}
             <Route path="holiday" element={<Holiday />} />
-            
+
             {/* Holiday List */}
             <Route path="holiday-list" element={<HolidayList />} />
-            
+
             {/* Holiday Apply */}
             <Route path="holiday-apply" element={<HolidayApply />} />
 
             {/* -------- WORK UPDATE ROUTES -------- */}
             {/* Work Update List */}
             <Route path="work-update" element={<WorkUpdate />} />
-            
+
             {/* Add Work Update */}
             <Route path="add-work-update" element={<AddWorkUpdate />} />
 
@@ -245,40 +251,56 @@ const App = () => {
             {/* Assigned Projects */}
             <Route path="assigned-project" element={<AssignedProject />} />
             <Route path="view-project" element={<EmpProjectList />} />
-            <Route path="assigned-project/:projectId" element={<EmpProjectDetails />} />
-            
+            <Route
+              path="assigned-project/:projectId"
+              element={<EmpProjectDetails />}
+            />
+            <Route
+              path="assigned-project/:projectId/workspace/:workspaceId"
+              element={<EmpProjectWorkspace />}
+            />
+
             {/* Create Project */}
             <Route path="create-project" element={<EmpCreateProject />} />
-            
+
             {/* Assigned Tasks */}
-            <Route path="assigned-task/:projectId" element={<EmpAssignTasks />} />
-            
+            <Route
+              path="assigned-task/:projectId"
+              element={<EmpAssignTasks />}
+            />
+
             {/* Admin View Task (Commented) */}
             {/* <Route path="assigned-view-task/:projectId" element={<EmpAdminViewTask />} /> */}
-            
+
             {/* Workspace (Commented - moved to separate route) */}
             {/* <Route path="workspace/:projectId" element={<WorkspacePage />} /> */}
 
             {/* -------- MODULE ROUTES -------- */}
             {/* Add Module */}
             <Route path="emp-add-module/:p_id" element={<CreateModule />} />
-            
+
             {/* Assign Work Item */}
-            <Route path="emp-assign-work-item/:p_id" element={<AssignWorkItem />} />
-            
+            <Route
+              path="emp-assign-work-item/:p_id"
+              element={<AssignWorkItem />}
+            />
+
             {/* Assigned Module */}
-            <Route path="emp-assigned-module/:p_id/:m_id" element={<EmpAssignedModule />} />
-            
+            <Route
+              path="emp-assigned-module/:p_id/:m_id"
+              element={<EmpAssignedModule />}
+            />
+
             {/* Assigned Module (Old - Commented) */}
             {/* <Route path="assigned-project/:projectId" element={<AssignedModule />} /> */}
-            
+
             {/* Module Details (Commented) */}
             {/* <Route path="assigned-project/:projectId/module/:moduleId/tasks" element={<ModuleDetailsPage />} /> */}
 
             {/* -------- TASK ROUTES -------- */}
             {/* Recent Task */}
             <Route path="assigned-task/:id" element={<RecentTask />} />
-            
+
             {/* Employee Assigned Task (Commented) */}
             {/* <Route path="emp-assigned-task/:id" element={<EmpAssignedTask />} /> */}
 
@@ -292,10 +314,13 @@ const App = () => {
             {/* -------- EMPLOYEE ROLL ROUTES -------- */}
             {/* Master Roll */}
             <Route path="master-roll" element={<EmpRollMaster />} />
-            
+
             {/* Project Permission */}
-            <Route path="project-permission" element={<EmpProjectPermissionMaster />} />
-            
+            <Route
+              path="project-permission"
+              element={<EmpProjectPermissionMaster />}
+            />
+
             {/* Permission List */}
             <Route path="permission-list" element={<EmpPermissionList />} />
           </Route>

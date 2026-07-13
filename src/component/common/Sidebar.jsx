@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleRight,
@@ -37,6 +37,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
   const { data, totalUnreadMessages } = useContext(AuthContext);
+  const storage_url = import.meta.env.VITE_STORAGE_URL;
+  // console.log("sidebar data:: ", data);
 
   // console.log("total unread message:: ",totalUnreadMessages)
 
@@ -125,7 +127,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
     {
       key: "assign-project",
       title: "Assign Project",
-      path: "/organization/assigned-project",
+      path: "/organization/view-project",
       icon: faProjectDiagram,
       type: "single",
     },
@@ -281,16 +283,16 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
         {/* Brand / Logo */}
         <div className="sidebar-brand">
           <div className="sidebar-brand-logo">
-            <img src={logo} alt="PONIC HR" />
+            <Link to={"/organization/employerdashboard"} >
+              <img
+                src={`${storage_url}/${data?.org_logo}`}
+                width="100"
+                height="80"
+                alt="Logo"
+              />
+            </Link>
           </div>
-          <div className="sidebar-brand-text">
-            <span className="sidebar-brand-title">
-              PONIC<sup>HR</sup>
-            </span>
-            <span className="sidebar-brand-tagline">
-              Sponsor Compliances made Easy
-            </span>
-          </div>
+         
         </div>
 
         <div className="sidebar-menu">
@@ -384,7 +386,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
         {/* Sidebar Footer */}
         <div className="sidebar-footer">
           {/* Promo card */}
-          <div className="sidebar-promo-card">
+          {/* <div className="sidebar-promo-card">
             <div className="sidebar-promo-glow" />
             <span className="sidebar-promo-title">SponicHR</span>
             <span className="sidebar-promo-subtitle">
@@ -393,7 +395,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMediumScreen, isSmallScreen }) => {
             <button type="button" className="sidebar-promo-btn">
               Explore More
             </button>
-          </div>
+          </div> */}
           {/* Footer logo and version info */}
           <div
             className="sidebar-footer-bottom"
