@@ -261,7 +261,7 @@
 }
 
 .toggle-icon:hover {
-    color: #FF902F;
+    color: #6366F1;
 }
 
 .forgot-block {
@@ -274,30 +274,42 @@
 }
 
 .forgot-block .text-muted:hover {
-    color: #FF902F !important;
+    color: #6366F1 !important;
 }
 
 .account-btn {
-    background-color: #FF902F !important;
-    border: 1px solid #FF902F !important;
-    color: #FFF !important;
-    padding: 10px 0;
-    display: block;
-    width: 80%;
-    margin: 0 auto;
-    transition: all 0.3s ease;
-
+    background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    padding: 14px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px;
+    width: 80% !important;
+    margin: 0 auto !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+    position: relative;
+    overflow: hidden;
 }
 
-.account-btn:hover {
-    background-color: #d86b0c !important;
+/* Hover State */
+.account-btn:hover:not(.disable-btn) {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
+    border: none !important;
 }
 
-.account-btn.disable-btn {
-    background-color: #FF902F !important;
-    cursor: not-allowed !important;
-    pointer-events: all !important;
-    opacity: 0.6;
+/* Active/Pressed State */
+.account-btn:active:not(.disable-btn) {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
 }
 
 .account-footer {
@@ -309,7 +321,7 @@
 }
 
 .account-footer p a:hover {
-    color: #FF902F !important;
+    color: #4F46E5 !important;
 }
 
 /* Responsive adjustments */
@@ -356,25 +368,30 @@
 /* Scrollbar Track */
 .account-content .acc-body::-webkit-scrollbar {
     width: 6px;
-    margin-left: 10px;
-}
-
-/* Scrollbar Thumb */
-.account-content .acc-body::-webkit-scrollbar-thumb {
-    background-color: #FF902F;
-    border-radius: 10px;
+    height: 6px;
     margin-left: 10px;
 }
 
 /* Scrollbar Track Background */
-/* .account-content .acc-body::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
-  border-radius: 10px;
-} */
+.account-content .acc-body::-webkit-scrollbar-track {
+    background: #F8FAFC; /* Page Background */
+    border-radius: 10px;
+    margin-block: 4px;
+}
+
+/* Scrollbar Thumb */
+.account-content .acc-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6366F1, #8B5CF6); /* Primary to Violet gradient */
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+    transition: all 0.3s ease;
+}
 
 /* Scrollbar on hover */
 .account-content .acc-body::-webkit-scrollbar-thumb:hover {
-    background-color: #fe7701;
+    background: linear-gradient(180deg, #4F46E5, #7C3AED); /* Darker violet on hover */
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 .account-logo img.login-logo {
@@ -450,18 +467,30 @@
 }
 
 .input-block button[type="submit"] {
-    background-color: #FF902F;
-    color: #fff;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #FFFFFF;
+    padding: 12px 28px;
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Hover State */
 .input-block button[type="submit"]:hover {
-    background-color: #f57505;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
 }
 
 .input-block-check {
@@ -477,7 +506,7 @@
 }
 
 .account-footer a {
-    color: #FF902F;
+    color: #4F46E5 !important;
     text-decoration: none;
     font-size: 1rem;
 }
@@ -3818,22 +3847,31 @@ textarea {
 /* Regular Login Button */
 .regular-login-btn {
     width: 80%;
-    padding: 12px 0;
+    padding: 14px 0;
     background-color: transparent !important;
-    border: 2px solid #FF902F !important;
-    color: #FF902F !important;
+    border: 2px solid #8B5CF6 !important;
+    color: #8B5CF6 !important;
     font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    font-size: 15px;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
 }
 
+/* Hover State */
 .regular-login-btn:hover {
-    background-color: #FF902F !important;
-    color: white !important;
+    background-color: #8B5CF6 !important;
+    color: #FFFFFF !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 144, 47, 0.3);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    border-color: #8B5CF6 !important;
 }
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .guest-tag {
@@ -3865,7 +3903,7 @@ textarea {
 }
 
 .guest-login-option p a:hover {
-  color: #FF902F !important;
+  color: #8B5CF6 !important;
   text-decoration: underline !important;
 }
 
@@ -3877,7 +3915,7 @@ textarea {
   left: 0;
   width: 0;
   height: 2px;
-  background-color: #FF902F;
+  background-color: #8B5CF6;
   transition: width 0.3s ease;
 }
 
@@ -4126,5 +4164,8 @@ textarea {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
 }
+
+
+
 
 

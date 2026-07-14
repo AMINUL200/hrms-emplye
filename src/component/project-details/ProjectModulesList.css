@@ -341,3 +341,186 @@
     min-width: 780px;
   }
 }
+
+/* ---------- Additional Icon Styles ---------- */
+.pml-file-icon {
+  color: #6366F1; /* Primary color */
+  flex-shrink: 0;
+}
+
+.pml-check-icon {
+  color: #10B981; /* Success color */
+  flex-shrink: 0;
+}
+
+/* ---------- Row Type Specific ---------- */
+.pml-row--module {
+  background: #F8FAFC;
+  border-left: 3px solid #6366F1;
+  border-radius: 6px 0 0 6px;
+}
+
+.pml-row--submodule {
+  background: #FFFFFF;
+  border-left: 2px solid #8B5CF6;
+}
+
+.pml-row--task {
+  background: #FFFFFF;
+}
+
+.pml-row--subtask {
+  background: #FAFBFC;
+  opacity: 0.9;
+}
+
+.pml-row--subtask .pml-row-title {
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.pml-row--subtask .pml-status-pill {
+  font-size: 10px;
+  padding: 2px 8px;
+}
+
+.pml-row--subtask .pml-progress-track {
+  width: 80px;
+  height: 4px;
+}
+
+.pml-row--subtask .pml-progress-pct {
+  font-size: 11px;
+  width: 30px;
+}
+
+/* ---------- Hover Effects ---------- */
+.pml-row:hover {
+  background: #EEF2FF !important;
+  transition: background 0.2s ease;
+}
+
+.pml-row--module:hover {
+  background: #EEF2FF !important;
+  border-left-color: #4F46E5;
+}
+
+.pml-row--subtask:hover {
+  background: #F1F5F9 !important;
+}
+
+/* ---------- Subtask specific ---------- */
+.pml-row-title--subtask {
+  font-weight: 500 !important;
+  color: #475569 !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1400px) {
+  .pml-row,
+  .pml-row--module,
+  .pml-row--submodule,
+  .pml-row--task,
+  .pml-row--subtask {
+    grid-template-columns: 26px 18px 1fr 110px 140px 70px 100px 26px;
+  }
+
+  .pml-progress-track {
+    width: 70px;
+  }
+  
+  .pml-row--subtask .pml-progress-track {
+    width: 60px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .pml-card {
+    overflow-x: auto;
+  }
+
+  .pml-row,
+  .pml-row--module,
+  .pml-row--submodule,
+  .pml-row--task,
+  .pml-row--subtask {
+    min-width: 780px;
+  }
+}
+
+/* ---------- Right Section Info ---------- */
+.pml-right-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.pml-right-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.pml-info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pml-info-label {
+  color: #94A3B8;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.pml-info-value {
+  color: #0F172A;
+  font-weight: 700;
+  font-size: 13px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.pml-info-value.pml-info-na {
+  color: #94A3B8;
+  font-weight: 400;
+}
+
+.pml-info-divider {
+  color: #E2E8F0;
+  font-weight: 300;
+}
+
+/* ---------- Grid Layout Update ---------- */
+.pml-row {
+  display: grid;
+  grid-template-columns: 26px 18px 1fr 110px 160px 140px 26px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 4px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .pml-row {
+    grid-template-columns: 26px 18px 1fr 110px 140px 120px 26px;
+  }
+  
+  .pml-right-section {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .pml-card {
+    overflow-x: auto;
+  }
+
+  .pml-row {
+    min-width: 780px;
+  }
+}

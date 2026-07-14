@@ -125,7 +125,7 @@ const LoginPage = () => {
                             to="/guest-login"
                             className="ms-1"
                             style={{
-                              color: "#FF902F",
+                              color: "#8B5CF6",
                               fontWeight: "600",
                               textDecoration: "none",
                             }}

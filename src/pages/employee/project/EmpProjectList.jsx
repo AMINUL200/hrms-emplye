@@ -28,7 +28,7 @@ const EmpProjectList = () => {
         "Content-Type": "application/json",
       },
     });
-
+    console.log("Projects Response:", res.data);
     if (res.data.status === 1) {
       setProjects(res.data.data || []);
     } else {
