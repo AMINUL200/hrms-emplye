@@ -1,5 +1,11 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import "./ProjectModulesList.css";
+
 import {
   ChevronDown,
   ChevronRight,
@@ -16,444 +22,362 @@ import {
   UserPlus,
   PlusCircle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const MODULES = [
-  {
-    id: "m1",
-    index: "1.",
-    title: "Project Planning",
-    status: "Completed",
-    progress: 100,
-    tasks: 5,
-    type: "module",
-    children: [
-      {
-        id: "m1-1",
-        index: "1.1",
-        title: "Requirements Gathering",
-        status: "Completed",
-        progress: 100,
-        tasks: 3,
-        type: "submodule",
-        children: [
-          {
-            id: "m1-1-1",
-            index: "1.1.1",
-            title: "Stakeholder Interviews",
-            status: "Completed",
-            progress: 100,
-            type: "task",
-            children: [
-              {
-                id: "m1-1-1-1",
-                index: "1.1.1.1",
-                title: "Schedule meetings with stakeholders",
-                status: "Completed",
-                progress: 100,
-                type: "subtask",
-              },
-              {
-                id: "m1-1-1-2",
-                index: "1.1.1.2",
-                title: "Document requirements",
-                status: "Completed",
-                progress: 100,
-                type: "subtask",
-              },
-            ],
-          },
-          {
-            id: "m1-1-2",
-            index: "1.1.2",
-            title: "Technical Feasibility Study",
-            status: "Completed",
-            progress: 100,
-            type: "task",
-            children: [
-              {
-                id: "m1-1-2-1",
-                index: "1.1.2.1",
-                title: "Technology stack analysis",
-                status: "Completed",
-                progress: 100,
-                type: "subtask",
-              },
-            ],
-          },
-          {
-            id: "m1-1-3",
-            index: "1.1.3",
-            title: "Risk Assessment",
-            status: "Completed",
-            progress: 100,
-            type: "task",
-          },
-        ],
-      },
-      {
-        id: "m1-2",
-        index: "1.2",
-        title: "Resource Planning",
-        status: "Completed",
-        progress: 100,
-        tasks: 2,
-        type: "submodule",
-        children: [
-          {
-            id: "m1-2-1",
-            index: "1.2.1",
-            title: "Team Allocation",
-            status: "Completed",
-            progress: 100,
-            type: "task",
-            children: [],
-          },
-          {
-            id: "m1-2-2",
-            index: "1.2.2",
-            title: "Budget Estimation",
-            status: "Completed",
-            progress: 100,
-            type: "task",
-            children: [],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "m2",
-    index: "2.",
-    title: "Design Phase",
-    status: "In Progress",
-    progress: 60,
-    tasks: 8,
-    type: "module",
-    children: [
-      {
-        id: "m2-1",
-        index: "2.1",
-        title: "UI/UX Design",
-        status: "In Progress",
-        progress: 75,
-        tasks: 4,
-        type: "submodule",
-        children: [
-          {
-            id: "m2-1-1",
-            index: "2.1.1",
-            title: "Wireframing",
-            status: "In Progress",
-            progress: 80,
-            type: "task",
-            children: [
-              {
-                id: "m2-1-1-1",
-                index: "2.1.1.1",
-                title: "Low-fidelity wireframes",
-                status: "Completed",
-                progress: 100,
-                type: "subtask",
-              },
-              {
-                id: "m2-1-1-2",
-                index: "2.1.1.2",
-                title: "High-fidelity wireframes",
-                status: "In Progress",
-                progress: 60,
-                type: "subtask",
-              },
-            ],
-          },
-          {
-            id: "m2-1-2",
-            index: "2.1.2",
-            title: "Visual Design",
-            status: "In Progress",
-            progress: 70,
-            type: "task",
-            children: [
-              {
-                id: "m2-1-2-1",
-                index: "2.1.2.1",
-                title: "Color palette design",
-                status: "Completed",
-                progress: 100,
-                type: "subtask",
-              },
-              {
-                id: "m2-1-2-2",
-                index: "2.1.2.2",
-                title: "Typography system",
-                status: "In Progress",
-                progress: 50,
-                type: "subtask",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "m2-2",
-        index: "2.2",
-        title: "Technical Architecture",
-        status: "In Progress",
-        progress: 50,
-        tasks: 4,
-        type: "submodule",
-        children: [
-          {
-            id: "m2-2-1",
-            index: "2.2.1",
-            title: "System Architecture Design",
-            status: "In Progress",
-            progress: 60,
-            type: "task",
-            children: [],
-          },
-          {
-            id: "m2-2-2",
-            index: "2.2.2",
-            title: "Database Design",
-            status: "Pending",
-            progress: 30,
-            type: "task",
-            children: [],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "m3",
-    index: "3.",
-    title: "Development Phase",
-    status: "Pending",
-    progress: 25,
-    tasks: 12,
-    type: "module",
-    children: [
-      {
-        id: "m3-1",
-        index: "3.1",
-        title: "Frontend Development",
-        status: "Pending",
-        progress: 30,
-        tasks: 6,
-        type: "submodule",
-        children: [
-          {
-            id: "m3-1-1",
-            index: "3.1.1",
-            title: "React Component Development",
-            status: "Pending",
-            progress: 40,
-            type: "task",
-            children: [],
-          },
-          {
-            id: "m3-1-2",
-            index: "3.1.2",
-            title: "State Management",
-            status: "Pending",
-            progress: 20,
-            type: "task",
-            children: [],
-          },
-        ],
-      },
-      {
-        id: "m3-2",
-        index: "3.2",
-        title: "Backend Development",
-        status: "Pending",
-        progress: 20,
-        tasks: 6,
-        type: "submodule",
-        children: [
-          {
-            id: "m3-2-1",
-            index: "3.2.1",
-            title: "API Development",
-            status: "Pending",
-            progress: 25,
-            type: "task",
-            children: [],
-          },
-          {
-            id: "m3-2-2",
-            index: "3.2.2",
-            title: "Database Integration",
-            status: "Pending",
-            progress: 15,
-            type: "task",
-            children: [],
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const STATUS_CLASS = {
-  Completed: "pml-status--completed",
-  "In Progress": "pml-status--progress",
-  Pending: "pml-status--pending",
-};
-
-const PROGRESS_CLASS = {
-  Completed: "pml-progress-fill--green",
-  "In Progress": "pml-progress-fill--blue",
-  Pending: "pml-progress-fill--orange",
-};
+// ==========================================
+// GET ICON BASED ON ITEM TYPE
+// ==========================================
 
 const getIcon = (type) => {
   switch (type) {
     case "module":
-      return <Folder size={16} className="pml-folder-icon" />;
+      return (
+        <Folder
+          size={16}
+          className="pml-folder-icon"
+        />
+      );
+
     case "submodule":
       return (
-        <Folder size={14} className="pml-folder-icon pml-folder-icon--sm" />
+        <Folder
+          size={14}
+          className="
+            pml-folder-icon
+            pml-folder-icon--sm
+          "
+        />
       );
+
     case "task":
-      return <FileText size={14} className="pml-file-icon" />;
+      return (
+        <FileText
+          size={14}
+          className="pml-file-icon"
+        />
+      );
+
     case "subtask":
-      return <CheckSquare size={14} className="pml-check-icon" />;
+      return (
+        <CheckSquare
+          size={14}
+          className="pml-check-icon"
+        />
+      );
+
     default:
-      return <Square size={14} className="pml-check-icon" />;
+      return (
+        <Square
+          size={14}
+          className="pml-check-icon"
+        />
+      );
   }
 };
 
-const getIndentLevel = (type) => {
-  switch (type) {
-    case "module":
-      return 0;
-    case "submodule":
-      return 30;
-    case "task":
-      return 60;
-    case "subtask":
-      return 90;
+// ==========================================
+// INDENT BASED ON LEVEL
+// ==========================================
+
+const getIndentLevel = (level) => {
+  return level * 30;
+};
+
+// ==========================================
+// FORMAT STATUS
+// ==========================================
+
+const formatStatus = (status) => {
+  if (!status) return "Unknown";
+
+  return status
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) =>
+      char.toUpperCase()
+    );
+};
+
+// ==========================================
+// GET STATUS CLASS
+// ==========================================
+
+const getStatusClass = (status) => {
+  const normalizedStatus =
+    status?.toLowerCase();
+
+  switch (normalizedStatus) {
+    case "completed":
+    case "complete":
+    case "done":
+    case "closed":
+      return "pml-status--completed";
+
+    case "in_progress":
+    case "in progress":
+    case "progress":
+      return "pml-status--progress";
+
+    case "open":
+    case "pending":
+    case "assigned":
+      return "pml-status--pending";
+
     default:
-      return 0;
+      return "pml-status--pending";
   }
 };
 
-// Helper functions for counting
-const countSubtasks = (item) => {
-  if (!item.children) return 0;
-  let count = 0;
-  item.children.forEach((child) => {
-    if (child.type === "subtask") count++;
-    if (child.children) count += countSubtasks(child);
-  });
-  return count;
+// ==========================================
+// GET PROGRESS CLASS
+// ==========================================
+
+const getProgressClass = (percentage) => {
+  if (percentage >= 100) {
+    return "pml-progress-fill--green";
+  }
+
+  if (percentage > 0) {
+    return "pml-progress-fill--blue";
+  }
+
+  return "pml-progress-fill--orange";
 };
 
-const countTasks = (item) => {
-  if (!item.children) return 0;
-  let count = 0;
-  item.children.forEach((child) => {
-    if (child.type === "task") count++;
-    if (child.children) count += countTasks(child);
-  });
-  return count;
+// ==========================================
+// RECURSIVE SEARCH + STATUS FILTER
+// Keeps parent if a child matches
+// ==========================================
+
+const filterTree = (
+  items = [],
+  search = "",
+  statusFilter = "All Status"
+) => {
+  const normalizedSearch =
+    search.trim().toLowerCase();
+
+  return items
+    .map((item) => {
+      const filteredChildren =
+        filterTree(
+          item.children || [],
+          search,
+          statusFilter
+        );
+
+      const matchesSearch =
+        !normalizedSearch ||
+        item.title
+          ?.toLowerCase()
+          .includes(normalizedSearch) ||
+        item.unique_id
+          ?.toLowerCase()
+          .includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === "All Status" ||
+        item.status
+          ?.toLowerCase() ===
+          statusFilter.toLowerCase();
+
+      if (
+        (matchesSearch &&
+          matchesStatus) ||
+        filteredChildren.length > 0
+      ) {
+        return {
+          ...item,
+          children: filteredChildren,
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
 };
 
-const countSubmodules = (item) => {
-  if (!item.children) return 0;
-  let count = 0;
-  item.children.forEach((child) => {
-    if (child.type === "submodule") count++;
-    if (child.children) count += countSubmodules(child);
-  });
-  return count;
-};
+// ==========================================
+// PROJECT MODULES LIST
+// ==========================================
 
-const ProjectModulesList = () => {
-  const [expanded, setExpanded] = useState({
-    m1: true,
-    m2: true,
-    m3: true,
-    "m1-1": true,
-    "m1-2": true,
-    "m2-1": true,
-    "m2-2": true,
-    "m3-1": true,
-    "m3-2": true,
-    "m1-1-1": true,
-    "m1-1-2": true,
-    "m2-1-1": true,
-    "m2-1-2": true,
-  });
-  const [viewMode, setViewMode] = useState("list");
-  const [statusFilter, setStatusFilter] = useState("All Status");
-  const [search, setSearch] = useState("");
-  const [openDropdown, setOpenDropdown] = useState(null);
+const ProjectModulesList = ({
+  modulesInfo = [],
+}) => {
+
+  const navigate = useNavigate();
+
+  const [expanded, setExpanded] =
+    useState({});
+
+  const [viewMode, setViewMode] =
+    useState("list");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState("All Status");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [
+    openDropdown,
+    setOpenDropdown,
+  ] = useState(null);
+
+  // ==========================================
+  // AUTO EXPAND TOP LEVEL MODULES
+  // ==========================================
+
+  useEffect(() => {
+    if (
+      !Array.isArray(modulesInfo) ||
+      modulesInfo.length === 0
+    ) {
+      return;
+    }
+
+    const initialExpanded = {};
+
+    modulesInfo.forEach((item) => {
+      initialExpanded[item.id] = true;
+    });
+
+    setExpanded(initialExpanded);
+  }, [modulesInfo]);
+
+  // ==========================================
+  // FILTERED DATA
+  // ==========================================
+
+  const filteredModules =
+    useMemo(() => {
+      return filterTree(
+        modulesInfo,
+        search,
+        statusFilter
+      );
+    }, [
+      modulesInfo,
+      search,
+      statusFilter,
+    ]);
+
+  // ==========================================
+  // TOGGLE TREE
+  // ==========================================
 
   const toggleExpand = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpanded((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
+
+  // ==========================================
+  // DROPDOWN
+  // ==========================================
 
   const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
+    setOpenDropdown((prev) =>
+      prev === id ? null : id
+    );
   };
 
-  const handleDropdownAction = (action, item) => {
-    console.log(`${action} clicked for:`, item.title);
+  const handleDropdownAction = (
+    action,
+    item
+  ) => {
+    console.log(
+      `${action} clicked for:`,
+      item
+    );
+
     setOpenDropdown(null);
-    // Add your action logic here
+
+    // Add your navigation / modal logic here
+    if (action === "View") {
+      navigate(
+        `/organization/assigned-project/${item.project_id}/workspace/${item.id}`
+      );
+    }
   };
 
-  // Get right side info based on item type
+  // ==========================================
+  // RIGHT SIDE INFO
+  // ==========================================
+
   const getRightInfo = (item) => {
     switch (item.type) {
       case "module":
-        const totalTasks = countTasks(item);
-        const totalSubmodules = countSubmodules(item);
         return (
           <div className="pml-right-info">
             <span className="pml-info-item">
-              <span className="pml-info-label">Tasks</span>
-              <span className="pml-info-value">{totalTasks}</span>
+              <span className="pml-info-label">
+                Tasks
+              </span>
+
+              <span className="pml-info-value">
+                {item.total_tasks ?? 0}
+              </span>
             </span>
-            <span className="pml-info-divider">|</span>
+
+            <span className="pml-info-divider">
+              |
+            </span>
+
             <span className="pml-info-item">
-              <span className="pml-info-label">Submodules</span>
-              <span className="pml-info-value">{totalSubmodules}</span>
+              <span className="pml-info-label">
+                Submodules
+              </span>
+
+              <span className="pml-info-value">
+                {item.total_submodules ?? 0}
+              </span>
             </span>
           </div>
         );
 
       case "submodule":
-        const submoduleTasks = countTasks(item);
-        const totalSubtasks = countSubtasks(item);
         return (
           <div className="pml-right-info">
             <span className="pml-info-item">
-              <span className="pml-info-label">Tasks</span>
-              <span className="pml-info-value">{submoduleTasks}</span>
+              <span className="pml-info-label">
+                Tasks
+              </span>
+
+              <span className="pml-info-value">
+                {item.total_tasks ?? 0}
+              </span>
             </span>
-            <span className="pml-info-divider">|</span>
+
+            <span className="pml-info-divider">
+              |
+            </span>
+
             <span className="pml-info-item">
-              <span className="pml-info-label">Subtasks</span>
-              <span className="pml-info-value">{totalSubtasks}</span>
+              <span className="pml-info-label">
+                Subtasks
+              </span>
+
+              <span className="pml-info-value">
+                {item.total_subtasks ?? 0}
+              </span>
             </span>
           </div>
         );
 
       case "task":
-        const taskSubtasks = countSubtasks(item);
         return (
           <div className="pml-right-info">
             <span className="pml-info-item">
-              <span className="pml-info-label">Subtasks</span>
-              <span className="pml-info-value">{taskSubtasks}</span>
-            </span>
-            <span className="pml-info-divider">|</span>
-            <span className="pml-info-item">
-              <span className="pml-info-label">N/A</span>
-              <span className="pml-info-value pml-info-na">—</span>
+              <span className="pml-info-label">
+                Subtasks
+              </span>
+
+              <span className="pml-info-value">
+                {item.total_subtasks ?? 0}
+              </span>
             </span>
           </div>
         );
@@ -462,13 +386,11 @@ const ProjectModulesList = () => {
         return (
           <div className="pml-right-info">
             <span className="pml-info-item">
-              <span className="pml-info-label">N/A</span>
-              <span className="pml-info-value pml-info-na">—</span>
-            </span>
-            <span className="pml-info-divider">|</span>
-            <span className="pml-info-item">
-              <span className="pml-info-label">N/A</span>
-              <span className="pml-info-value pml-info-na">—</span>
+              
+
+              <span className="pml-info-value">
+                N/A -
+              </span>
             </span>
           </div>
         );
@@ -478,186 +400,406 @@ const ProjectModulesList = () => {
     }
   };
 
-  const renderTree = (items, level = 0) => {
-    return items.map((item) => {
-      const hasChildren = item.children && item.children.length > 0;
-      const isOpen = expanded[item.id];
-      const indent = getIndentLevel(item.type);
-      const isDropdownOpen = openDropdown === item.id;
+  // ==========================================
+  // RECURSIVE TREE RENDER
+  // parentIndex examples:
+  // 1
+  // 1.1
+  // 1.1.1
+  // 1.1.1.1
+  // ==========================================
 
-      return (
-        <div className="pml-module-group" key={item.id}>
+  const renderTree = (
+    items = [],
+    level = 0,
+    parentIndex = ""
+  ) => {
+    return items.map(
+      (item, itemIndex) => {
+        const displayIndex =
+          parentIndex
+            ? `${parentIndex}.${
+                itemIndex + 1
+              }`
+            : `${itemIndex + 1}`;
+
+        const hasChildren =
+          Array.isArray(
+            item.children
+          ) &&
+          item.children.length > 0;
+
+        const isOpen =
+          expanded[item.id];
+
+        const indent =
+          getIndentLevel(level);
+
+        const isDropdownOpen =
+          openDropdown === item.id;
+
+        const progress =
+          item.assignment_summary
+            ?.percentage ?? 0;
+
+        return (
           <div
-            className={`pml-row pml-row--${item.type}`}
-            style={{ paddingLeft: `${indent + 4}px` }}
+            className="pml-module-group"
+            key={item.id}
           >
-            <button
-              type="button"
-              className="pml-expand-btn"
-              onClick={() => hasChildren && toggleExpand(item.id)}
-              aria-label={isOpen ? "Collapse" : "Expand"}
+            <div
+              className={`
+                pml-row
+                pml-row--${item.type}
+              `}
+              style={{
+                paddingLeft:
+                  `${indent + 4}px`,
+              }}
             >
-              {hasChildren ? (
-                isOpen ? (
-                  <ChevronDown size={15} />
+              {/* Expand Button */}
+              <button
+                type="button"
+                className="pml-expand-btn"
+                onClick={() =>
+                  hasChildren &&
+                  toggleExpand(item.id)
+                }
+                aria-label={
+                  isOpen
+                    ? "Collapse"
+                    : "Expand"
+                }
+              >
+                {hasChildren ? (
+                  isOpen ? (
+                    <ChevronDown
+                      size={15}
+                    />
+                  ) : (
+                    <ChevronRight
+                      size={15}
+                    />
+                  )
                 ) : (
-                  <ChevronRight size={15} />
-                )
-              ) : (
-                <span
-                  className="pml-expand-btn--disabled"
-                  style={{ width: 15, display: "inline-block" }}
-                >
-                  •
-                </span>
-              )}
-            </button>
+                  <span
+                    className="
+                      pml-expand-btn--disabled
+                    "
+                    style={{
+                      width: 15,
+                      display:
+                        "inline-block",
+                    }}
+                  >
+                    •
+                  </span>
+                )}
+              </button>
 
-            {getIcon(item.type)}
+              {/* Type Icon */}
+              {getIcon(item.type)}
 
-            <span
-              className={`pml-row-title ${item.type === "subtask" ? "pml-row-title--subtask" : ""}`}
-            >
-              {item.index} {item.title}
-            </span>
-
-            {item.status && (
-              <span className={`pml-status-pill ${STATUS_CLASS[item.status]}`}>
-                {item.status}
+              {/* Title */}
+              <span
+                className={`
+                  pml-row-title
+                  ${
+                    item.type ===
+                    "subtask"
+                      ? "pml-row-title--subtask"
+                      : ""
+                  }
+                `}
+                title={item.title}
+              >
+              
+                {item.title}
               </span>
-            )}
 
-            {item.progress !== undefined && (
+              {/* Status */}
+              <span
+                className={`
+                  pml-status-pill
+                  ${getStatusClass(
+                    item.status
+                  )}
+                `}
+              >
+                {formatStatus(
+                  item.status
+                )}
+              </span>
+
+              {/* Progress */}
               <div className="pml-progress-wrap">
                 <div className="pml-progress-track">
                   <div
-                    className={`pml-progress-fill ${PROGRESS_CLASS[item.status]}`}
-                    style={{ width: `${item.progress}%` }}
+                    className={`
+                      pml-progress-fill
+                      ${getProgressClass(
+                        progress
+                      )}
+                    `}
+                    style={{
+                      width:
+                        `${progress}%`,
+                    }}
                   />
                 </div>
-                <span className="pml-progress-pct">{item.progress}%</span>
+
+                <span className="pml-progress-pct">
+                  {progress}%
+                </span>
               </div>
-            )}
 
-            {/* Right side info - counts */}
-            <div className="pml-right-section">{getRightInfo(item)}</div>
+              {/* Right Side Counts */}
+              <div className="pml-right-section">
+                {getRightInfo(item)}
+              </div>
 
-            {/* Dropdown */}
-            <div className="pml-dropdown-wrapper">
-              <button
-                type="button"
-                className="pml-more-btn"
-                onClick={() => toggleDropdown(item.id)}
-                aria-label="More options"
-              >
-                <MoreVertical size={16} />
-              </button>
+              {/* Dropdown */}
+              <div className="pml-dropdown-wrapper">
+                <button
+                  type="button"
+                  className="pml-more-btn"
+                  onClick={(
+                    event
+                  ) => {
+                    event.stopPropagation();
 
-              {isDropdownOpen && (
-                <div className="pml-dropdown-menu">
-                  <button
-                    className="pml-dropdown-item"
-                    onClick={() => handleDropdownAction("View", item)}
-                  >
-                    <Eye size={15} />
-                    View
-                  </button>
-                  <button
-                    className="pml-dropdown-item"
-                    onClick={() => handleDropdownAction("Assigned", item)}
-                  >
-                    <UserPlus size={15} />
-                    Assigned
-                  </button>
-                  <button
-                    className="pml-dropdown-item"
-                    onClick={() => handleDropdownAction("Create", item)}
-                  >
-                    <PlusCircle size={15} />
-                    Create
-                  </button>
+                    toggleDropdown(
+                      item.id
+                    );
+                  }}
+                  aria-label="More options"
+                >
+                  <MoreVertical
+                    size={16}
+                  />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="pml-dropdown-menu">
+                    <button
+                      type="button"
+                      className="pml-dropdown-item"
+                      onClick={() =>
+                        handleDropdownAction(
+                          "View",
+                          item
+                        )
+                      }
+                    >
+                      <Eye size={15} />
+                      View
+                    </button>
+
+                    {/* <button
+                      type="button"
+                      className="pml-dropdown-item"
+                      onClick={() =>
+                        handleDropdownAction(
+                          "Assigned",
+                          item
+                        )
+                      }
+                    >
+                      <UserPlus
+                        size={15}
+                      />
+                      Assigned
+                    </button> */}
+
+                    {/* <button
+                      type="button"
+                      className="pml-dropdown-item"
+                      onClick={() =>
+                        handleDropdownAction(
+                          "Create",
+                          item
+                        )
+                      }
+                    >
+                      <PlusCircle
+                        size={15}
+                      />
+                      Create
+                    </button> */}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recursive Children */}
+            {hasChildren &&
+              isOpen && (
+                <div className="pml-children">
+                  {renderTree(
+                    item.children,
+                    level + 1,
+                    displayIndex
+                  )}
                 </div>
               )}
-            </div>
           </div>
-
-          {hasChildren && isOpen && (
-            <div className="pml-children">
-              {renderTree(item.children, level + 1)}
-            </div>
-          )}
-        </div>
-      );
-    });
+        );
+      }
+    );
   };
 
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".pml-dropdown-wrapper")) {
+  // ==========================================
+  // CLOSE DROPDOWN OUTSIDE
+  // ==========================================
+
+  useEffect(() => {
+    const handleClickOutside = (
+      event
+    ) => {
+      if (
+        !event.target.closest(
+          ".pml-dropdown-wrapper"
+        )
+      ) {
         setOpenDropdown(null);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+
+    document.addEventListener(
+      "click",
+      handleClickOutside
+    );
+
+    return () =>
+      document.removeEventListener(
+        "click",
+        handleClickOutside
+      );
   }, []);
+
+  // ==========================================
+  // RETURN
+  // ==========================================
 
   return (
     <div className="pml-card">
       {/* Header */}
       <div className="pml-header">
         <div className="pml-title">
-          <h3>Project Modules</h3>
-          <span className="pml-count-badge">{MODULES.length}</span>
+          <h3>
+            Project Modules
+          </h3>
+
+          <span className="pml-count-badge">
+            {modulesInfo.length}
+          </span>
         </div>
 
         <div className="pml-controls">
+          {/* Search */}
           <div className="pml-search-box">
             <Search size={14} />
+
             <input
               type="text"
-              placeholder="Search modules..."
+              placeholder="Search modules, tasks..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
             />
           </div>
 
+          {/* Status Filter */}
           <div className="pml-select-wrap">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value
+                )
+              }
             >
-              <option>All Status</option>
-              <option>Completed</option>
-              <option>In Progress</option>
-              <option>Pending</option>
+              <option value="All Status">
+                All Status
+              </option>
+
+              <option value="open">
+                Open
+              </option>
+
+              <option value="in_progress">
+                In Progress
+              </option>
+
+              <option value="completed">
+                Completed
+              </option>
             </select>
-            <CaretDown size={14} className="pml-select-caret" />
+
+            <CaretDown
+              size={14}
+              className="pml-select-caret"
+            />
           </div>
 
+          {/* View Toggle */}
           <div className="pml-view-toggle">
             <button
               type="button"
-              className={viewMode === "list" ? "pml-view-btn--active" : ""}
-              onClick={() => setViewMode("list")}
+              className={
+                viewMode === "list"
+                  ? "pml-view-btn--active"
+                  : ""
+              }
+              onClick={() =>
+                setViewMode("list")
+              }
               aria-label="List view"
             >
               <List size={15} />
             </button>
+
             <button
               type="button"
-              className={viewMode === "grid" ? "pml-view-btn--active" : ""}
-              onClick={() => setViewMode("grid")}
+              className={
+                viewMode === "grid"
+                  ? "pml-view-btn--active"
+                  : ""
+              }
+              onClick={() =>
+                setViewMode("grid")
+              }
               aria-label="Grid view"
             >
-              <LayoutGrid size={15} />
+              <LayoutGrid
+                size={15}
+              />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Tree list */}
-      <div className="pml-list">{renderTree(MODULES)}</div>
+      {/* Dynamic Tree */}
+      <div className="pml-list">
+        {filteredModules.length >
+        0 ? (
+          renderTree(
+            filteredModules
+          )
+        ) : (
+          <div className="pml-empty-state">
+            <Folder size={32} />
+
+            <p>
+              No project items
+              found
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

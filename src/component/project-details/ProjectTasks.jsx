@@ -1,108 +1,455 @@
-import React, { useState } from "react";
-import "./ProjectTasks.css";
-import { Search, Plus, ChevronDown, User } from "lucide-react";
+import React, {
+  useMemo,
+  useState,
+} from "react";
 
-const TASKS = [
-  { id: 1, title: "Finalize homepage wireframes", module: "Design Phase", assignee: "Jane Smith", due: "12 Jul 2026", priority: "High", status: "In Progress" },
-  { id: 2, title: "API contract review with backend", module: "Development Phase", assignee: "Mike Johnson", due: "14 Jul 2026", priority: "High", status: "To Do" },
-  { id: 3, title: "Set up CI/CD pipeline", module: "Development Phase", assignee: "John Doe", due: "18 Jul 2026", priority: "Medium", status: "To Do" },
-  { id: 4, title: "Draft QA test plan", module: "Testing Phase", assignee: "Sarah Wilson", due: "22 Jul 2026", priority: "Medium", status: "To Do" },
-  { id: 5, title: "Requirements sign-off", module: "Project Planning", assignee: "John Doe", due: "05 Mar 2026", priority: "High", status: "Completed" },
-  { id: 6, title: "Resource allocation plan", module: "Project Planning", assignee: "Jane Smith", due: "08 Mar 2026", priority: "Low", status: "Completed" },
-  { id: 7, title: "Technical architecture doc", module: "Design Phase", assignee: "Mike Johnson", due: "28 Jun 2026", priority: "Medium", status: "In Progress" },
-  { id: 8, title: "Deployment checklist", module: "Deployment Phase", assignee: "Sarah Wilson", due: "15 Feb 2027", priority: "Low", status: "To Do" },
-];
+import "./ProjectTasks.css";
+
+import {
+  Search,
+  Plus,
+  ChevronDown,
+  Users,
+} from "lucide-react";
+
+// ==========================================
+// STATUS CLASS
+// ==========================================
 
 const STATUS_CLASS = {
-  "To Do": "pt-status--todo",
-  "In Progress": "pt-status--progress",
-  Completed: "pt-status--completed",
+  open: "pt-status--todo",
+  todo: "pt-status--todo",
+  "to do": "pt-status--todo",
+
+  in_progress:
+    "pt-status--progress",
+  "in progress":
+    "pt-status--progress",
+
+  completed:
+    "pt-status--completed",
+  complete:
+    "pt-status--completed",
+  done:
+    "pt-status--completed",
+
+  review:
+    "pt-status--review",
+  "in review":
+    "pt-status--review",
+
+  on_hold:
+    "pt-status--on-hold",
+  "on hold":
+    "pt-status--on-hold",
 };
+
+// ==========================================
+// PRIORITY CLASS
+// ==========================================
 
 const PRIORITY_CLASS = {
   High: "pt-priority--high",
-  Medium: "pt-priority--medium",
+  Medium:
+    "pt-priority--medium",
   Low: "pt-priority--low",
 };
 
-const ProjectTasks = () => {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Status");
+// ==========================================
+// FORMAT STATUS
+// ==========================================
 
-  const filteredTasks = TASKS.filter((t) => {
-    const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "All Status" || t.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+const formatStatus = (status) => {
+  if (!status) {
+    return "Unknown";
+  }
+
+  return status
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) =>
+      char.toUpperCase()
+    );
+};
+
+// ==========================================
+// FORMAT DATE
+// 2026-07-14 -> 14 Jul 2026
+// ==========================================
+
+const formatDate = (date) => {
+  if (!date) {
+    return "—";
+  }
+
+  const parsedDate =
+    new Date(`${date}T00:00:00`);
+
+  if (
+    Number.isNaN(
+      parsedDate.getTime()
+    )
+  ) {
+    return date;
+  }
+
+  return parsedDate.toLocaleDateString(
+    "en-GB",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+};
+
+// ==========================================
+// PROJECT TASKS
+// ==========================================
+
+const ProjectTasks = ({
+  tasksData = [],
+}) => {
+  const [search, setSearch] =
+    useState("");
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState("all");
+
+  console.log(
+    "Tasks Data in ProjectTasks:",
+    tasksData
+  );
+
+  // ==========================================
+  // GET AVAILABLE STATUSES
+  // ==========================================
+
+  const availableStatuses =
+    useMemo(() => {
+      return [
+        ...new Set(
+          tasksData
+            .map(
+              (task) =>
+                task.status
+            )
+            .filter(Boolean)
+        ),
+      ];
+    }, [tasksData]);
+
+  // ==========================================
+  // FILTER TASKS
+  // ==========================================
+
+  const filteredTasks =
+    useMemo(() => {
+      const normalizedSearch =
+        search
+          .trim()
+          .toLowerCase();
+
+      return tasksData.filter(
+        (task) => {
+          const taskTitle =
+            task.title
+              ?.toLowerCase() ||
+            "";
+
+          const taskId =
+            task.unique_id
+              ?.toLowerCase() ||
+            "";
+
+          const priority =
+            task.priority
+              ?.toLowerCase() ||
+            "";
+
+          const matchesSearch =
+            !normalizedSearch ||
+            taskTitle.includes(
+              normalizedSearch
+            ) ||
+            taskId.includes(
+              normalizedSearch
+            ) ||
+            priority.includes(
+              normalizedSearch
+            );
+
+          const matchesStatus =
+            statusFilter ===
+              "all" ||
+            task.status ===
+              statusFilter;
+
+          return (
+            matchesSearch &&
+            matchesStatus
+          );
+        }
+      );
+    }, [
+      tasksData,
+      search,
+      statusFilter,
+    ]);
 
   return (
     <div className="pt-card">
+      {/* =========================
+          HEADER
+      ========================= */}
+
       <div className="pt-header">
-        <h3>Tasks</h3>
+        <div className="pt-title-wrap">
+          <h3>Tasks</h3>
+
+          <span className="pt-count">
+            {tasksData.length}
+          </span>
+        </div>
+
         <div className="pt-controls">
+          {/* Search */}
+
           <div className="pt-search-box">
             <Search size={14} />
+
             <input
               type="text"
               placeholder="Search tasks..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
             />
           </div>
 
+          {/* Status Filter */}
+
           <div className="pt-select-wrap">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option>All Status</option>
-              <option>To Do</option>
-              <option>In Progress</option>
-              <option>Completed</option>
+            <select
+              value={
+                statusFilter
+              }
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value
+                )
+              }
+            >
+              <option value="all">
+                All Status
+              </option>
+
+              {availableStatuses.map(
+                (status) => (
+                  <option
+                    key={status}
+                    value={status}
+                  >
+                    {formatStatus(
+                      status
+                    )}
+                  </option>
+                )
+              )}
             </select>
-            <ChevronDown size={14} className="pt-select-caret" />
+
+            <ChevronDown
+              size={14}
+              className="pt-select-caret"
+            />
           </div>
 
-          <button type="button" className="pt-add-btn">
+          {/* Add Task */}
+
+          <button
+            type="button"
+            className="pt-add-btn"
+          >
             <Plus size={14} />
             Add Task
           </button>
         </div>
       </div>
 
+      {/* =========================
+          TABLE
+      ========================= */}
+
       <div className="pt-table-scroll">
         <table className="pt-table">
           <thead>
             <tr>
               <th>TASK</th>
-              <th>MODULE</th>
-              <th>ASSIGNEE</th>
-              <th>DUE DATE</th>
-              <th>PRIORITY</th>
-              <th>STATUS</th>
+
+              <th>
+                TASK ID
+              </th>
+
+              <th>
+                ASSIGNED
+              </th>
+
+              <th>
+                DUE DATE
+              </th>
+
+              <th>
+                PRIORITY
+              </th>
+
+              <th>
+                STATUS
+              </th>
             </tr>
           </thead>
+
           <tbody>
-            {filteredTasks.map((t) => (
-              <tr key={t.id}>
-                <td className="pt-task-title">{t.title}</td>
-                <td className="pt-module-cell">{t.module}</td>
-                <td>
-                  <span className="pt-assignee">
-                    <User size={12} />
-                    {t.assignee}
-                  </span>
-                </td>
-                <td>{t.due}</td>
-                <td>
-                  <span className={`pt-pill ${PRIORITY_CLASS[t.priority]}`}>{t.priority}</span>
-                </td>
-                <td>
-                  <span className={`pt-pill ${STATUS_CLASS[t.status]}`}>{t.status}</span>
-                </td>
-              </tr>
-            ))}
-            {filteredTasks.length === 0 && (
+            {filteredTasks.map(
+              (task) => {
+                const statusKey =
+                  task.status
+                    ?.toLowerCase();
+
+                const statusClass =
+                  STATUS_CLASS[
+                    statusKey
+                  ] ||
+                  "pt-status--todo";
+
+                const priorityClass =
+                  PRIORITY_CLASS[
+                    task.priority
+                  ] || "";
+
+                const assignedCount =
+                  task
+                    .assignment_summary
+                    ?.total_employee ??
+                  0;
+
+                return (
+                  <tr key={task.id}>
+                    {/* Task Title */}
+
+                    <td>
+                      <div className="pt-task-info">
+                        <span className="pt-task-title">
+                          {
+                            task.title
+                          }
+                        </span>
+
+                        {task
+                          .children
+                          ?.length >
+                          0 && (
+                          <span className="pt-subtask-text">
+                            {
+                              task
+                                .children
+                                .length
+                            }{" "}
+                            subtask
+                            {task
+                              .children
+                              .length >
+                            1
+                              ? "s"
+                              : ""}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Task ID */}
+
+                    <td>
+                      <span className="pt-task-id">
+                        {task.unique_id ||
+                          "—"}
+                      </span>
+                    </td>
+
+                    {/* Assigned Employees */}
+
+                    <td>
+                      <span className="pt-assignee">
+                        <Users
+                          size={13}
+                        />
+
+                        {assignedCount ===
+                        0
+                          ? "Unassigned"
+                          : `${assignedCount} Assigned`}
+                      </span>
+                    </td>
+
+                    {/* Due Date */}
+
+                    <td>
+                      <span className="pt-due-date">
+                        {formatDate(
+                          task.end_date
+                        )}
+                      </span>
+                    </td>
+
+                    {/* Priority */}
+
+                    <td>
+                      <span
+                        className={`
+                          pt-pill
+                          ${priorityClass}
+                        `}
+                      >
+                        {task.priority ||
+                          "—"}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+
+                    <td>
+                      <span
+                        className={`
+                          pt-pill
+                          ${statusClass}
+                        `}
+                      >
+                        {formatStatus(
+                          task.status
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              }
+            )}
+
+            {/* Empty State */}
+
+            {filteredTasks.length ===
+              0 && (
               <tr>
-                <td colSpan={6} className="pt-empty">
-                  No tasks match your search.
+                <td
+                  colSpan={6}
+                  className="pt-empty"
+                >
+                  {tasksData.length ===
+                  0
+                    ? "No tasks found for this project."
+                    : "No tasks match your search or filter."}
                 </td>
               </tr>
             )}

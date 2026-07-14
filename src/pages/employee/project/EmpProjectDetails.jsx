@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./EmpProjectDetails.css";
 import { useParams } from "react-router-dom";
 
@@ -18,65 +18,102 @@ import ProjectFiles from "../../../component/project-details/ProjectFiles";
 import ProjectTimeline from "../../../component/project-details/ProjectTimeline";
 import ProjectReports from "../../../component/project-details/ProjectReports";
 import ProjectTeam from "../../../component/project-details/ProjectTeam";
+import { WorkspaceContext } from "../../../context/WorkspaceContext";
+import { ClipboardList } from "lucide-react";
+
+const getAllTasks = (items = []) => {
+  let tasks = [];
+
+  items.forEach((item) => {
+    if (item.type === "task") {
+      tasks.push(item);
+    }
+
+    if (
+      Array.isArray(item.children) &&
+      item.children.length > 0
+    ) {
+      tasks = [
+        ...tasks,
+        ...getAllTasks(item.children),
+      ];
+    }
+  });
+
+  return tasks;
+};
 
 const EmpProjectDetails = () => {
+  const { treeData, getProjectTree, treeLoading } =
+    useContext(WorkspaceContext);
   const { projectId } = useParams();
 
   const [activeTab, setActiveTab] = useState("overview");
 
+  useEffect(() => {
+    if (projectId) {
+      getProjectTree(projectId);
+    }
+  }, [projectId, getProjectTree]);
+  // console.log("Tree Data in EmpProjectDetails:", treeData);
+
+  // Only recalculates when treeData changes
+  const taskData = useMemo(() => {
+    return getAllTasks(treeData);
+  }, [treeData]);
+
+  console.log("Tree Data:", treeData);
+  console.log("Only Tasks:", taskData);
+
+  if (treeLoading) {
+    return (
+      <div className="att-overview-card">
+        <div className="att-overview-heading">
+          <ClipboardList size={18} className="att-heading-icon" />
+          <h2>Project Details</h2>
+        </div>
+        <div className="text-center py-5">
+          <div
+            className="spinner-border text-primary"
+            role="status"
+            style={{ width: "3rem", height: "3rem" }}
+          >
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3 text-muted">Loading Project data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="epd-page">
       <div className="epd-main-row">
-
         {/* Left */}
         <div className="epd-col epd-col--left">
+          <ProjectHeader projectName="Website Development" status="Active" />
 
-          <ProjectHeader
-            projectName="Website Development"
-            status="Active"
-          />
-
-          <ProjectTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <ProjectStatsCards />
 
-        
-
           {/* Tab Content */}
-          {activeTab === "overview" && (
-           <ProjectOverview/>
-          )}
+          {activeTab === "overview" && <ProjectOverview />}
 
           {activeTab === "modules" && (
-            <ProjectModulesList />
+            <ProjectModulesList modulesInfo={treeData} />
           )}
 
-          {activeTab === "tasks" && (
-            <ProjectTasks />
-          )}
+          {activeTab === "tasks" && <ProjectTasks tasksData={taskData} />}
 
-          {activeTab === "discussions" && (
-            <ProjectDiscussion />
-          )}
+          {activeTab === "discussions" && <ProjectDiscussion />}
 
-          {activeTab === "team" && (
-            <ProjectTeam />
-          )}
+          {activeTab === "team" && <ProjectTeam />}
 
-          {activeTab === "files" && (
-            <ProjectFiles />
-          )}
+          {activeTab === "files" && <ProjectFiles />}
 
-          {activeTab === "timeline" && (
-            <ProjectTimeline />
-          )}
+          {activeTab === "timeline" && <ProjectTimeline />}
 
-          {activeTab === "reports" && (
-            <ProjectReports />
-          )}
-
+          {activeTab === "reports" && <ProjectReports />}
         </div>
 
         {/* Right */}
@@ -85,7 +122,6 @@ const EmpProjectDetails = () => {
           <RecentActivities />
           <ProjectProgressDonut />
         </div>
-
       </div>
     </div>
   );

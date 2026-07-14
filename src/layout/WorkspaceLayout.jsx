@@ -10,8 +10,7 @@ import WorkspaceSidebar from
 
 import { Outlet } from "react-router-dom";
 
-import WorkspaceProvider from
-"../context/WorkspaceContext";
+
 
 const WorkspaceLayout = () => {
 
@@ -79,7 +78,7 @@ const WorkspaceLayout = () => {
 
   return (
 
-    <WorkspaceProvider>
+  
 
       <div className="app">
 
@@ -127,7 +126,7 @@ const WorkspaceLayout = () => {
 
       </div>
 
-    </WorkspaceProvider>
+   
   );
 };
 
