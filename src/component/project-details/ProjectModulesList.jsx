@@ -12,6 +12,9 @@ import {
   List,
   LayoutGrid,
   MoreVertical,
+  Eye,
+  UserPlus,
+  PlusCircle,
 } from "lucide-react";
 
 const MODULES = [
@@ -309,7 +312,9 @@ const getIcon = (type) => {
     case "module":
       return <Folder size={16} className="pml-folder-icon" />;
     case "submodule":
-      return <Folder size={14} className="pml-folder-icon pml-folder-icon--sm" />;
+      return (
+        <Folder size={14} className="pml-folder-icon pml-folder-icon--sm" />
+      );
     case "task":
       return <FileText size={14} className="pml-file-icon" />;
     case "subtask":
@@ -334,49 +339,41 @@ const getIndentLevel = (type) => {
   }
 };
 
-// Helper function to count total subtasks in a task
+// Helper functions for counting
 const countSubtasks = (item) => {
   if (!item.children) return 0;
   let count = 0;
-  item.children.forEach(child => {
-    if (child.type === 'subtask') count++;
+  item.children.forEach((child) => {
+    if (child.type === "subtask") count++;
     if (child.children) count += countSubtasks(child);
   });
   return count;
 };
 
-// Helper function to count total tasks in a submodule/module
 const countTasks = (item) => {
   if (!item.children) return 0;
   let count = 0;
-  item.children.forEach(child => {
-    if (child.type === 'task') count++;
+  item.children.forEach((child) => {
+    if (child.type === "task") count++;
     if (child.children) count += countTasks(child);
   });
   return count;
 };
 
-// Helper function to count total submodules in a module
 const countSubmodules = (item) => {
   if (!item.children) return 0;
   let count = 0;
-  item.children.forEach(child => {
-    if (child.type === 'submodule') count++;
+  item.children.forEach((child) => {
+    if (child.type === "submodule") count++;
     if (child.children) count += countSubmodules(child);
   });
   return count;
 };
 
-// Helper function to count direct children by type
-const countDirectChildren = (item, type) => {
-  if (!item.children) return 0;
-  return item.children.filter(child => child.type === type).length;
-};
-
 const ProjectModulesList = () => {
-  const [expanded, setExpanded] = useState({ 
-    m1: true, 
-    m2: true, 
+  const [expanded, setExpanded] = useState({
+    m1: true,
+    m2: true,
     m3: true,
     "m1-1": true,
     "m1-2": true,
@@ -392,9 +389,20 @@ const ProjectModulesList = () => {
   const [viewMode, setViewMode] = useState("list");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [search, setSearch] = useState("");
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const toggleExpand = (id) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  const handleDropdownAction = (action, item) => {
+    console.log(`${action} clicked for:`, item.title);
+    setOpenDropdown(null);
+    // Add your action logic here
   };
 
   // Get right side info based on item type
@@ -475,10 +483,11 @@ const ProjectModulesList = () => {
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = expanded[item.id];
       const indent = getIndentLevel(item.type);
+      const isDropdownOpen = openDropdown === item.id;
 
       return (
         <div className="pml-module-group" key={item.id}>
-          <div 
+          <div
             className={`pml-row pml-row--${item.type}`}
             style={{ paddingLeft: `${indent + 4}px` }}
           >
@@ -489,15 +498,26 @@ const ProjectModulesList = () => {
               aria-label={isOpen ? "Collapse" : "Expand"}
             >
               {hasChildren ? (
-                isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />
+                isOpen ? (
+                  <ChevronDown size={15} />
+                ) : (
+                  <ChevronRight size={15} />
+                )
               ) : (
-                <span className="pml-expand-btn--disabled" style={{ width: 15, display: 'inline-block' }}>•</span>
+                <span
+                  className="pml-expand-btn--disabled"
+                  style={{ width: 15, display: "inline-block" }}
+                >
+                  •
+                </span>
               )}
             </button>
 
             {getIcon(item.type)}
 
-            <span className={`pml-row-title ${item.type === 'subtask' ? 'pml-row-title--subtask' : ''}`}>
+            <span
+              className={`pml-row-title ${item.type === "subtask" ? "pml-row-title--subtask" : ""}`}
+            >
               {item.index} {item.title}
             </span>
 
@@ -520,13 +540,45 @@ const ProjectModulesList = () => {
             )}
 
             {/* Right side info - counts */}
-            <div className="pml-right-section">
-              {getRightInfo(item)}
-            </div>
+            <div className="pml-right-section">{getRightInfo(item)}</div>
 
-            <button type="button" className="pml-more-btn" aria-label="More options">
-              <MoreVertical size={16} />
-            </button>
+            {/* Dropdown */}
+            <div className="pml-dropdown-wrapper">
+              <button
+                type="button"
+                className="pml-more-btn"
+                onClick={() => toggleDropdown(item.id)}
+                aria-label="More options"
+              >
+                <MoreVertical size={16} />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="pml-dropdown-menu">
+                  <button
+                    className="pml-dropdown-item"
+                    onClick={() => handleDropdownAction("View", item)}
+                  >
+                    <Eye size={15} />
+                    View
+                  </button>
+                  <button
+                    className="pml-dropdown-item"
+                    onClick={() => handleDropdownAction("Assigned", item)}
+                  >
+                    <UserPlus size={15} />
+                    Assigned
+                  </button>
+                  <button
+                    className="pml-dropdown-item"
+                    onClick={() => handleDropdownAction("Create", item)}
+                  >
+                    <PlusCircle size={15} />
+                    Create
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {hasChildren && isOpen && (
@@ -538,6 +590,17 @@ const ProjectModulesList = () => {
       );
     });
   };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".pml-dropdown-wrapper")) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <div className="pml-card">
@@ -594,9 +657,7 @@ const ProjectModulesList = () => {
       </div>
 
       {/* Tree list */}
-      <div className="pml-list">
-        {renderTree(MODULES)}
-      </div>
+      <div className="pml-list">{renderTree(MODULES)}</div>
     </div>
   );
 };
