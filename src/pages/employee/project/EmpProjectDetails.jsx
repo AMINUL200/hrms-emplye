@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import "./EmpProjectDetails.css";
 import { useParams } from "react-router-dom";
 
@@ -20,6 +26,8 @@ import ProjectReports from "../../../component/project-details/ProjectReports";
 import ProjectTeam from "../../../component/project-details/ProjectTeam";
 import { WorkspaceContext } from "../../../context/WorkspaceContext";
 import { ClipboardList } from "lucide-react";
+import { AuthContext } from "../../../context/AuthContex";
+import axios from "axios";
 
 const getAllTasks = (items = []) => {
   let tasks = [];
@@ -29,14 +37,8 @@ const getAllTasks = (items = []) => {
       tasks.push(item);
     }
 
-    if (
-      Array.isArray(item.children) &&
-      item.children.length > 0
-    ) {
-      tasks = [
-        ...tasks,
-        ...getAllTasks(item.children),
-      ];
+    if (Array.isArray(item.children) && item.children.length > 0) {
+      tasks = [...tasks, ...getAllTasks(item.children)];
     }
   });
 
@@ -44,28 +46,66 @@ const getAllTasks = (items = []) => {
 };
 
 const EmpProjectDetails = () => {
+  const { token } = useContext(AuthContext);
+  const api_url = import.meta.env.VITE_API_URL;
   const { treeData, getProjectTree, treeLoading } =
     useContext(WorkspaceContext);
   const { projectId } = useParams();
+  const [projectDetails, setProjectDetails] = useState(null);
+  const [projectDetailsLoading, setProjectDetailsLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("overview");
 
+  const getProjectDetails = useCallback(
+    async (projectId) => {
+      try {
+        setProjectDetailsLoading(true);
+
+        const response = await axios.get(
+          `${api_url}/emp-project-overview/${projectId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              noCache: true,
+            },
+          },
+        );
+
+        if (response.data.status === 1) {
+          setProjectDetails(response.data.data);
+          console.log("Project Details:", response.data.data);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setProjectDetailsLoading(false);
+      }
+    },
+    [api_url, token],
+  );
+
   useEffect(() => {
-    if (projectId) {
-      getProjectTree(projectId);
-    }
-  }, [projectId, getProjectTree]);
+    if (!projectId) return;
+
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          getProjectTree(projectId),
+          getProjectDetails(projectId),
+        ]);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadData();
+  }, [projectId, getProjectTree, getProjectDetails]);
   // console.log("Tree Data in EmpProjectDetails:", treeData);
 
   // Only recalculates when treeData changes
-  const taskData = useMemo(() => {
-    return getAllTasks(treeData);
-  }, [treeData]);
+ 
 
-  console.log("Tree Data:", treeData);
-  console.log("Only Tasks:", taskData);
-
-  if (treeLoading) {
+  if (treeLoading || projectDetailsLoading) {
     return (
       <div className="att-overview-card">
         <div className="att-overview-heading">
@@ -91,19 +131,19 @@ const EmpProjectDetails = () => {
       <div className="epd-main-row">
         {/* Left */}
         <div className="epd-col epd-col--left">
-          <ProjectHeader projectName="Website Development" status="Active" />
+          <ProjectHeader  projectDetails={projectDetails?.project}  />
 
           <ProjectTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <ProjectStatsCards />
 
           {/* Tab Content */}
-          {activeTab === "overview" && <ProjectOverview />}
+          {activeTab === "overview" && <ProjectOverview projectDetails={projectDetails?.project} projectProgress={projectDetails?.project_progress} tasks={projectDetails?.tasks} />}
 
           {activeTab === "modules" && (
             <ProjectModulesList modulesInfo={treeData} />
           )}
 
-          {activeTab === "tasks" && <ProjectTasks tasksData={taskData} />}
+          {activeTab === "tasks" && <ProjectTasks tasksData={projectDetails?.tasks} />}
 
           {activeTab === "discussions" && <ProjectDiscussion />}
 
@@ -118,9 +158,9 @@ const EmpProjectDetails = () => {
 
         {/* Right */}
         <div className="epd-col epd-col--right">
-          <ProjectDetailsPanel />
+          <ProjectDetailsPanel projectDetails={projectDetails?.project} />
           <RecentActivities />
-          <ProjectProgressDonut />
+          <ProjectProgressDonut projectProgress={projectDetails?.project_progress} />
         </div>
       </div>
     </div>

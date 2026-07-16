@@ -1,16 +1,10 @@
-import React, {
-  useMemo,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 
 import "./ProjectTasks.css";
 
-import {
-  Search,
-  Plus,
-  ChevronDown,
-  Users,
-} from "lucide-react";
+import { Search, Plus, ChevronDown, Users, Eye } from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
 
 // ==========================================
 // STATUS CLASS
@@ -21,27 +15,18 @@ const STATUS_CLASS = {
   todo: "pt-status--todo",
   "to do": "pt-status--todo",
 
-  in_progress:
-    "pt-status--progress",
-  "in progress":
-    "pt-status--progress",
+  in_progress: "pt-status--progress",
+  "in progress": "pt-status--progress",
 
-  completed:
-    "pt-status--completed",
-  complete:
-    "pt-status--completed",
-  done:
-    "pt-status--completed",
+  completed: "pt-status--completed",
+  complete: "pt-status--completed",
+  done: "pt-status--completed",
 
-  review:
-    "pt-status--review",
-  "in review":
-    "pt-status--review",
+  review: "pt-status--review",
+  "in review": "pt-status--review",
 
-  on_hold:
-    "pt-status--on-hold",
-  "on hold":
-    "pt-status--on-hold",
+  on_hold: "pt-status--on-hold",
+  "on hold": "pt-status--on-hold",
 };
 
 // ==========================================
@@ -50,8 +35,7 @@ const STATUS_CLASS = {
 
 const PRIORITY_CLASS = {
   High: "pt-priority--high",
-  Medium:
-    "pt-priority--medium",
+  Medium: "pt-priority--medium",
   Low: "pt-priority--low",
 };
 
@@ -66,9 +50,7 @@ const formatStatus = (status) => {
 
   return status
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase()
-    );
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 // ==========================================
@@ -81,122 +63,84 @@ const formatDate = (date) => {
     return "—";
   }
 
-  const parsedDate =
-    new Date(`${date}T00:00:00`);
+  const parsedDate = new Date(`${date}T00:00:00`);
 
-  if (
-    Number.isNaN(
-      parsedDate.getTime()
-    )
-  ) {
+  if (Number.isNaN(parsedDate.getTime())) {
     return date;
   }
 
-  return parsedDate.toLocaleDateString(
-    "en-GB",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }
-  );
+  return parsedDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 };
 
 // ==========================================
 // PROJECT TASKS
 // ==========================================
 
-const ProjectTasks = ({
-  tasksData = [],
-}) => {
-  const [search, setSearch] =
-    useState("");
+const ProjectTasks = ({ tasksData = [], projectId = null }) => {
+  const navigate = useNavigate();
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState("all");
+  const [search, setSearch] = useState("");
 
-  console.log(
-    "Tasks Data in ProjectTasks:",
-    tasksData
-  );
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  console.log("Tasks Data in ProjectTasks:", tasksData);
 
   // ==========================================
   // GET AVAILABLE STATUSES
   // ==========================================
 
-  const availableStatuses =
-    useMemo(() => {
-      return [
-        ...new Set(
-          tasksData
-            .map(
-              (task) =>
-                task.status
-            )
-            .filter(Boolean)
-        ),
-      ];
-    }, [tasksData]);
+  const availableStatuses = useMemo(() => {
+    return [...new Set(tasksData.map((task) => task.status).filter(Boolean))];
+  }, [tasksData]);
 
   // ==========================================
   // FILTER TASKS
   // ==========================================
 
-  const filteredTasks =
-    useMemo(() => {
-      const normalizedSearch =
-        search
-          .trim()
-          .toLowerCase();
+  const filteredTasks = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-      return tasksData.filter(
-        (task) => {
-          const taskTitle =
-            task.title
-              ?.toLowerCase() ||
-            "";
+    return tasksData.filter((task) => {
+      const taskTitle = task.title?.toLowerCase() || "";
 
-          const taskId =
-            task.unique_id
-              ?.toLowerCase() ||
-            "";
+      const taskId = task.unique_id?.toLowerCase() || "";
 
-          const priority =
-            task.priority
-              ?.toLowerCase() ||
-            "";
+      const priority = task.priority?.toLowerCase() || "";
 
-          const matchesSearch =
-            !normalizedSearch ||
-            taskTitle.includes(
-              normalizedSearch
-            ) ||
-            taskId.includes(
-              normalizedSearch
-            ) ||
-            priority.includes(
-              normalizedSearch
-            );
+      const matchesSearch =
+        !normalizedSearch ||
+        taskTitle.includes(normalizedSearch) ||
+        taskId.includes(normalizedSearch) ||
+        priority.includes(normalizedSearch);
 
-          const matchesStatus =
-            statusFilter ===
-              "all" ||
-            task.status ===
-              statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || task.status === statusFilter;
 
-          return (
-            matchesSearch &&
-            matchesStatus
-          );
-        }
-      );
-    }, [
-      tasksData,
-      search,
-      statusFilter,
-    ]);
+      return matchesSearch && matchesStatus;
+    });
+  }, [tasksData, search, statusFilter]);
+
+  // ==========================================
+  // HANDLE VIEW TASK
+  // ==========================================
+
+  const handleViewTask = (task) => {
+    const { project_id, id } = task;
+    // console.log("Navigating to task:", { project_id, id });
+    if (project_id && id) {
+      // Construct the URL
+      const url = `/organization/assigned-project/${project_id}/workspace/${id}`;
+
+      // Open in new tab
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      console.warn("Missing project_id or id for navigation");
+    }
+  };
 
   return (
     <div className="pt-card">
@@ -208,9 +152,7 @@ const ProjectTasks = ({
         <div className="pt-title-wrap">
           <h3>Tasks</h3>
 
-          <span className="pt-count">
-            {tasksData.length}
-          </span>
+          <span className="pt-count">{tasksData.length}</span>
         </div>
 
         <div className="pt-controls">
@@ -223,11 +165,7 @@ const ProjectTasks = ({
               type="text"
               placeholder="Search tasks..."
               value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
@@ -235,45 +173,24 @@ const ProjectTasks = ({
 
           <div className="pt-select-wrap">
             <select
-              value={
-                statusFilter
-              }
-              onChange={(e) =>
-                setStatusFilter(
-                  e.target.value
-                )
-              }
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">
-                All Status
-              </option>
+              <option value="all">All Status</option>
 
-              {availableStatuses.map(
-                (status) => (
-                  <option
-                    key={status}
-                    value={status}
-                  >
-                    {formatStatus(
-                      status
-                    )}
-                  </option>
-                )
-              )}
+              {availableStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {formatStatus(status)}
+                </option>
+              ))}
             </select>
 
-            <ChevronDown
-              size={14}
-              className="pt-select-caret"
-            />
+            <ChevronDown size={14} className="pt-select-caret" />
           </div>
 
           {/* Add Task */}
 
-          <button
-            type="button"
-            className="pt-add-btn"
-          >
+          <button type="button" className="pt-add-btn">
             <Plus size={14} />
             Add Task
           </button>
@@ -289,165 +206,117 @@ const ProjectTasks = ({
           <thead>
             <tr>
               <th>TASK</th>
-
-              <th>
-                TASK ID
-              </th>
-
-              <th>
-                ASSIGNED
-              </th>
-
-              <th>
-                DUE DATE
-              </th>
-
-              <th>
-                PRIORITY
-              </th>
-
-              <th>
-                STATUS
-              </th>
+              <th>TASK ID</th>
+              <th>ASSIGNED</th>
+              <th>DUE DATE</th>
+              <th>PRIORITY</th>
+              <th>STATUS</th>
+              <th>ACTION</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredTasks.map(
-              (task) => {
-                const statusKey =
-                  task.status
-                    ?.toLowerCase();
+            {filteredTasks.map((task) => {
+              const statusKey = task.status?.toLowerCase();
 
-                const statusClass =
-                  STATUS_CLASS[
-                    statusKey
-                  ] ||
-                  "pt-status--todo";
+              const statusClass = STATUS_CLASS[statusKey] || "pt-status--todo";
 
-                const priorityClass =
-                  PRIORITY_CLASS[
-                    task.priority
-                  ] || "";
+              const priorityClass = PRIORITY_CLASS[task.priority] || "";
 
-                const assignedCount =
-                  task
-                    .assignment_summary
-                    ?.total_employee ??
-                  0;
+              const assignedCount =
+                task.assignment_summary?.total_employee ?? 0;
 
-                return (
-                  <tr key={task.id}>
-                    {/* Task Title */}
+              return (
+                <tr key={task.id}>
+                  {/* Task Title */}
 
-                    <td>
-                      <div className="pt-task-info">
-                        <span className="pt-task-title">
-                          {
-                            task.title
-                          }
+                  <td>
+                    <div className="pt-task-info">
+                      <span className="pt-task-title">{task.title}</span>
+
+                      {task.children?.length > 0 && (
+                        <span className="pt-subtask-text">
+                          {task.children.length} subtask
+                          {task.children.length > 1 ? "s" : ""}
                         </span>
+                      )}
+                    </div>
+                  </td>
 
-                        {task
-                          .children
-                          ?.length >
-                          0 && (
-                          <span className="pt-subtask-text">
-                            {
-                              task
-                                .children
-                                .length
-                            }{" "}
-                            subtask
-                            {task
-                              .children
-                              .length >
-                            1
-                              ? "s"
-                              : ""}
-                          </span>
-                        )}
-                      </div>
-                    </td>
+                  {/* Task ID */}
 
-                    {/* Task ID */}
+                  <td>
+                    <span className="pt-task-id">{task.unique_id || "—"}</span>
+                  </td>
 
-                    <td>
-                      <span className="pt-task-id">
-                        {task.unique_id ||
-                          "—"}
-                      </span>
-                    </td>
+                  {/* Assigned Employees */}
 
-                    {/* Assigned Employees */}
+                  <td>
+                    <span className="pt-assignee">
+                      <Users size={13} />
 
-                    <td>
-                      <span className="pt-assignee">
-                        <Users
-                          size={13}
-                        />
+                      {assignedCount === 0
+                        ? "Unassigned"
+                        : `${assignedCount} Assigned`}
+                    </span>
+                  </td>
 
-                        {assignedCount ===
-                        0
-                          ? "Unassigned"
-                          : `${assignedCount} Assigned`}
-                      </span>
-                    </td>
+                  {/* Due Date */}
 
-                    {/* Due Date */}
+                  <td>
+                    <span className="pt-due-date">
+                      {formatDate(task.end_date)}
+                    </span>
+                  </td>
 
-                    <td>
-                      <span className="pt-due-date">
-                        {formatDate(
-                          task.end_date
-                        )}
-                      </span>
-                    </td>
+                  {/* Priority */}
 
-                    {/* Priority */}
-
-                    <td>
-                      <span
-                        className={`
+                  <td>
+                    <span
+                      className={`
                           pt-pill
                           ${priorityClass}
                         `}
-                      >
-                        {task.priority ||
-                          "—"}
-                      </span>
-                    </td>
+                    >
+                      {task.priority || "—"}
+                    </span>
+                  </td>
 
-                    {/* Status */}
+                  {/* Status */}
 
-                    <td>
-                      <span
-                        className={`
+                  <td>
+                    <span
+                      className={`
                           pt-pill
                           ${statusClass}
                         `}
-                      >
-                        {formatStatus(
-                          task.status
-                        )}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              }
-            )}
+                    >
+                      {formatStatus(task.status)}
+                    </span>
+                  </td>
+
+                  {/* Action - View Button */}
+
+                  <td>
+                    <button
+                      className="pt-view-btn"
+                      onClick={() => handleViewTask(task)}
+                      aria-label="View task"
+                    >
+                      <Eye size={15} />
+                      View
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
 
             {/* Empty State */}
 
-            {filteredTasks.length ===
-              0 && (
+            {filteredTasks.length === 0 && (
               <tr>
-                <td
-                  colSpan={6}
-                  className="pt-empty"
-                >
-                  {tasksData.length ===
-                  0
+                <td colSpan={7} className="pt-empty">
+                  {tasksData.length === 0
                     ? "No tasks found for this project."
                     : "No tasks match your search or filter."}
                 </td>

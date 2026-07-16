@@ -3964,7 +3964,7 @@ textarea {
 
   margin-left: 300px;
 
-  padding-top: 60px;
+  /* padding-top: 60px; */
 
   min-height: 100vh;
 
@@ -4001,7 +4001,7 @@ textarea {
 
     width: 100%;
 
-    padding-top: 60px;
+    /* padding-top: 60px; */
   }
 
 }

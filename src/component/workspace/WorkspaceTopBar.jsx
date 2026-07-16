@@ -3,6 +3,7 @@ import "./WorkspaceTopBar.css";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 const WorkspaceTopBar = ({ onBack, onEdit }) => {
+  
   return (
     <div className="wtb-wrap">
       <button type="button" className="wtb-back-btn" onClick={onBack}>

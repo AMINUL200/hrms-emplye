@@ -1,56 +1,24 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
-
-import { useParams } from "react-router-dom";
-
-import axios from "axios";
-
+import React, { useContext, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { WorkspaceContext } from "../../context/WorkspaceContext";
-
-import { AuthContext } from "../../context/AuthContex";
-
 import "./WorkspaceSidebar.css";
 
 const WorkspaceSidebar = ({ isOpen }) => {
+  const navigate = useNavigate();
   const { projectId } = useParams();
-
-  const { token } = useContext(AuthContext);
-
-  const api_url = import.meta.env.VITE_API_URL;
-
   const {
     treeData,
     selectedItem,
-    setSelectedItem,
     expanded,
-    setExpanded,
-    getProjectTree,
+    toggleExpand,
+    selectItem,
+    treeLoading,
   } = useContext(WorkspaceContext);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   // =========================
-  // GET TREE
-  // =========================
-
- 
-
-  useEffect(() => {
-    getProjectTree(projectId);
-  }, [projectId, token, getProjectTree]);
-
-  // =========================
-  // TOGGLE
-  // =========================
-
-  const toggleExpand = (id) => {
-    setExpanded((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  // =========================
-  // FILTER
+  // FILTER TREE
   // =========================
 
   const filterTree = (items, term) => {
@@ -58,8 +26,7 @@ const WorkspaceSidebar = ({ isOpen }) => {
 
     return items
       .map((item) => {
-        const matches = item.title.toLowerCase().includes(term.toLowerCase());
-
+        const matches = item.title?.toLowerCase().includes(term.toLowerCase()) || false;
         const filteredChildren = item.children
           ? filterTree(item.children, term)
           : [];
@@ -73,25 +40,31 @@ const WorkspaceSidebar = ({ isOpen }) => {
 
         return null;
       })
-
       .filter(Boolean);
   };
 
   const filteredTreeData = useMemo(
     () => filterTree(treeData, searchTerm),
-    [treeData, searchTerm],
+    [treeData, searchTerm]
   );
 
   // =========================
-  // TREE NODE
+  // RENDER TREE NODE (Recursive)
   // =========================
 
   const TreeNode = ({ item, level = 0 }) => {
     const hasChildren = item.children?.length > 0;
-
-    const isExpanded = expanded[item.id];
-
+    const isExpanded = expanded[item.id] || false;
     const isSelected = selectedItem?.id === item.id;
+
+    const handleClick = () => {
+      selectItem(item, navigate);
+    };
+
+    const handleToggle = (e) => {
+      e.stopPropagation();
+      toggleExpand(item.id);
+    };
 
     // Get icon based on type
     const getTypeIcon = () => {
@@ -109,22 +82,6 @@ const WorkspaceSidebar = ({ isOpen }) => {
       }
     };
 
-    // Get type class for styling
-    const getTypeClass = () => {
-      switch (item.type) {
-        case "module":
-          return "type-module";
-        case "submodule":
-          return "type-submodule";
-        case "task":
-          return "type-task";
-        case "subtask":
-          return "type-subtask";
-        default:
-          return "";
-      }
-    };
-
     return (
       <li className="workspace-tree-node">
         <div
@@ -136,11 +93,12 @@ const WorkspaceSidebar = ({ isOpen }) => {
           style={{
             paddingLeft: `${level * 20 + 12}px`,
           }}
+          onClick={handleClick}
         >
           {hasChildren ? (
             <button
               className={`tree-expand-btn ${isExpanded ? "expanded" : ""}`}
-              onClick={() => toggleExpand(item.id)}
+              onClick={handleToggle}
             >
               <svg
                 width="12"
@@ -157,15 +115,12 @@ const WorkspaceSidebar = ({ isOpen }) => {
             <span className="tree-expand-placeholder"></span>
           )}
 
-          <div className="tree-label" onClick={() => setSelectedItem(item)}>
-            <span className={`tree-icon ${getTypeClass()}`}>
-              {getTypeIcon()}
-            </span>
-            <div className="tree-info">
-              <span className="tree-title">{item.title}</span>
-              <span className="tree-type-badge">{item.type}</span>
-            </div>
-          </div>
+          <span className="tree-icon">{getTypeIcon()}</span>
+          <span className="tree-title">{item.title}</span>
+          
+          {item.type && (
+            <span className="tree-type-badge">{item.type}</span>
+          )}
         </div>
 
         {hasChildren && isExpanded && (
@@ -178,6 +133,27 @@ const WorkspaceSidebar = ({ isOpen }) => {
       </li>
     );
   };
+
+  // =========================
+  // LOADING STATE
+  // =========================
+
+  if (treeLoading) {
+    return (
+      <aside className={`workspace-sidebar ${isOpen ? "visible" : "not-visible"}`}>
+        <div className="workspace-sidebar-inner">
+          <div className="workspace-loading">
+            <div className="workspace-loading-spinner"></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // =========================
+  // RENDER
+  // =========================
 
   return (
     <aside
@@ -201,7 +177,6 @@ const WorkspaceSidebar = ({ isOpen }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="workspace-search-input"
             />
-            {/* <span className="search-icon">🔍</span> */}
           </div>
         </div>
 

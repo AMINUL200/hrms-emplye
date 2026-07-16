@@ -255,10 +255,10 @@ const App = () => {
               path="assigned-project/:projectId"
               element={<EmpProjectDetails />}
             />
-            <Route
+            {/* <Route
               path="assigned-project/:projectId/workspace/:workspaceId"
               element={<EmpProjectWorkspace />}
-            />
+            /> */}
 
             {/* Create Project */}
             <Route path="create-project" element={<EmpCreateProject />} />
@@ -328,6 +328,7 @@ const App = () => {
           {/* ============================================
               WORKSPACE ROUTES (Protected)
               ============================================ */}
+              
           <Route
             path="/organization"
             element={
@@ -338,6 +339,10 @@ const App = () => {
           >
             {/* Workspace Page */}
             <Route path="workspace/:projectId" element={<WorkspacePage />} />
+            <Route
+              path="assigned-project/:projectId/workspace/:workspaceId"
+              element={<EmpProjectWorkspace />}
+            />
           </Route>
 
           {/* ============================================
@@ -348,7 +353,7 @@ const App = () => {
             element={
               <Navigate
                 to={
-                  isAuthenticated ? "/organization/employerdashboard" : "/login"
+                  isAuthenticated ? "/organization/employee-dashboard" : "/login"
                 }
                 replace
               />

@@ -20,7 +20,7 @@ const WorkspaceHeader = ({
             <h1>{title.toUpperCase()}</h1>
             <span className="wh-status-badge">{status}</span>
           </div>
-          <p className="wh-description">{description}</p>
+          {/* <p className="wh-description">{description}</p> */}
         </div>
       </div>
 

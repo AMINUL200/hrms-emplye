@@ -130,3 +130,113 @@
     flex-wrap: wrap;
   }
 }
+
+/* ---------- Project ID Badge ---------- */
+.pjh-project-id {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  background: #F8FAFC;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  white-space: nowrap;
+}
+
+/* ---------- Meta Info ---------- */
+.pjh-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.pjh-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.pjh-meta-label {
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.pjh-meta-value {
+  color: #0F172A;
+  font-weight: 600;
+}
+
+.pjh-meta-divider {
+  color: #E2E8F0;
+  font-weight: 300;
+}
+
+/* ---------- Status Badge Variants ---------- */
+.pjh-status--open {
+  background: #DBEAFE;
+  color: #6366F1;
+}
+
+.pjh-status--progress {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+.pjh-status--completed {
+  background: #DCFCE7;
+  color: #10B981;
+}
+
+.pjh-status--pending {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+.pjh-status--closed {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.pjh-status--onhold {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .pjh-title-row {
+    flex-wrap: wrap;
+  }
+
+  .pjh-project-id {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .pjh-meta-info {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .pjh-meta-divider {
+    display: none;
+  }
+
+  .pjh-meta-item {
+    background: #F8FAFC;
+    padding: 2px 10px;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+  }
+}
+
+@media (max-width: 480px) {
+  .pjh-meta-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

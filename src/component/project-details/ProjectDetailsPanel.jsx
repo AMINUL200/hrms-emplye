@@ -2,20 +2,80 @@ import React from "react";
 import "./ProjectDetailsPanel.css";
 import { MoreVertical } from "lucide-react";
 
-const MEMBERS = [
-  { id: 1, initials: "JD", color: "#7c3aed" },
-  { id: 2, initials: "JS", color: "#2563eb" },
-  { id: 3, initials: "MJ", color: "#0f172a" },
-];
+
 
 const ProjectDetailsPanel = ({
-  owner = "SWC GLOBAL",
-  startDate = "21-02-2026",
-  endDate = "21-02-2027",
-  status = "Active",
-  priority = "High",
-  extraMembers = 5,
+  projectDetails = {},
+ 
 }) => {
+  // Extract project details with fallbacks
+  const {
+    title = "Project",
+    emid = "N/A",
+    description = "No description available",
+    identifier = "N/A",
+    createdBy = "N/A",
+    status = "open",
+    project_start_date = "N/A",
+    project_end_date = "N/A",
+    created_at = "N/A",
+    updated_at = "N/A",
+  } = projectDetails;
+
+  // Format date function
+  const formatDate = (dateStr) => {
+    if (!dateStr || dateStr === "N/A") return "N/A";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Get status badge class
+  const getStatusClass = (status) => {
+    const statusMap = {
+      open: "pdp-badge--blue",
+      in_progress: "pdp-badge--orange",
+      completed: "pdp-badge--green",
+      pending: "pdp-badge--orange",
+      closed: "pdp-badge--gray",
+      on_hold: "pdp-badge--red",
+    };
+    return statusMap[status] || "pdp-badge--blue";
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    const statusMap = {
+      open: "Open",
+      in_progress: "In Progress",
+      completed: "Completed",
+      pending: "Pending",
+      closed: "Closed",
+      on_hold: "On Hold",
+    };
+    return statusMap[status] || status;
+  };
+
+  // Get priority (from identifier or default)
+  const getPriority = () => {
+    // You can determine priority based on some logic
+    // For now, return a default or derive from identifier
+    if (identifier === "SWCUKW") return "High";
+    return "Medium";
+  };
+
+  // Get owner (from createdBy or emid)
+  const getOwner = () => {
+    return emid || `User ${createdBy}`;
+  };
+
   return (
     <div className="pdp-card">
       <div className="pdp-header">
@@ -26,48 +86,39 @@ const ProjectDetailsPanel = ({
       </div>
 
       <div className="pdp-rows">
-        <div className="pdp-row">
-          <span className="pdp-label">Owner</span>
-          <span className="pdp-value">{owner}</span>
-        </div>
+       
+
+        
 
         <div className="pdp-row">
           <span className="pdp-label">Start Date</span>
-          <span className="pdp-badge pdp-badge--blue">{startDate}</span>
+          <span className="pdp-badge pdp-badge--blue">
+            {formatDate(project_start_date)}
+          </span>
         </div>
 
         <div className="pdp-row">
           <span className="pdp-label">End Date</span>
-          <span className="pdp-badge pdp-badge--red">{endDate}</span>
+          <span className="pdp-badge pdp-badge--red">
+            {formatDate(project_end_date)}
+          </span>
         </div>
 
         <div className="pdp-row">
           <span className="pdp-label">Status</span>
-          <span className="pdp-badge pdp-badge--green">{status}</span>
+          <span className={`pdp-badge ${getStatusClass(status)}`}>
+            {getStatusLabel(status)}
+          </span>
         </div>
 
         <div className="pdp-row">
           <span className="pdp-label">Priority</span>
-          <span className="pdp-badge pdp-badge--orange">{priority}</span>
+          <span className="pdp-badge pdp-badge--orange">{getPriority()}</span>
         </div>
 
-        <div className="pdp-row pdp-row--members">
-          <span className="pdp-label">Members</span>
-          <div className="pdp-avatars">
-            {MEMBERS.map((m) => (
-              <span
-                key={m.id}
-                className="pdp-avatar"
-                style={{ background: m.color }}
-              >
-                {m.initials}
-              </span>
-            ))}
-            {extraMembers > 0 && (
-              <span className="pdp-avatar pdp-avatar--extra">+{extraMembers}</span>
-            )}
-          </div>
-        </div>
+        
+
+        
       </div>
     </div>
   );

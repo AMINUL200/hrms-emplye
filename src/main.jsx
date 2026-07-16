@@ -19,8 +19,7 @@ createRoot(document.getElementById("root")).render(
           <App />
         </ChatProvider>
       </WorkspaceProvider>
-      {/* <StrictMode> */}
-      {/* </StrictMode>, */}
+     
     </EmployeeContextProvider>
   </AuthContextProvider>,
 );
