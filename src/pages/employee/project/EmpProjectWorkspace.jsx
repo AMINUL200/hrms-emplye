@@ -1,7 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./EmpProjectWorkspace.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { WorkspaceContext } from "../../../context/WorkspaceContext";
+import { AuthContext } from "../../../context/AuthContex";
+import axios from "axios";
 import WorkspaceTopBar from "../../../component/workspace/WorkspaceTopBar";
 import WorkspaceHeader from "../../../component/workspace/WorkspaceHeader";
 import WorkspaceTabs from "../../../component/workspace/WorkspaceTabs";
@@ -16,11 +18,23 @@ import WorkspaceDiscussion from "../../../component/workspace/WorkspaceDiscussio
 import { ClipboardList } from "lucide-react";
 
 const EmpProjectWorkspace = () => {
-  const [activeTab, setActiveTab] = React.useState("overview");
+  const [activeTab, setActiveTab] = useState("overview");
   const { projectId, workspaceId } = useParams();
+  const navigate = useNavigate();
+  const { token, data } = useContext(AuthContext);
   const { selectedItem, getProjectTree, syncWorkspaceRoute, treeLoading } =
     useContext(WorkspaceContext);
-  const navigate = useNavigate();
+  const api_url = import.meta.env.VITE_API_URL;
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+
+  // =========================
+  // STATE FOR WORKSPACE DETAILS
+  // =========================
+
+  const [workspaceDetails, setWorkspaceDetails] = useState(null);
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState(null);
+
   // =========================
   // SYNC ROUTE VALUES TO CONTEXT
   // =========================
@@ -41,6 +55,47 @@ const EmpProjectWorkspace = () => {
     }
   }, [projectId, getProjectTree]);
 
+  // =========================
+  // FETCH WORKSPACE DETAILS
+  // =========================
+
+  const fetchWorkspaceDetails = async () => {
+    if (!workspaceId || !token || !projectId) return;
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const response = await axios.get(
+        `${api_url}/module-details/${workspaceId}/${projectId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status === 1) {
+        setWorkspaceDetails(response.data.data);
+      } else {
+        setWorkspaceError("Failed to fetch workspace details");
+      }
+    } catch (error) {
+      console.error("Error fetching workspace details:", error);
+      setWorkspaceError(error.message || "Failed to fetch workspace details");
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkspaceDetails();
+  }, [projectId, workspaceId, token]);
+
+  // =========================
+  // NAVIGATION HANDLERS
+  // =========================
+
   const onBack = () => {
     navigate(`/organization/assigned-project/${projectId}`);
   };
@@ -49,7 +104,7 @@ const EmpProjectWorkspace = () => {
   // LOADING STATE
   // =========================
 
-  if (treeLoading) {
+  if (treeLoading || workspaceLoading) {
     return (
       <div className="att-overview-card">
         <div className="att-overview-heading">
@@ -90,24 +145,51 @@ const EmpProjectWorkspace = () => {
 
       {activeTab === "overview" && (
         <div className="epw-main-row">
-          {/* Left column */}
           <div className="epw-col epw-col--left">
-            <ProjectOverviewCard />
-            <AttachedFilesPanel />
+            <ProjectOverviewCard
+              overViewInfo={workspaceDetails?.details}
+              employeeCount={workspaceDetails?.employee_count}
+            />
+            <AttachedFilesPanel overViewInfo={workspaceDetails?.details} />
           </div>
-
-          {/* Right column */}
           <div className="epw-col epw-col--right">
-            <TeamMembersPanel />
+            <TeamMembersPanel
+              teamInfo={workspaceDetails?.employees}
+              onTabChange={setActiveTab}
+            />
             <TasksSummaryPanel />
           </div>
         </div>
       )}
 
-      {activeTab === "team" && <WorkspaceTeam />}
-      {activeTab === "submissions" && <WorkspaceSubmission />}
-      {activeTab === "work-history" && <WorkspaceWorkHistory />}
-      {activeTab === "discussion" && <WorkspaceDiscussion />}
+      {activeTab === "team" && (
+        <WorkspaceTeam teamInfo={workspaceDetails?.employees} />
+      )}
+
+      {activeTab === "submissions" && (
+        <WorkspaceSubmission
+          workspaceId={workspaceId}
+          selectedItem={selectedItem}
+          onSuccess={fetchWorkspaceDetails}
+        />
+      )}
+
+      {activeTab === "work-history" && (
+        <WorkspaceWorkHistory workHistory={workspaceDetails?.submissions} />
+      )}
+
+      {activeTab === "discussion" && (
+        <WorkspaceDiscussion
+          api_url={api_url}
+          token={token}
+          projectId={projectId}
+          workItemId={workspaceId}
+          STORAGE_URL={STORAGE_URL}
+          currentUserId={data?.employee_id}
+          employeeName={data?.employee_name}
+          employeeId={data?.employee_id}
+        />
+      )}
     </div>
   );
 };

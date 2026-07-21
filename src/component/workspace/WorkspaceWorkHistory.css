@@ -121,3 +121,166 @@
   padding: 5px 12px;
   border-radius: 8px;
 }
+
+/* ---------- Date Info ---------- */
+.wwh-date-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wwh-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1f2333;
+}
+
+.wwh-date-icon {
+  color: #94A3B8;
+}
+
+.wwh-submitter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.wwh-user-icon {
+  color: #94A3B8;
+}
+
+/* ---------- File Type Badge ---------- */
+.wwh-file-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: #EDE9FE;
+  color: #8B5CF6;
+  flex-shrink: 0;
+}
+
+/* ---------- File Chip ---------- */
+.wwh-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366F1;
+  background: #EEF2FF;
+  border: 1px solid #C7D2FE;
+  padding: 6px 12px 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 100%;
+}
+
+.wwh-file-chip:hover {
+  background: #E0E7FF;
+  border-color: #6366F1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.wwh-file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wwh-file-download-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366F1;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wwh-file-download-btn:hover {
+  background: #6366F1;
+  color: #FFFFFF;
+}
+
+/* ---------- Empty State ---------- */
+.wwh-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.wwh-empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.wwh-empty-text {
+  font-size: 14px;
+  color: #9aa0b4;
+  margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wwh-item-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .wwh-date-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .wwh-file-type-badge {
+    align-self: flex-start;
+  }
+
+  .wwh-file-chip {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .wwh-card {
+    padding: 16px;
+  }
+
+  .wwh-item {
+    padding: 12px 4px;
+  }
+
+  .wwh-remarks {
+    font-size: 12.5px;
+  }
+
+  .wwh-file-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}

@@ -189,3 +189,121 @@
 .wst-assigned-at {
   color: #9aa0b4;
 }
+
+/* ---------- Additional Role Badges ---------- */
+.wst-role--admin {
+  background: #EDE9FE;
+  color: #8B5CF6;
+}
+
+.wst-role--members {
+  background: #DCFCE7;
+  color: #10B981;
+}
+
+.wst-role--lead {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+.wst-role--default {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+/* ---------- Status Badge ---------- */
+.wst-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.wst-status--assigned {
+  background: #DCFCE7;
+  color: #10B981;
+}
+
+.wst-status--unassigned {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+.wst-status--default {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.wst-status--na {
+  background: #F1F5F9;
+  color: #94A3B8;
+}
+
+.wst-status-icon {
+  flex-shrink: 0;
+}
+
+/* ---------- Empty State ---------- */
+.wst-empty-state {
+  text-align: center;
+  padding: 40px 20px !important;
+}
+
+.wst-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.wst-empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.wst-empty-content p {
+  color: #9aa0b4;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wst-card {
+    padding: 16px;
+  }
+
+  .wst-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wst-controls {
+    flex-wrap: wrap;
+  }
+
+  .wst-search-box {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .wst-add-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .wst-search-box {
+    width: 100%;
+  }
+
+  .wst-add-btn {
+    width: 100%;
+  }
+}

@@ -1,61 +1,110 @@
 import React from "react";
 import "./WorkspaceWorkHistory.css";
-import { History, FileText, Paperclip, CheckCircle2, Clock, XCircle } from "lucide-react";
+import {
+  History,
+  FileText,
+  Paperclip,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  User,
+  Calendar,
+  File,
+} from "lucide-react";
 
-const HISTORY = [
-  {
-    id: 1,
-    remarks:
-      "Completed the homepage hero section and updated the responsive breakpoints for mobile view. Ready for review.",
-    file: "Homepage_Hero_v2.zip",
-    date: "08 Jul 2026",
-    time: "04:12 PM",
-    status: "Approved",
-  },
-  {
-    id: 2,
-    remarks:
-      "Fixed the navigation bar overlap issue on tablet screens and added smooth scroll behavior across all sections.",
-    file: "Nav_Fix_Patch.zip",
-    date: "05 Jul 2026",
-    time: "11:40 AM",
-    status: "Approved",
-  },
-  {
-    id: 3,
-    remarks:
-      "Initial draft of the contact page with form validation. Awaiting feedback on the layout before finalizing styles.",
-    file: null,
-    date: "02 Jul 2026",
-    time: "02:55 PM",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    remarks:
-      "Uploaded first version of the pricing page. Colors don't match the brand guide yet, will revise after review.",
-    file: "Pricing_Page_Draft.pdf",
-    date: "28 Jun 2026",
-    time: "05:20 PM",
-    status: "Rejected",
-  },
-  {
-    id: 5,
-    remarks: "Set up the project repository, base folder structure, and initial README documentation.",
-    file: "Project_Setup_Notes.docx",
-    date: "24 Jun 2026",
-    time: "10:05 AM",
-    status: "Approved",
-  },
-];
+const WorkspaceWorkHistory = ({ workHistory = [] }) => {
+  const storageUrl = import.meta.env.VITE_STORAGE_URL
+  // Format date
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
-const STATUS_CONFIG = {
-  Approved: { icon: CheckCircle2, className: "wwh-status--approved" },
-  Pending: { icon: Clock, className: "wwh-status--pending" },
-  Rejected: { icon: XCircle, className: "wwh-status--rejected" },
-};
+  // Get full file URL with storage path
+  const getFullFileUrl = (filePath) => {
+    if (!filePath) return null;
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return filePath;
+    }
+    return `${storageUrl}${filePath}`;
+  };
 
-const WorkspaceWorkHistory = () => {
+  // Get file name from path
+  const getFileName = (filePath) => {
+    if (!filePath) return null;
+    const parts = filePath.split('/');
+    return parts[parts.length - 1];
+  };
+
+  // Get file extension
+  const getFileExtension = (filePath) => {
+    if (!filePath) return null;
+    const parts = filePath.split('.');
+    return parts[parts.length - 1].toLowerCase();
+  };
+
+  // Get file icon based on extension
+  const getFileIcon = (filePath) => {
+    if (!filePath) return <File size={14} />;
+    const ext = getFileExtension(filePath);
+    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
+      return <File size={14} />;
+    }
+    return <Paperclip size={14} />;
+  };
+
+  // Handle file download
+  const handleFileDownload = (filePath) => {
+    if (filePath) {
+      const fullUrl = getFullFileUrl(filePath);
+      const link = document.createElement('a');
+      link.href = fullUrl;
+      link.download = getFileName(filePath) || 'download';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Handle file preview
+  const handleFilePreview = (filePath) => {
+    if (filePath) {
+      const fullUrl = getFullFileUrl(filePath);
+      window.open(fullUrl, '_blank');
+    }
+  };
+
+  // Determine file type for badge
+  const getFileTypeBadge = (filePath) => {
+    if (!filePath) return null;
+    const ext = getFileExtension(filePath);
+    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
+      return 'Image';
+    }
+    if (['pdf'].includes(ext)) {
+      return 'PDF';
+    }
+    if (['doc', 'docx'].includes(ext)) {
+      return 'Document';
+    }
+    if (['xls', 'xlsx'].includes(ext)) {
+      return 'Spreadsheet';
+    }
+    return 'File';
+  };
+
   return (
     <div className="wwh-card">
       <div className="wwh-header">
@@ -63,35 +112,57 @@ const WorkspaceWorkHistory = () => {
           <History size={16} />
         </span>
         <h3>Work History</h3>
-        <span className="wwh-count-badge">{HISTORY.length}</span>
+        <span className="wwh-count-badge">{workHistory.length}</span>
       </div>
 
       <div className="wwh-list">
-        {HISTORY.map((entry) => {
-          const { icon: StatusIcon, className } = STATUS_CONFIG[entry.status];
-          return (
-            <div className="wwh-item" key={entry.id}>
+        {workHistory.length > 0 ? (
+          workHistory.map((entry) => (
+            <div className="wwh-item" key={entry.id || entry.submitted_at}>
               <div className="wwh-item-top">
-                <span className="wwh-date">
-                  {entry.date} <span className="wwh-time">&middot; {entry.time}</span>
-                </span>
-                <span className={`wwh-status-pill ${className}`}>
-                  <StatusIcon size={12} />
-                  {entry.status}
-                </span>
+                <div className="wwh-date-info">
+                  <span className="wwh-date">
+                    <Calendar size={12} className="wwh-date-icon" />
+                    {formatDateTime(entry.submitted_at)}
+                  </span>
+                  <span className="wwh-submitter">
+                    <User size={12} className="wwh-user-icon" />
+                    {entry.employee_name || entry.employee_id}
+                  </span>
+                </div>
+                {entry.file && (
+                  <span className="wwh-file-type-badge">
+                    {getFileTypeBadge(entry.file)}
+                  </span>
+                )}
               </div>
 
-              <p className="wwh-remarks">{entry.remarks}</p>
+              <p className="wwh-remarks">{entry.remarks || "No remarks provided"}</p>
 
               {entry.file && (
-                <div className="wwh-file-chip">
-                  <Paperclip size={12} />
-                  {entry.file}
+                <div className="wwh-file-chip" onClick={() => handleFilePreview(entry.file)}>
+                  {getFileIcon(entry.file)}
+                  <span className="wwh-file-name">{getFileName(entry.file)}</span>
+                  <button 
+                    className="wwh-file-download-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFileDownload(entry.file);
+                    }}
+                    aria-label="Download file"
+                  >
+                    ↓
+                  </button>
                 </div>
               )}
             </div>
-          );
-        })}
+          ))
+        ) : (
+          <div className="wwh-empty-state">
+            <span className="wwh-empty-icon">📝</span>
+            <p className="wwh-empty-text">No work history available</p>
+          </div>
+        )}
       </div>
     </div>
   );

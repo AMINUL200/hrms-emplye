@@ -152,3 +152,140 @@
 .wsb-submit-btn:hover {
   filter: brightness(1.05);
 }
+
+/* ---------- Item Title ---------- */
+.wsb-item-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8B5CF6;
+  background: #EDE9FE;
+  padding: 2px 12px;
+  border-radius: 12px;
+  margin-left: auto;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- File Preview ---------- */
+.wsb-file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.wsb-file-preview-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.wsb-file-preview-info svg {
+  color: #6366F1;
+  flex-shrink: 0;
+}
+
+.wsb-file-preview-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0F172A;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wsb-file-preview-size {
+  font-size: 11px;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.wsb-file-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: #FEE2E2;
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wsb-file-remove-btn:hover {
+  background: #FECACA;
+  transform: scale(1.05);
+}
+
+.wsb-file-remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Spinner ---------- */
+.wsb-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #FFFFFF;
+  animation: wsb-spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes wsb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Submit Button Disabled ---------- */
+.wsb-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wsb-item-title {
+    max-width: 100px;
+    font-size: 10px;
+  }
+
+  .wsb-file-preview {
+    flex-wrap: wrap;
+  }
+
+  .wsb-file-preview-info {
+    flex: 1 1 100%;
+  }
+
+  .wsb-file-remove-btn {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .wsb-card {
+    padding: 16px;
+  }
+
+  .wsb-item-title {
+    max-width: 80px;
+    font-size: 9px;
+    padding: 1px 8px;
+  }
+}

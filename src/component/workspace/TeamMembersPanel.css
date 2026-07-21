@@ -138,3 +138,143 @@
 .tmp-view-all-link:hover {
   text-decoration: underline;
 }
+
+/* ---------- Right Side Container ---------- */
+.tmp-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---------- Status Badge ---------- */
+.tmp-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.tmp-status-icon {
+  flex-shrink: 0;
+}
+
+.tmp-status--assigned {
+  color: #10B981;
+}
+
+.tmp-status--unassigned {
+  color: #EF4444;
+}
+
+.tmp-status--default {
+  color: #64748B;
+}
+
+/* ---------- Assigned By Text ---------- */
+.tmp-assigned-by {
+  font-size: 10px;
+  color: #94A3B8;
+  font-weight: 400;
+}
+
+/* ---------- Additional Badge Classes ---------- */
+.tmp-badge--admin {
+  background: #EDE9FE;
+  color: #8B5CF6;
+}
+
+.tmp-badge--members {
+  background: #DCFCE7;
+  color: #10B981;
+}
+
+.tmp-badge--lead {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+.tmp-badge--default {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+/* ---------- Empty State ---------- */
+.tmp-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.tmp-empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.tmp-empty-text {
+  font-size: 13px;
+  color: #9aa0b4;
+  margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .tmp-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tmp-right {
+    width: 100%;
+    justify-content: flex-start;
+    padding-left: 50px;
+    gap: 6px;
+  }
+
+  .tmp-status-badge {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .tmp-badge {
+    font-size: 10px;
+    padding: 2px 10px;
+  }
+
+  .tmp-assigned-by {
+    display: block;
+    margin-top: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tmp-card {
+    padding: 16px;
+  }
+
+  .tmp-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 10px;
+  }
+
+  .tmp-name {
+    font-size: 12.5px;
+  }
+
+  .tmp-role {
+    font-size: 10.5px;
+  }
+
+  .tmp-right {
+    padding-left: 44px;
+  }
+}

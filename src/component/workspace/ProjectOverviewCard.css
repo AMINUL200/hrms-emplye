@@ -12,6 +12,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .poc-header-icon {
@@ -31,6 +32,28 @@
   font-size: 15.5px;
   font-weight: 700;
   color: #1f2333;
+}
+
+/* ---------- Badges ---------- */
+.poc-type-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: #EDE9FE;
+  color: #8B5CF6;
+  margin-left: auto;
+  text-transform: capitalize;
+}
+
+.poc-id-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  color: #64748B;
+  border: 1px solid #E2E8F0;
 }
 
 /* ---------- Stat boxes ---------- */
@@ -104,6 +127,80 @@
   color: #ea580c;
 }
 
+/* ---------- Status Colors ---------- */
+.poc-status--open {
+  color: #6366F1;
+}
+
+.poc-status--progress {
+  color: #F59E0B;
+}
+
+.poc-status--completed {
+  color: #10B981;
+}
+
+.poc-status--pending {
+  color: #F59E0B;
+}
+
+.poc-status--closed {
+  color: #64748B;
+}
+
+.poc-status--onhold {
+  color: #EF4444;
+}
+
+/* ---------- Priority Colors ---------- */
+.poc-priority--high {
+  background: #FEE2E2;
+  border-color: #FECACA;
+}
+
+.poc-priority--medium {
+  background: #FEF3C7;
+  border-color: #FDE68A;
+}
+
+.poc-priority--low {
+  background: #DCFCE7;
+  border-color: #BBF7D0;
+}
+
+.poc-stat-box--priority .poc-stat-value--orange {
+  color: #EF4444;
+}
+
+.poc-priority--high .poc-stat-value--orange {
+  color: #DC2626;
+}
+
+.poc-priority--medium .poc-stat-value--orange {
+  color: #F59E0B;
+}
+
+.poc-priority--low .poc-stat-value--orange {
+  color: #10B981;
+}
+
+/* ---------- Stat Box Variations ---------- */
+.poc-stat-box--priority.poc-priority--high {
+  background: #FEF2F2;
+  border-color: #FECACA;
+}
+
+.poc-stat-box--priority.poc-priority--medium {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+}
+
+.poc-stat-box--priority.poc-priority--low {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+/* ---------- Manager ---------- */
 .poc-manager-plus {
   width: 26px;
   height: 26px;
@@ -164,11 +261,11 @@
   color: #9aa0b4;
 }
 
-/* ---------- Info rows ---------- */
+/* ---------- Info rows - Single Column ---------- */
 .poc-info-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 40px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .poc-info-col {
@@ -182,6 +279,12 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f3f8;
+}
+
+.poc-info-row:last-child {
+  border-bottom: none;
 }
 
 .poc-info-row--desc {
@@ -193,6 +296,7 @@
   font-weight: 600;
   color: #6b7280;
   flex-shrink: 0;
+  min-width: 100px;
 }
 
 .poc-info-value {
@@ -200,13 +304,15 @@
   font-weight: 700;
   color: #1f2333;
   text-align: right;
+  word-break: break-word;
 }
 
 .poc-info-value--desc {
   font-weight: 500;
   color: #6b7280;
   line-height: 1.55;
-  max-width: 260px;
+  max-width: 100%;
+  text-align: left;
 }
 
 /* ---------- Responsive ---------- */
@@ -215,7 +321,56 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .poc-info-grid {
-    grid-template-columns: 1fr;
+  .poc-header {
+    flex-wrap: wrap;
+  }
+
+  .poc-type-badge {
+    margin-left: 0;
+  }
+
+  .poc-id-badge {
+    font-size: 9px;
+    padding: 2px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .poc-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .poc-info-label {
+    min-width: unset;
+  }
+
+  .poc-info-value {
+    text-align: left;
+    width: 100%;
+  }
+
+  .poc-info-value--desc {
+    text-align: left;
+  }
+}
+
+@media (max-width: 576px) {
+  .poc-stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .poc-stat-box {
+    padding: 10px 12px;
+  }
+
+  .poc-stat-value {
+    font-size: 14px;
+  }
+
+  .poc-card {
+    padding: 16px;
   }
 }

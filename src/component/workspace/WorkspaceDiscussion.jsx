@@ -1,269 +1,441 @@
-import React, { useState, useRef, useEffect } from "react";
-import "./WorkspaceDiscussion.css";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Paperclip,
-  Send,
-  Reply,
-  X,
-  FileText,
-  Download,
-  MessageSquare,
-} from "lucide-react";
+  faComment,
+  faSmile,
+  faPaperclip,
+  faPaperPlane,
+  faSpinner,
+  faTimes,
+  faClock,
+  faReply,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
+import axios from "axios";
+// import { listenMessages } from "../../../service/chatService";
+// import MessageBubble from "./MessageBubble";
+import "./WorkspaceDiscussion.css";
+import { listenMessages } from "../../service/chatService";
+import MessageBubble from "../../pages/employee/project/MessageBubble";
 
-const CURRENT_USER = { id: "me", name: "SK Shamim", initials: "SS", color: "#7c3aed" };
+// ========================================
+// HELPER FUNCTIONS
+// ========================================
 
-const PARTICIPANTS = {
-  tanvir: { id: "tanvir", name: "Tanvir Hasan", initials: "TH", color: "#2563eb" },
-  rafia: { id: "rafia", name: "Rafia Sultana", initials: "RS", color: "#16a34a" },
-  jakaria: { id: "jakaria", name: "Jakaria Ahmed", initials: "JA", color: "#0f172a" },
+const sortCommentsByDate = (commentsList) => {
+  return [...commentsList].sort(
+    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+  );
 };
 
-const INITIAL_MESSAGES = [
-  {
-    id: 1,
-    sender: PARTICIPANTS.tanvir,
-    isMe: false,
-    time: "10:12 AM",
-    text: "Pushed the API changes for the login flow, can someone review before EOD?",
-  },
-  {
-    id: 2,
-    sender: PARTICIPANTS.rafia,
-    isMe: false,
-    time: "10:20 AM",
-    text: "Here's the updated homepage mockup for review 👇",
-    image:
-      "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=500&q=60",
-  },
-  {
-    id: 3,
-    sender: CURRENT_USER,
-    isMe: true,
-    time: "10:24 AM",
-    replyTo: { id: 1, senderName: "Tanvir Hasan", snippet: "Pushed the API changes for the login flow..." },
-    text: "On it, will review in the next hour and share comments here.",
-  },
-  {
-    id: 4,
-    sender: PARTICIPANTS.jakaria,
-    isMe: false,
-    time: "11:02 AM",
-    text: "Sharing the QA checklist for this sprint.",
-    file: { name: "QA_Checklist_Sprint4.pdf", size: "482 KB" },
-  },
-  {
-    id: 5,
-    sender: CURRENT_USER,
-    isMe: true,
-    time: "11:15 AM",
-    replyTo: { id: 2, senderName: "Rafia Sultana", snippet: "Photo" },
-    text: "Loving the new hero section, can we try a slightly darker overlay?",
-  },
-];
+const groupCommentsByDate = (commentsList) => {
+  const groups = {};
+  commentsList.forEach((comment) => {
+    const date = new Date(comment.created_at);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-const WorkspaceDiscussion = () => {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [input, setInput] = useState("");
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [attachment, setAttachment] = useState(null); // { type: 'image'|'file', file, previewUrl? }
+    let dateKey;
+    if (date.toDateString() === today.toDateString()) {
+      dateKey = "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      dateKey = "Yesterday";
+    } else {
+      dateKey = date.toLocaleDateString([], {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
 
-  const fileInputRef = useRef(null);
-  const bottomRef = useRef(null);
+    if (!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(comment);
+  });
+  return groups;
+};
+
+const WorkspaceDiscussion = ({
+  api_url,
+  token,
+  projectId,
+  workItemId,
+  STORAGE_URL,
+  currentUserId,
+  employeeName,
+  employeeId,
+}) => {
+  // ========================================
+  // STATE
+  // ========================================
+
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [newCommentFile, setNewCommentFile] = useState(null);
+  const [replyTo, setReplyTo] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
+
+  // ========================================
+  // REFS
+  // ========================================
+
+  const messagesEndRef = useRef(null);
+  const replyInputRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  // ========================================
+  // EMOJIS
+  // ========================================
+
+  const emojis = [
+    "😊",
+    "😂",
+    "❤️",
+    "👍",
+    "🎉",
+    "🔥",
+    "👏",
+    "🙏",
+    "😢",
+    "😡",
+    "🤔",
+    "💯",
+  ];
+
+  // ========================================
+  // SCROLL TO BOTTOM
+  // ========================================
+
+  const scrollToBottom = useCallback(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, []);
+
+  // ========================================
+  // FETCH COMMENTS
+  // ========================================
+
+  const fetchComments = useCallback(async () => {
+    if (!workItemId || !projectId) return;
+    try {
+      setCommentsLoading(true);
+      const response = await axios.get(
+        `${api_url}/work-item-comment/${projectId}/${workItemId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.status === 1) {
+        setComments(response.data.data || []);
+        setTimeout(scrollToBottom, 100);
+      } else {
+        toast.error(response.data.message || "Failed to load comments");
+        setComments([]);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      toast.error("Failed to load comments");
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, [api_url, token, projectId, workItemId, scrollToBottom]);
+
+  // ========================================
+  // SUBMIT COMMENT
+  // ========================================
+
+  const handleSubmitComment = async () => {
+    if (!newComment.trim() && !newCommentFile) {
+      toast.error("Please enter a message or attach a file");
+      return;
+    }
+    try {
+      setSubmittingComment(true);
+      const formData = new FormData();
+      formData.append("project_id", projectId);
+      formData.append("work_item_id", workItemId);
+      formData.append("comment", newComment.trim());
+      if (replyTo) formData.append("parent_comment_id", replyTo.id);
+      if (newCommentFile) formData.append("file", newCommentFile);
+
+      const response = await axios.post(
+        `${api_url}/work-item-comment/store`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.status === 1) {
+        toast.success(replyTo ? "Reply sent!" : "Message sent!");
+        setNewComment("");
+        setNewCommentFile(null);
+        setReplyTo(null);
+        setShowEmojiPicker(false);
+        await fetchComments();
+        requestAnimationFrame(() => scrollToBottom());
+      } else {
+        toast.error(response.data.message || "Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      toast.error("Failed to send message");
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  // ========================================
+  // DELETE COMMENT
+  // ========================================
+
+  const handleDeleteComment = useCallback(
+    async (commentId) => {
+      if (!window.confirm("Are you sure you want to delete this message?"))
+        return;
+      try {
+        setDeletingCommentId(commentId);
+        const response = await axios.delete(
+          `${api_url}/work-item-comment/delete/${commentId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (response.data.status === 1) {
+          toast.success("Message deleted!");
+          await fetchComments();
+        } else {
+          toast.error(response.data.message || "Failed to delete message");
+        }
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+        toast.error("Failed to delete message");
+      } finally {
+        setDeletingCommentId(null);
+      }
+    },
+    [api_url, token, fetchComments]
+  );
+
+  // ========================================
+  // REPLY CLICK
+  // ========================================
+
+  const handleReplyClick = useCallback((comment) => {
+    setReplyTo(comment);
+    setTimeout(() => replyInputRef.current?.focus(), 100);
+  }, []);
+
+  // ========================================
+  // EMOJI CLICK
+  // ========================================
+
+  const handleEmojiClick = (emoji) => {
+    setNewComment((prev) => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // ========================================
+  // KEY PRESS
+  // ========================================
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmitComment();
+    }
+  };
+
+  // ========================================
+  // FIREBASE REALTIME LISTENER
+  // ========================================
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!workItemId) return;
 
-  const handleFilePick = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const unsubscribe = listenMessages(workItemId, (newMessage) => {
+      setComments((prev) => {
+        const exists = prev.some((msg) => msg.id === newMessage.id);
+        if (exists) return prev;
+        return [...prev, newMessage];
+      });
 
-    if (file.type.startsWith("image/")) {
-      setAttachment({ type: "image", file, previewUrl: URL.createObjectURL(file) });
-    } else {
-      setAttachment({ type: "file", file });
-    }
-    e.target.value = "";
-  };
-
-  const clearAttachment = () => setAttachment(null);
-
-  const handleReplyClick = (msg) => {
-    setReplyingTo({
-      id: msg.id,
-      senderName: msg.isMe ? "You" : msg.sender.name,
-      snippet: msg.text || (msg.image ? "Photo" : msg.file ? msg.file.name : ""),
+      requestAnimationFrame(() => {
+        scrollToBottom();
+      });
     });
-  };
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!input.trim() && !attachment) return;
-
-    const newMessage = {
-      id: Date.now(),
-      sender: CURRENT_USER,
-      isMe: true,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      text: input.trim(),
-      replyTo: replyingTo || undefined,
-      image: attachment?.type === "image" ? attachment.previewUrl : undefined,
-      file:
-        attachment?.type === "file"
-          ? { name: attachment.file.name, size: `${(attachment.file.size / 1024).toFixed(0)} KB` }
-          : undefined,
+    return () => {
+      if (unsubscribe) unsubscribe();
     };
+  }, [workItemId, scrollToBottom]);
 
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-    setReplyingTo(null);
-    setAttachment(null);
-  };
+  // ========================================
+  // FETCH COMMENTS ON MOUNT
+  // ========================================
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
+  // ========================================
+  // MEMOIZED DATA
+  // ========================================
+
+  const groupedComments = useMemo(() => {
+    const sorted = sortCommentsByDate(comments);
+    return groupCommentsByDate(sorted);
+  }, [comments]);
+
+  // ========================================
+  // RENDER
+  // ========================================
 
   return (
-    <div className="wd-card">
-      <div className="wd-header">
-        <span className="wd-header-icon">
-          <MessageSquare size={16} />
-        </span>
-        <h3>Discussion</h3>
-        <span className="wd-count-badge">{messages.length}</span>
+    <div className="tab-card comments-whatsapp-container">
+      {/* Chat Header */}
+      <div className="chat-header">
+        <div className="chat-header-info">
+          <FontAwesomeIcon icon={faComment} className="chat-header-icon" />
+          <div>
+            <h3>Discussion</h3>
+            <p>{comments.length} messages</p>
+          </div>
+        </div>
       </div>
 
-      {/* Message list */}
-      <div className="wd-messages">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`wd-message-row ${msg.isMe ? "wd-message-row--me" : ""}`}>
-            {!msg.isMe && (
-              <span className="wd-avatar" style={{ background: msg.sender.color }}>
-                {msg.sender.initials}
+      {/* Messages Area */}
+      <div className="chat-messages-area" ref={chatContainerRef}>
+        {commentsLoading ? (
+          <div className="chat-loading">
+            <div className="loading-spinner-small"></div>
+            <p>Loading messages...</p>
+          </div>
+        ) : Object.keys(groupedComments).length > 0 ? (
+          Object.entries(groupedComments).map(([date, messages]) => (
+            <div key={date}>
+              <div className="chat-date-divider">
+                <span>{date}</span>
+              </div>
+              {messages.map((comment) => (
+                <MessageBubble
+                  key={comment.id}
+                  comment={comment}
+                  onReply={handleReplyClick}
+                  onDelete={handleDeleteComment}
+                  currentUserId={currentUserId}
+                  STORAGE_URL={STORAGE_URL}
+                  employeeName={employeeName}
+                  employeeId={employeeId}
+                />
+              ))}
+            </div>
+          ))
+        ) : (
+          <div className="chat-empty">
+            <div className="chat-empty-icon">💬</div>
+            <h4>No messages yet</h4>
+            <p>Start the conversation by sending a message below</p>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Reply Indicator */}
+      {replyTo && (
+        <div className="reply-indicator">
+          <div className="reply-indicator-content">
+            <FontAwesomeIcon icon={faReply} />
+            <div className="reply-indicator-preview">
+              <span className="reply-indicator-user">
+                {replyTo.user?.name || replyTo.employee_id}
               </span>
-            )}
-
-            <div className="wd-bubble-col">
-              {!msg.isMe && <span className="wd-sender-name">{msg.sender.name}</span>}
-
-              <div className={`wd-bubble ${msg.isMe ? "wd-bubble--me" : "wd-bubble--other"}`}>
-                {msg.replyTo && (
-                  <div className="wd-reply-quote">
-                    <span className="wd-reply-quote-name">{msg.replyTo.senderName}</span>
-                    <span className="wd-reply-quote-snippet">{msg.replyTo.snippet}</span>
-                  </div>
-                )}
-
-                {msg.image && (
-                  <img src={msg.image} alt="Shared attachment" className="wd-image-preview" />
-                )}
-
-                {msg.file && (
-                  <div className="wd-file-chip">
-                    <span className="wd-file-icon">
-                      <FileText size={16} />
-                    </span>
-                    <div className="wd-file-info">
-                      <span className="wd-file-name">{msg.file.name}</span>
-                      <span className="wd-file-size">{msg.file.size}</span>
-                    </div>
-                    <button type="button" className="wd-file-download" aria-label="Download">
-                      <Download size={14} />
-                    </button>
-                  </div>
-                )}
-
-                {msg.text && <p className="wd-bubble-text">{msg.text}</p>}
-
-                <span className="wd-bubble-time">{msg.time}</span>
-              </div>
-
-              <button
-                type="button"
-                className="wd-reply-btn"
-                onClick={() => handleReplyClick(msg)}
-              >
-                <Reply size={12} />
-                Reply
-              </button>
+              <span className="reply-indicator-text">
+                {replyTo.comment?.substring(0, 60)}
+                {replyTo.comment?.length > 60 ? "..." : ""}
+              </span>
             </div>
+            <button onClick={() => setReplyTo(null)}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
+        </div>
+      )}
 
-      {/* Composer */}
-      <form className="wd-composer" onSubmit={handleSend}>
-        {replyingTo && (
-          <div className="wd-composer-reply-preview">
-            <div className="wd-composer-reply-text">
-              <span className="wd-composer-reply-name">Replying to {replyingTo.senderName}</span>
-              <span className="wd-composer-reply-snippet">{replyingTo.snippet}</span>
-            </div>
-            <button
-              type="button"
-              className="wd-composer-reply-close"
-              onClick={() => setReplyingTo(null)}
-              aria-label="Cancel reply"
-            >
-              <X size={14} />
+      {/* Input Area */}
+      <div className="chat-input-area">
+        {newCommentFile && (
+          <div className="file-preview">
+            <FontAwesomeIcon icon={faPaperclip} />
+            <span>{newCommentFile.name}</span>
+            <button onClick={() => setNewCommentFile(null)}>
+              <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
         )}
 
-        {attachment && (
-          <div className="wd-composer-attachment-preview">
-            {attachment.type === "image" ? (
-              <img src={attachment.previewUrl} alt="Attachment preview" />
-            ) : (
-              <div className="wd-composer-file-chip">
-                <FileText size={15} />
-                <span>{attachment.file.name}</span>
-              </div>
-            )}
-            <button
-              type="button"
-              className="wd-composer-attachment-remove"
-              onClick={clearAttachment}
-              aria-label="Remove attachment"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        )}
-
-        <div className="wd-composer-row">
+        <div className="chat-input-wrapper">
           <button
-            type="button"
-            className="wd-composer-icon-btn"
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Attach file"
+            className="chat-emoji-btn"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            title="Add emoji"
           >
-            <Paperclip size={17} />
+            <FontAwesomeIcon icon={faSmile} />
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="wd-hidden-file-input"
-            onChange={handleFilePick}
-            accept="image/*,.pdf,.doc,.docx,.zip,.xlsx"
+
+          {showEmojiPicker && (
+            <div className="emoji-picker">
+              {emojis.map((emoji) => (
+                <button key={emoji} onClick={() => handleEmojiClick(emoji)}>
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <textarea
+            ref={replyInputRef}
+            placeholder={
+              replyTo
+                ? `Replying to ${replyTo.user?.name || replyTo.employee_id}...`
+                : "Type a message..."
+            }
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyPress={handleKeyPress}
+            rows="1"
           />
 
-          <input
-            type="text"
-            className="wd-composer-input"
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <div className="chat-attach-wrapper">
+            <input
+              type="file"
+              id="chat-file"
+              onChange={(e) => setNewCommentFile(e.target.files[0])}
+              hidden
+            />
+            <label htmlFor="chat-file" className="chat-attach-btn" title="Attach file">
+              <FontAwesomeIcon icon={faPaperclip} />
+            </label>
+          </div>
 
           <button
-            type="submit"
-            className="wd-send-btn"
-            disabled={!input.trim() && !attachment}
-            aria-label="Send message"
+            className="chat-send-btn"
+            onClick={handleSubmitComment}
+            disabled={submittingComment || (!newComment.trim() && !newCommentFile)}
           >
-            <Send size={16} />
+            {submittingComment ? (
+              <FontAwesomeIcon icon={faSpinner} spin />
+            ) : (
+              <FontAwesomeIcon icon={faPaperPlane} />
+            )}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
