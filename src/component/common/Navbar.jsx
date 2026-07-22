@@ -263,10 +263,17 @@ const Navbar = ({ toggleSidebar, isOpen }) => {
               return;
             }
             // Workspace comment
+            // if (data.work_item_id) {
+            //   console.log("Navigating to work item:", data.work_item_id);
+            //   navigate(
+            //     `/organization/workspace/${data.project_id}?item=${data.work_item_id}&type=${data.work_item_type}&comment=${data.comment_id}`,
+            //   );
+            //   return;
+            // }
             if (data.work_item_id) {
               console.log("Navigating to work item:", data.work_item_id);
               navigate(
-                `/organization/workspace/${data.project_id}?item=${data.work_item_id}&type=${data.work_item_type}&comment=${data.comment_id}`,
+                `/organization/assigned-project/${data.project_id}/workspace/${data.work_item_id}?activeTab=discussion`,
               );
               return;
             }

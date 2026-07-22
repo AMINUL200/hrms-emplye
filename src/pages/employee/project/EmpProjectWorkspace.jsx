@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./EmpProjectWorkspace.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { WorkspaceContext } from "../../../context/WorkspaceContext";
 import { AuthContext } from "../../../context/AuthContex";
 import axios from "axios";
@@ -20,6 +20,7 @@ import { ClipboardList } from "lucide-react";
 const EmpProjectWorkspace = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { projectId, workspaceId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { token, data } = useContext(AuthContext);
   const { selectedItem, getProjectTree, syncWorkspaceRoute, treeLoading } =
@@ -72,7 +73,7 @@ const EmpProjectWorkspace = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data.status === 1) {
@@ -91,6 +92,17 @@ const EmpProjectWorkspace = () => {
   useEffect(() => {
     fetchWorkspaceDetails();
   }, [projectId, workspaceId, token]);
+
+  useEffect(() => {
+    const tab = searchParams.get("activeTab");
+
+    if (tab === "discussion") {
+      setActiveTab("discussion");
+
+      searchParams.delete("activeTab");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [workspaceId]);
 
   // =========================
   // NAVIGATION HANDLERS
@@ -131,7 +143,13 @@ const EmpProjectWorkspace = () => {
 
   return (
     <div className="epw-page">
-      <WorkspaceTopBar onBack={onBack} />
+      <WorkspaceTopBar
+        onBack={onBack}
+        permissionInfo={workspaceDetails?.current_user_permissions}
+        selectedItemType={workspaceDetails?.details?.type}
+        projectId={workspaceDetails?.details?.project_id}
+        selectedItemId={workspaceDetails?.details?.id}
+      />
 
       <WorkspaceHeader
         title={selectedItem?.title || "Workspace"}
@@ -141,7 +159,12 @@ const EmpProjectWorkspace = () => {
         endDate={selectedItem?.end_date || "N/A"}
       />
 
-      <WorkspaceTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <WorkspaceTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        permissionInfo={workspaceDetails?.current_user_permissions}
+        selectedItemType={workspaceDetails?.details?.type}
+      />
 
       {activeTab === "overview" && (
         <div className="epw-main-row">

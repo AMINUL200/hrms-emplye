@@ -37,3 +37,75 @@
   border-bottom-color: #6d28d9;
   background: #f5f3ff;
 }
+
+/* ---------- Disabled Tab ---------- */
+.wtab-tab--disabled {
+  color: #94A3B8 !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  opacity: 0.6;
+}
+
+.wtab-tab--disabled:hover {
+  color: #94A3B8 !important;
+  background: transparent !important;
+}
+
+.wtab-tab--disabled .wtab-lock-icon {
+  font-size: 10px;
+  margin-left: 2px;
+  opacity: 0.5;
+}
+
+/* ---------- Active Tab ---------- */
+.wtab-tab--active {
+  color: #6366F1;
+  border-bottom-color: #6366F1;
+  background: #EEF2FF;
+}
+
+.wtab-tab--active:hover {
+  color: #4F46E5;
+  background: #EEF2FF;
+}
+
+/* ---------- Hover for enabled tabs ---------- */
+.wtab-tab:not(.wtab-tab--disabled):hover {
+  color: #6366F1;
+  background: #F8FAFC;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wtab-wrap {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .wtab-tab {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .wtab-tab svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .wtab-lock-icon {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wtab-tab {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .wtab-tab svg {
+    width: 12px;
+    height: 12px;
+  }
+}

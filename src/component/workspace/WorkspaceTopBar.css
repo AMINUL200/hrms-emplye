@@ -6,33 +6,116 @@
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
-.wtb-back-btn,
-.wtb-edit-btn {
+/* ---------- Back Button ---------- */
+.wtb-back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   height: 40px;
   padding: 0 16px;
   border-radius: 9px;
-  border: 1px solid #e3e5ee;
-  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.wtb-back-btn {
-  color: #6d28d9;
+  color: #6366F1;
+  transition: all 0.25s ease;
 }
 
 .wtb-back-btn:hover {
-  background: #f5f3ff;
+  background: #EEF2FF;
+  border-color: #6366F1;
 }
 
-.wtb-edit-btn {
-  color: #1f2333;
+/* ---------- Actions Container ---------- */
+.wtb-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.wtb-edit-btn:hover {
-  background: #f4f5fa;
+/* ---------- Base Button Styles ---------- */
+.wtb-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+/* ---------- Primary Button (Violet gradient) ---------- */
+.wtb-btn--primary {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  border: none;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.wtb-btn--primary:hover {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.wtb-btn--primary:active {
+  transform: translateY(0);
+}
+
+/* ---------- Outline Button (Violet border) ---------- */
+.wtb-btn--outline {
+  background: transparent;
+  border: 2px solid #8B5CF6;
+  color: #8B5CF6;
+}
+
+.wtb-btn--outline:hover {
+  background: #8B5CF6;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+.wtb-btn--outline:active {
+  transform: translateY(0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wtb-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .wtb-actions {
+    flex-wrap: wrap;
+  }
+
+  .wtb-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 140px;
+  }
+
+  .wtb-back-btn {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .wtb-actions {
+    flex-direction: column;
+  }
+
+  .wtb-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
